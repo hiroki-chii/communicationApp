@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>社内ランチ交流会 - マッチングポータル</title>
+  <!-- インライン展開されるスタイルシート -->
+  <?!= include('styles'); ?>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200">
+
+  <!-- PC用 左サイドバー (md以上で表示) -->
+  <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shrink-0 sticky top-0 h-screen">
+    <!-- ロゴ・アプリタイトル -->
+    <div class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-zinc-800 gap-3">
+      <div class="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm animate-pulse">
+        <i data-lucide="coffee" class="w-4.5 h-4.5"></i>
+      </div>
+      <div>
+        <h1 class="font-heading font-bold text-base leading-tight">ランチ交流会</h1>
+        <p class="text-[10px] text-slate-400 dark:text-zinc-500" id="pc-app-subtitle">マッチングポータル</p>
+      </div>
+    </div>
+    
+    <!-- ナビゲーションメニュー -->
+    <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+      
+      <!-- 一般メニューセクション -->
+      <div class="space-y-1">
+        <p class="px-4 text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2">一般メニュー</p>
+        <a href="#user-matching" id="nav-user-matching" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="calendar-heart" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+          <span>次回マッチング結果</span>
+        </a>
+        <a href="#user-profile" id="nav-user-profile" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="user-cog" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+          <span>プロフィール設定</span>
+        </a>
+      </div>
+
+      <!-- 管理者メニューセクション (isAdmin === true の場合のみJSで表示制御) -->
+      <div id="pc-admin-menu-section" class="space-y-1 hidden border-t border-slate-100 dark:border-zinc-800/60 pt-4">
+        <p class="px-4 text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>管理者メニュー</span>
+        </p>
+        <a href="#dashboard" id="nav-dashboard" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+          <span>ダッシュボード</span>
+        </a>
+        <a href="#matching" id="nav-matching" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="sparkles" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+          <span>マッチング作成</span>
+        </a>
+        <a href="#members" id="nav-members" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="users" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+          <span>メンバー一覧</span>
+        </a>
+        <a href="#settings" id="nav-settings" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="settings" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+          <span>システム設定</span>
+        </a>
+      </div>
+    </nav>
+    
+    <!-- 左サイドバー下部 (ステータス & ユーザー情報) -->
+    <div class="p-4 border-t border-slate-100 dark:border-zinc-800 space-y-3">
+      <div class="px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40 text-xs flex flex-col gap-0.5 min-w-0">
+        <p class="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">ログインアカウント</p>
+        <p class="font-medium text-slate-700 dark:text-zinc-300 truncate" id="pc-user-email">読み込み中...</p>
+        <p class="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 hidden" id="pc-user-role-badge"></p>
+      </div>
+      <div class="flex items-center gap-2 px-2 text-[10px] text-slate-500 dark:text-zinc-400">
+        <span class="relative flex h-1.5 w-1.5 shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+        </span>
+        <span class="truncate">GAS データベース接続中</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- モバイル用 ヘッダー (md未満で表示) -->
+  <header class="md:hidden h-14 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-4 flex items-center justify-between sticky top-0 z-30 shrink-0">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+        <i data-lucide="coffee" class="w-3.5 h-3.5"></i>
+      </div>
+      <div>
+        <h1 class="font-heading font-bold text-sm leading-tight">ランチ交流会</h1>
+        <p class="text-[8px] text-slate-400 dark:text-zinc-500 font-medium truncate max-w-[150px]" id="mobile-user-email">読み込み中...</p>
+      </div>
+    </div>
+    
+    <!-- ダークモード切り替えトグル & 管理者切り替え (モバイル) -->
+    <div class="flex items-center gap-2">
+      <!-- モバイル用 管理者切り替えトグル (管理者アカウントのみ表示) -->
+      <button id="mobile-admin-mode-toggle" class="hidden px-2.5 py-1 text-[10px] font-bold rounded-lg border border-indigo-200 dark:border-indigo-950/40 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center gap-1 transition-colors">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+        <span id="mobile-admin-toggle-text">管理者用へ</span>
+      </button>
+
+      <button id="theme-toggle-mobile" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
+        <i id="theme-icon-mobile" data-lucide="sun" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ領域 -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+    
+    <!-- PC用 ヘッダー (md以上で表示) -->
+    <header class="hidden md:flex h-16 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-8 items-center justify-between shrink-0">
+      <div id="page-title-container">
+        <!-- ページタイトルがJSによって動的に書き換わる -->
+        <h2 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50" id="header-title">次回マッチング結果</h2>
+      </div>
+      
+      <!-- 右上のユーティリティ (テーマ切り替え等) -->
+      <div class="flex items-center gap-4">
+        <!-- 管理者ログインバッジ (PC) -->
+        <div id="pc-admin-badge" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100/50 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>管理者権限オン</span>
+        </div>
+
+        <!-- テーマモードセレクトトグル (ライト/ダーク/システム) -->
+        <div class="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-slate-200/50 dark:border-zinc-700/50">
+          <button id="theme-btn-light" class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200" title="ライトモード">
+            <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+            <span>ライト</span>
+          </button>
+          <button id="theme-btn-dark" class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200" title="ダークモード">
+            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+            <span>ダーク</span>
+          </button>
+          <button id="theme-btn-system" class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200" title="システム同期">
+            <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+            <span>システム</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- メインコンテンツ (SPA挿入用) -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8 max-w-7xl w-full mx-auto" id="app-view">
+      <!-- ローディング初期プレースホルダー -->
+      <div class="flex flex-col items-center justify-center h-96 gap-4">
+        <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm font-medium text-slate-500 dark:text-zinc-400 animate-pulse">データベースからデータを読み込んでいます...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- モバイル用 下部タブナビゲーション (md未満で表示) -->
+  <!-- 一般ユーザー用ボトムナビ (JSで表示切り替え) -->
+  <nav id="mobile-nav-user" class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2">
+    <a href="#user-matching" id="nav-user-matching-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+      <i data-lucide="calendar-heart" class="w-5 h-5"></i>
+      <span>次回マッチング</span>
+    </a>
+    <a href="#user-profile" id="nav-user-profile-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+      <i data-lucide="user-cog" class="w-5 h-5"></i>
+      <span>プロフィール</span>
+    </a>
+  </nav>
+
+  <!-- 管理者用ボトムナビ (管理者モード時のみ表示) -->
+  <nav id="mobile-nav-admin" class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2 hidden">
+    <a href="#dashboard" id="nav-dashboard-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span>ダッシュボード</span>
+    </a>
+    <a href="#matching" id="nav-matching-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+      <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <span>作成</span>
+    </a>
+    <a href="#members" id="nav-members-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+      <i data-lucide="users" class="w-5 h-5"></i>
+      <span>メンバー</span>
+    </a>
+    <a href="#settings" id="nav-settings-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+      <i data-lucide="settings" class="w-5 h-5"></i>
+      <span>設定</span>
+    </a>
+  </nav>
+
+  <!-- 通知トーストトレイ -->
+  <div id="toast-container" class="fixed bottom-18 md:bottom-6 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- インライン展開されるJavaScriptロジック -->
+  <?!= include('scripts'); ?>
+</body>
+</html>
