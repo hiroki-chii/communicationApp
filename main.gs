@@ -7,11 +7,7 @@ function doGet(e) {
   // 起動時に自動でスプレッドシートの初期化を行う（シートが存在しない場合のみ作成）
   initDatabase();
   
-  var template = HtmlService.createTemplateFromFile('index');
-  // クエリパラメータから asUser を取得してテンプレートに埋め込む
-  template.asUser = (e && e.parameter && e.parameter.asUser === 'true') ? 'true' : 'false';
-  
-  return template.evaluate()
+  return HtmlService.createHtmlOutputFromFile('index')
     .setTitle('社内ランチ交流会 - マッチングポータル')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -230,11 +226,7 @@ function checkAdminPermission() {
   var adminEmailsStr = settings.admin_emails || '';
   var adminEmails = adminEmailsStr.split(',').map(function(e) { return e.trim().toLowerCase(); });
   
-  // デプロイした本人のメールアドレスも自動的に管理者に含める (権限エラーの自動フォールバック)
-  var ownerEmail = Session.getEffectiveUser().getEmail();
-  if (ownerEmail && adminEmails.indexOf(ownerEmail.toLowerCase()) === -1) {
-    adminEmails.push(ownerEmail.toLowerCase());
-  }
+
   
   if (adminEmails.indexOf(userEmail.toLowerCase()) === -1) {
     throw new Error('管理者権限がありません。アカウント: ' + userEmail);
@@ -260,11 +252,7 @@ function getInitialData() {
     var adminEmailsStr = settings.admin_emails || '';
     var adminEmails = adminEmailsStr.split(',').map(function(e) { return e.trim().toLowerCase(); });
     
-    // 実行オーナーのメールも管理者に自動的に含める
-    var ownerEmail = Session.getEffectiveUser().getEmail();
-    if (ownerEmail && adminEmails.indexOf(ownerEmail.toLowerCase()) === -1) {
-      adminEmails.push(ownerEmail.toLowerCase());
-    }
+
     
     var isAdmin = userEmail && adminEmails.indexOf(userEmail.toLowerCase()) !== -1;
     
@@ -398,10 +386,7 @@ function saveSettings(settingsObj) {
     var userEmail = Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail();
     var adminEmailsStr = updatedSettings.admin_emails || '';
     var adminEmails = adminEmailsStr.split(',').map(function(e) { return e.trim().toLowerCase(); });
-    var ownerEmail = Session.getEffectiveUser().getEmail();
-    if (ownerEmail && adminEmails.indexOf(ownerEmail.toLowerCase()) === -1) {
-      adminEmails.push(ownerEmail.toLowerCase());
-    }
+
     var isAdmin = userEmail && adminEmails.indexOf(userEmail.toLowerCase()) !== -1;
     
     return {
@@ -861,10 +846,7 @@ function checkRoomAccess(userEmail, roomId) {
     var adminEmailsStr = settings.admin_emails || '';
     var adminEmails = adminEmailsStr.split(',').map(function(e) { return e.trim().toLowerCase(); });
     
-    var ownerEmail = Session.getEffectiveUser().getEmail();
-    if (ownerEmail && adminEmails.indexOf(ownerEmail.toLowerCase()) === -1) {
-      adminEmails.push(ownerEmail.toLowerCase());
-    }
+
     
     if (adminEmails.indexOf(userEmail.toLowerCase()) !== -1) {
       return true; // 管理者なので無条件でアクセス許可

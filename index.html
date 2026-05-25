@@ -95,9 +95,6 @@
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200">
 
-  <!-- GASサーバーから渡されるクエリパラメータ (asUser) を安全に受け取るための非表示要素 -->
-  <div id="gas-params" data-as-user="<?= asUser ?>" class="hidden"></div>
-
   <!-- PC用 左サイドバー (md以上で表示) -->
   <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shrink-0 sticky top-0 h-screen">
     <!-- ロゴ・アプリタイトル -->
@@ -395,27 +392,6 @@
           state.activeCount = res.activeCount;
           state.hasApiKey = res.hasApiKey;
           state.isAdmin = res.isAdmin;
-          
-          // デバッグ用: GASのdoGetパラメータまたはURLパラメータに asUser=true が含まれている場合は、管理者であっても非管理者として画面をエミュレート
-          let isForceUser = false;
-          const gasParamsEl = document.getElementById('gas-params');
-          if (gasParamsEl) {
-            const gasAsUser = gasParamsEl.getAttribute('data-as-user');
-            // GASのテンプレート機能で評価された場合は 'true' または 'false' になる。未評価（ローカル等）の場合はテンプレート記法のままになる
-            if (gasAsUser === 'true') {
-              isForceUser = true;
-            } else if (gasAsUser && gasAsUser.indexOf('<' + '?' + '=') !== -1) {
-              // ローカル環境等でのフォールバック取得
-              const urlParams = new URLSearchParams(window.location.search);
-              if (urlParams.get('asUser') === 'true') {
-                isForceUser = true;
-              }
-            }
-          }
-          
-          if (isForceUser) {
-            state.isAdmin = false;
-          }
           
           state.currentUserEmail = res.currentUserEmail;
           state.myProfile = res.myProfile;
@@ -2464,7 +2440,7 @@
           totalCount: 3,
           activeCount: 3,
           hasApiKey: false,
-          isAdmin: (new URLSearchParams(window.location.search).get('asUser') === 'true') ? false : true, // asUser=true の場合は一般ユーザーとして表示
+          isAdmin: true, // ローカル開発では常に管理者として表示
           currentUserEmail: 'hiroki@example.com',
           myProfile: { id: 'M001', name: '山田 太郎', email: 'hiroki@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談, 他部署の交流', status: 'アクティブ' }
         };
