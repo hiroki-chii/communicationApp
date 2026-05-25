@@ -155,4 +155,9 @@
     2. **プレースホルダーヒントの更新**: チャット入力フォームである `<textarea id="chat-message-input">` の `placeholder` 属性を、「(Shift+Enterで改行、Enterで送信)」から「(Ctrl+Enterで送信、Enterで改行)」へ変更し、ユーザーが新しいショートカットに気づきやすいようUXを向上。
   - claspによりリモートへ反映完了。
 
-
+- **HTMLとGSファイルの1本化（統合）の実行とデプロイ (2026-05-25 10:53 JST)**:
+  - ユーザーからの指示により、HTMLファイル（index.html, styles.html, scripts.html）およびGASファイル（main.gs, sheets.gs, matching.gs）のそれぞれ1本化を実施。
+  - **HTML統合**: `styles.html` のCSSと `scripts.html` のJavaScriptを、すべて `index.html` 内へインライン（`<style>` と `<script>` タグ）で展開。不要になったGASテンプレートの `include` 命令も削除。
+  - **GAS統合**: `sheets.gs` と `matching.gs` のサーバーサイドコードを `main.gs` 内へ順次結合し、1つのGASファイルへマージ。これに伴い、`doGet` で `createTemplateFromFile` を使う必要がなくなったため、処理効率化として `createHtmlOutputFromFile` にリファクタリング。
+  - **不要ファイルの削除**: 統合完了後、不要となった `styles.html`、`scripts.html`、`sheets.gs`、`matching.gs` をローカルから完全削除。
+  - **GASデプロイ**: `npx clasp push` を実行し、1本化した `index.html`、`main.gs`、`appsscript.json` の3ファイルのみをリモートのGoogle Apps Scriptへ無事デプロイ完了。
