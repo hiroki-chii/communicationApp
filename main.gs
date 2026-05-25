@@ -7,7 +7,11 @@ function doGet(e) {
   // 起動時に自動でスプレッドシートの初期化を行う（シートが存在しない場合のみ作成）
   initDatabase();
   
-  return HtmlService.createHtmlOutputFromFile('index')
+  var template = HtmlService.createTemplateFromFile('index');
+  // クエリパラメータから asUser を取得してテンプレートに埋め込む
+  template.asUser = (e && e.parameter && e.parameter.asUser === 'true') ? 'true' : 'false';
+  
+  return template.evaluate()
     .setTitle('社内ランチ交流会 - マッチングポータル')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
