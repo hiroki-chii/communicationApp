@@ -688,22 +688,37 @@
           const memberInfo = state.members.find(m => m.name === name) || {};
           const dept = memberInfo.department || '不明';
           
+          // ログインユーザー自身かどうか判定 (大文字小文字を区別せず比較)
+          const isMe = state.myProfile && name.toLowerCase() === state.myProfile.name.toLowerCase();
+          
+          const boxClass = isMe 
+            ? 'flex flex-col p-2.5 rounded-lg border-2 border-indigo-500 bg-indigo-50/15 dark:bg-indigo-950/40 text-xs relative overflow-hidden' 
+            : 'flex flex-col p-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30 text-xs';
+            
           return `
-            <div class="flex flex-col p-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30 text-xs">
-              <span class="font-bold text-slate-800 dark:text-zinc-100">${escapeHtml(name)}</span>
-              <span class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium mt-0.5">${escapeHtml(dept)}</span>
+            <div class="${boxClass}">
+              <span class="font-bold ${isMe ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-zinc-100'}">${escapeHtml(name)}</span>
+              <span class="text-[9px] ${isMe ? 'text-indigo-500/80 dark:text-indigo-350' : 'text-slate-400 dark:text-zinc-500'} font-medium mt-0.5">${escapeHtml(dept)}</span>
             </div>
           `;
         }).join('');
         
-        // 自分がこのグループのメンバーに含まれているか判定
-        const isMyGroup = state.myProfile && g.memberNames.map(n => n.toLowerCase()).includes(state.myProfile.name.toLowerCase());
+        // 自分がこのグループのメンバーに含まれているか判定 (管理者の場合はすべてのルームを開けるようにする)
+        const isMyGroup = state.isAdmin || (state.myProfile && g.memberNames.map(n => n.toLowerCase()).includes(state.myProfile.name.toLowerCase()));
+        
+        // マークを付ける「自分のグループ」かどうか
+        const isReallyMyGroup = state.myProfile && g.memberNames.map(n => n.toLowerCase()).includes(state.myProfile.name.toLowerCase());
+        
         const roomId = `${latestMatchingDate}_${g.groupId}`;
         
+        const cardClass = isReallyMyGroup 
+          ? 'user-group-card p-6 border-2 border-indigo-500 bg-indigo-50/5 dark:border-indigo-500 dark:bg-indigo-950/10 rounded-2xl flex flex-col justify-between gap-4 shadow-md transition-all duration-200 relative scale-[1.01]' 
+          : 'user-group-card p-6 border-2 border-slate-200 dark:border-zinc-800/80 rounded-2xl bg-white dark:bg-zinc-900 flex flex-col justify-between gap-4 shadow-sm hover:border-slate-350 dark:hover:border-zinc-700 hover:shadow transition-all duration-200 relative';
+        
         groupCards += `
-          <div id="user-group-${escapeHtml(g.groupId)}" class="user-group-card p-6 border-2 border-slate-200 dark:border-zinc-800/80 rounded-2xl bg-white dark:bg-zinc-900 flex flex-col justify-between gap-4 shadow-sm hover:border-slate-350 dark:hover:border-zinc-700 hover:shadow transition-all duration-200 relative">
+          <div id="user-group-${escapeHtml(g.groupId)}" class="${cardClass}">
             <!-- あなたのグループバッジ -->
-            <div class="my-group-indicator absolute -top-3.5 right-4 px-2.5 py-1 text-[9px] font-bold bg-indigo-600 text-white rounded-full shadow hidden items-center gap-1">
+            <div class="my-group-indicator absolute -top-3.5 right-4 px-2.5 py-1 text-[9px] font-bold bg-indigo-600 text-white rounded-full shadow ${isReallyMyGroup ? 'flex' : 'hidden'} items-center gap-1">
               <i data-lucide="party-popper" class="w-3.5 h-3.5"></i>
               <span>あなたのグループです！</span>
             </div>
@@ -735,9 +750,11 @@
             </div>
             
             ${g.memo ? `
-              <div class="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed border-t border-slate-50 dark:border-zinc-800/40 pt-3 bg-slate-50/50 dark:bg-zinc-905/40 -mx-6 -mb-6 p-4.5 rounded-b-2xl border-t">
-                <p class="font-bold text-slate-700 dark:text-zinc-300 mb-1 flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> AI雑談おすすめテーマ</p>
-                ${escapeHtml(g.memo)}
+              <div class="h-36 flex flex-col text-xs text-slate-600 dark:text-zinc-300 leading-relaxed border-t border-slate-100 dark:border-zinc-800/60 bg-slate-50 dark:bg-zinc-950/80 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                <p class="font-bold text-slate-800 dark:text-zinc-200 mb-2 flex items-center gap-1 shrink-0"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400"></i> AI雑談おすすめテーマ</p>
+                <div class="flex-1 overflow-y-auto pr-1">
+                  ${escapeHtml(g.memo)}
+                </div>
               </div>
             ` : ''}
           </div>
@@ -747,26 +764,15 @@
       return `
         <div class="space-y-8">
           <!-- ウェルカムバナー -->
-          <div class="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-2">
-              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400">
-                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                <span>次回開催日: ${escapeHtml(latestMatchingDate)}</span>
-              </div>
-              <h3 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50 leading-snug">ランチ交流会のマッチングが発表されました！</h3>
-              <p class="text-xs text-slate-500 dark:text-zinc-400 max-w-2xl leading-relaxed">
-                今回のマッチングです。異なる部署のメンバー同士でサウナや旅行など、共通の趣味や興味があるトピックについて楽しくおしゃべりしてください。
-              </p>
+          <div class="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark flex flex-col gap-2.5">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 w-max">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span>次回開催日: ${escapeHtml(latestMatchingDate)}</span>
             </div>
-            
-            <!-- 自分を探す検索窓 -->
-            <div class="w-full md:w-80 shrink-0 space-y-1">
-              <label for="my-group-search" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">自分のグループを探す</label>
-              <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
-                <input type="text" id="my-group-search" placeholder="あなたの名前を入力..." class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500" oninput="highlightMyGroup(this.value)">
-              </div>
-            </div>
+            <h3 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50 leading-snug">ランチ交流会のマッチングが発表されました！</h3>
+            <p class="text-xs text-slate-500 dark:text-zinc-400 max-w-4xl leading-relaxed">
+              今回のマッチングです。異なる部署のメンバー同士でサウナや旅行など、共通の趣味や興味があるトピックについて楽しくおしゃべりしてください。「あなたのグループです！」マークのカードから専用チャットを開くことができます。
+            </p>
           </div>
 
           <!-- グループカードグリッド -->
@@ -777,37 +783,7 @@
       `;
     }
 
-    // 自分のグループをハイライトする処理
-    function highlightMyGroup(searchValue) {
-      const val = searchValue.trim().toLowerCase();
-      
-      // 全グループカードのスタイルをリセット
-      const cards = document.querySelectorAll('.user-group-card');
-      cards.forEach(c => {
-        c.className = 'user-group-card p-6 border-2 border-slate-200 dark:border-zinc-800/80 rounded-2xl bg-white dark:bg-zinc-900 flex flex-col justify-between gap-4 shadow-sm hover:border-slate-350 dark:hover:border-zinc-700 hover:shadow transition-all duration-200 relative';
-        const badge = c.querySelector('.my-group-indicator');
-        if (badge) badge.classList.add('hidden');
-      });
-
-      if (!val) return;
-      
-      // 入力値に合致するメンバーを持つグループを検索
-      state.history.forEach(h => {
-        // 最新の回のみが対象（日付一致）
-        if (state.history.length > 0 && h.date === state.history[0].date) {
-          const hasMe = h.memberNames.some(name => name.toLowerCase().includes(val));
-          
-          if (hasMe) {
-            const matchedCard = document.getElementById(`user-group-${h.groupId}`);
-            if (matchedCard) {
-              matchedCard.className = 'user-group-card p-6 border-2 border-indigo-500 bg-indigo-50/20 dark:border-indigo-500 dark:bg-indigo-950/20 rounded-2xl flex flex-col justify-between gap-4 shadow-md transition-all duration-200 relative scale-[1.01]';
-              const badge = matchedCard.querySelector('.my-group-indicator');
-              if (badge) badge.classList.remove('hidden');
-            }
-          }
-        }
-      });
-    }
+    // (検索窓廃止に伴い highlightMyGroup 関数は廃止されました)
 
     // --- 👤 一般ユーザー②：プロフィール登録・変更 ---
     function getUserProfileViewHtml() {
@@ -1250,10 +1226,15 @@
             `).join('');
             
             groupCards += `
-              <div class="p-5 border border-slate-100 dark:border-zinc-800/80 rounded-xl bg-white dark:bg-zinc-900 flex flex-col gap-3 shadow-sm hover:border-indigo-100 dark:hover:border-indigo-950/50 transition-colors">
+              <div class="p-5 border border-slate-100 dark:border-zinc-800/80 rounded-xl bg-white dark:bg-zinc-900 flex flex-col gap-3 shadow-sm hover:border-indigo-100 dark:hover:border-indigo-950/50 transition-colors relative group/card">
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(g.groupId)}</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30">${escapeHtml(g.method)}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30">${escapeHtml(g.method)}</span>
+                    <button type="button" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 transition-all opacity-0 group-hover/card:opacity-100 focus:opacity-100" title="このグループを削除" onclick="handleDeleteMatchingGroup('${escapeHtml(date)}', '${escapeHtml(g.groupId)}')">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
                 </div>
                 <div class="flex flex-wrap gap-1.5 my-1">
                   ${namesList}
@@ -2095,6 +2076,39 @@
       }
     }
 
+    // 履歴から特定のグループを完全に削除する (管理者のみ)
+    async function handleDeleteMatchingGroup(date, groupId) {
+      if (!confirm(`【削除確認】\n日付: ${date}\nグループ: ${groupId}\n\nこのグループを履歴から完全に削除しますか？\n（このグループのチャット履歴もすべて削除されます。この操作は取り消せません）`)) {
+        return;
+      }
+      
+      showToast('削除中', 'グループを削除しています...', 'warning');
+      
+      try {
+        const res = await callGas('deleteMatchingGroup', date, groupId);
+        if (res.success) {
+          showToast('削除完了', `グループ ${groupId} を正常に削除しました。`, 'success');
+          
+          // データを再読み込みしてダッシュボードを更新
+          const loadRes = await callGas('getInitialData');
+          if (loadRes.success) {
+            state.members = loadRes.members;
+            state.settings = loadRes.settings;
+            state.history = loadRes.history;
+            state.totalCount = loadRes.totalCount;
+            state.activeCount = loadRes.activeCount;
+            state.hasApiKey = loadRes.hasApiKey;
+          }
+          
+          renderView();
+        } else {
+          showToast('削除エラー', res.error || 'グループの削除に失敗しました。', 'error');
+        }
+      } catch (e) {
+        showToast('エラー', '削除中に例外が発生しました：' + e.toString(), 'error');
+      }
+    }
+
     // --- ⑤-メンバー管理コントローラー (管理者用) ---
     function getUniqueDepartments() {
       const depts = state.members.map(m => m.department).filter(Boolean);
@@ -2507,6 +2521,7 @@
     window.handleSubmitMember = handleSubmitMember;
     window.discardTempMatching = discardTempMatching;
     window.confirmTempMatching = confirmTempMatching;
+    window.handleDeleteMatchingGroup = handleDeleteMatchingGroup;
     window.handleToggleStatus = handleToggleStatus;
     window.openEditMemberModal = openEditMemberModal;
     window.handleDeleteMember = handleDeleteMember;

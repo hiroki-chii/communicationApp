@@ -851,6 +851,24 @@ function registerSelfProfile(profileObj) {
 function checkRoomAccess(userEmail, roomId) {
   if (!userEmail) return false;
   
+  // 管理者はすべてのルームにアクセス可能にする (閲覧・送信のガード解除)
+  try {
+    var settings = getSettings();
+    var adminEmailsStr = settings.admin_emails || '';
+    var adminEmails = adminEmailsStr.split(',').map(function(e) { return e.trim().toLowerCase(); });
+    
+    var ownerEmail = Session.getEffectiveUser().getEmail();
+    if (ownerEmail && adminEmails.indexOf(ownerEmail.toLowerCase()) === -1) {
+      adminEmails.push(ownerEmail.toLowerCase());
+    }
+    
+    if (adminEmails.indexOf(userEmail.toLowerCase()) !== -1) {
+      return true; // 管理者なので無条件でアクセス許可
+    }
+  } catch (e) {
+    Logger.log('checkRoomAccess内での管理者判定エラー: ' + e.toString());
+  }
+  
   // ルームIDから開催日とグループIDをパース (例: "2026-05-24_G-1" -> "2026-05-24", "G-1")
   var parts = roomId.split('_');
   if (parts.length < 2) return false;
@@ -869,7 +887,8 @@ function checkRoomAccess(userEmail, roomId) {
   // 指定した開催日＆グループIDのマッチング履歴行を探す
   var targetRow = null;
   for (var i = 0; i < data.length; i++) {
-    var rowDate = Utilities.formatDate(new Date(data[i][0]), 'Asia/Tokyo', 'yyyy-MM-dd');
+    var val = data[i][0];
+    var rowDate = val instanceof Date ? Utilities.formatDate(val, 'Asia/Tokyo', 'yyyy-MM-dd') : val.toString();
     var rowGroupId = data[i][1];
     if (rowDate === dateStr && rowGroupId === groupId) {
       targetRow = data[i];
@@ -1062,6 +1081,64 @@ function clearMatchingHistory() {
   }
 }
 
+/**
+ * 特定のマッチンググループを履歴から削除する (管理者のみ)
+ */
+function deleteMatchingGroup(dateStr, groupId) {
+  try {
+    checkAdminPermission(); // 権限チェック
+    
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('マッチング履歴');
+    if (!sheet) return { success: false, error: 'マッチング履歴シートが見つかりません。' };
+    
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return { success: false, error: '履歴が存在しません。' };
+    
+    var data = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+    var rowIndexToDelete = -1;
+    
+    for (var i = 0; i < data.length; i++) {
+      var rowDate = data[i][0] instanceof Date ? Utilities.formatDate(data[i][0], 'Asia/Tokyo', 'yyyy-MM-dd') : data[i][0].toString();
+      var rowGroupId = data[i][1];
+      
+      if (rowDate === dateStr && rowGroupId === groupId) {
+        rowIndexToDelete = i + 2; // ヘッダー分+1, 0-indexで+1 => i + 2
+        break;
+      }
+    }
+    
+    if (rowIndexToDelete === -1) {
+      return { success: false, error: '指定されたグループが見つかりません。日付: ' + dateStr + ', グループID: ' + groupId };
+    }
+    
+    // 行の削除
+    sheet.deleteRow(rowIndexToDelete);
+    
+    // チャットメッセージシートからも、該当ルームIDのチャットメッセージを削除してクリーンアップ
+    var chatSheet = ss.getSheetByName('チャットメッセージ');
+    if (chatSheet) {
+      var chatLastRow = chatSheet.getLastRow();
+      if (chatLastRow > 1) {
+        var roomId = dateStr + '_' + groupId;
+        var chatData = chatSheet.getRange(2, 2, chatLastRow - 1, 1).getValues();
+        // 下から順に削除 (行番号がズレるのを防ぐため)
+        for (var j = chatData.length - 1; j >= 0; j--) {
+          if (chatData[j][0] === roomId) {
+            chatSheet.deleteRow(j + 2);
+          }
+        }
+      }
+    }
+    
+    SpreadsheetApp.flush();
+    return { success: true };
+  } catch (e) {
+    Logger.log('deleteMatchingGroup エラー: ' + e.toString());
+    return { success: false, error: e.toString() };
+  }
+}
+
 // -------------------------------------------------------------
 // matching.gs より統合されたマッチングロジック
 // -------------------------------------------------------------
@@ -1151,6 +1228,24 @@ function runMatching(params) {
       finalMethod = 'logic';
     }
     
+    if (result && result.success && result.groups) {
+      // グループIDを通算のユニークな連番にする (例: 前回がG-4までなら、今回はG-5から開始)
+      var maxGroupIdNum = 0;
+      history.forEach(function(h) {
+        var match = h.groupId.match(/^G-(\d+)$/);
+        if (match) {
+          var num = parseInt(match[1], 10);
+          if (num > maxGroupIdNum) {
+            maxGroupIdNum = num;
+          }
+        }
+      });
+
+      result.groups.forEach(function(group, idx) {
+        group.groupId = 'G-' + (maxGroupIdNum + idx + 1);
+      });
+    }
+
     return {
       success: true,
       method: finalMethod,
@@ -1254,13 +1349,13 @@ function runGeminiMatching(members, history, groupSize, groupCount, apiKey, addi
     }
     
     // IDから詳細なメンバー情報を復元してフロントに返す形にする
-    var finalGroups = parsedData.groups.map(function(g) {
+    var finalGroups = parsedData.groups.map(function(g, idx) {
       var matchedMembers = g.members.map(function(id) {
         return members.find(function(m) { return m.id === id; });
       }).filter(Boolean); // nullやundefinedを除外
       
       return {
-        groupId: g.groupId,
+        groupId: 'G-' + (idx + 1), // Geminiの出力ゆらぎに依存せず、連番のグループIDを強制適用する
         members: matchedMembers,
         memo: g.memo || ''
       };
