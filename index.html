@@ -730,7 +730,7 @@
 
       let groupCards = '';
       latestGroups.forEach(g => {
-        const namesList = g.memberNames.map(name => {
+        const namesList = g.memberNames.map((name, index) => {
           // 所属部署を取得
           const cleanName = (n) => n ? n.replace(/\s+/g, '') : '';
           const memberInfo = state.members.find(m => cleanName(m.name) === cleanName(name)) || {};
@@ -743,26 +743,35 @@
             ? 'flex flex-col p-2.5 rounded-lg border-2 border-indigo-500 bg-indigo-50/15 dark:bg-indigo-950/40 text-xs relative group cursor-help'
             : 'flex flex-col p-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30 text-xs relative group cursor-help';
 
+          // 奇数・偶数（左右の列）での位置調整クラス
+          const isLeftColumn = index % 2 === 0;
+          const popoverAlignClass = isLeftColumn
+            ? 'left-0 translate-x-0 origin-bottom-left'
+            : 'right-0 left-auto translate-x-0 origin-bottom-right';
+          const arrowAlignClass = isLeftColumn
+            ? 'left-6 translate-x-0'
+            : 'right-6 left-auto translate-x-0';
+
           return `
             <div class="${boxClass}">
               <span class="font-bold ${isMe ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-zinc-100'}">${escapeHtml(name)}</span>
               <span class="text-[9px] ${isMe ? 'text-indigo-500/80 dark:text-indigo-350' : 'text-slate-400 dark:text-zinc-500'} font-medium mt-0.5">${escapeHtml(dept)}</span>
               
               <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
+              <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-64 max-h-60 overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
                 <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
                   <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
                 </div>
                 <div class="space-y-1">
                   <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.interests || '未登録')}</p>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || '未登録')}</p>
                 </div>
                 <div class="space-y-1">
                   <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.purpose || '未登録')}</p>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.purpose || '未登録')}</p>
                 </div>
-                <div class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
+                <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
               </div>
             </div>
           `;
@@ -1036,30 +1045,40 @@
       let aiThemeHtml = '';
 
       if (matchingGroup) {
-        membersBadge = matchingGroup.memberNames.map(name => {
+        membersBadge = matchingGroup.memberNames.map((name, index) => {
           const cleanName = (n) => n ? n.replace(/\s+/g, '') : '';
           const memberInfo = state.members.find(m => cleanName(m.name) === cleanName(name)) || {};
           const dept = memberInfo.department || '他部署';
+
+          // 左半分か右半分かでポップオーバーの展開方向をスマートに分ける（前半メンバーは右へ、後半メンバーは左へ）
+          const isLeftHalf = index < Math.ceil(matchingGroup.memberNames.length / 2);
+          const popoverAlignClass = isLeftHalf
+            ? 'left-0 translate-x-0 origin-bottom-left'
+            : 'right-0 left-auto translate-x-0 origin-bottom-right';
+          const arrowAlignClass = isLeftHalf
+            ? 'left-6 translate-x-0'
+            : 'right-6 left-auto translate-x-0';
+
           return `
             <span class="inline-flex flex-col px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/50 text-xs relative group cursor-help">
               <span class="font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(name)}</span>
               <span class="text-[9px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
               
               <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
+              <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-64 max-h-60 overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
                 <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
                   <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
                 </div>
                 <div class="space-y-1">
                   <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.interests || '未登録')}</p>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || '未登録')}</p>
                 </div>
                 <div class="space-y-1">
                   <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.purpose || '未登録')}</p>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.purpose || '未登録')}</p>
                 </div>
-                <div class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
+                <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
               </div>
             </span>
           `;
@@ -1210,18 +1229,18 @@
                     <span>${timeStr}</span>
                     
                     <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
-                    <div class="absolute bottom-full left-0 mb-2 w-64 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
+                    <div class="absolute bottom-full left-0 mb-2 w-64 max-h-60 overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
                       <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
                         <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(msg.senderName)}</span>
                         <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(msg.department || '他部署')}</span>
                       </div>
                       <div class="space-y-1">
                         <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
-                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.interests || '未登録')}</p>
+                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || '未登録')}</p>
                       </div>
                       <div class="space-y-1">
                         <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
-                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.purpose || '未登録')}</p>
+                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.purpose || '未登録')}</p>
                       </div>
                       <div class="absolute top-full left-6 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
                     </div>
