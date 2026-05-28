@@ -111,8 +111,8 @@
         <i data-lucide="coffee" class="w-4.5 h-4.5"></i>
       </div>
       <div>
-        <h1 class="font-heading font-bold text-base leading-tight">ランチ交流会</h1>
-        <p class="text-[10px] text-slate-400 dark:text-zinc-500" id="pc-app-subtitle">マッチングポータル</p>
+        <h1 class="font-heading font-bold text-base leading-tight">NBテーブル</h1>
+        <p class="text-[10px] text-slate-400 dark:text-zinc-500" id="pc-app-subtitle">ランチ交流会</p>
       </div>
     </div>
 
@@ -843,9 +843,9 @@
               <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
               <span>次回開催日: ${escapeHtml(latestMatchingDate)}</span>
             </div>
-            <h3 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50 leading-snug">ランチ交流会のマッチングが発表されました！</h3>
+            <h3 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50 leading-snug">ランチ交流会のメンバー発表です！</h3>
             <p class="text-xs text-slate-500 dark:text-zinc-400 max-w-4xl leading-relaxed">
-              今回のマッチングです。異なる部署のメンバー同士でサウナや旅行など、共通の趣味や興味があるトピックについて楽しくおしゃべりしてください。「あなたのグループです！」マークのカードから専用チャットを開くことができます。
+              以下のグループ内チャット欄で、ランチ交流会の日程調整を行ってください。お互い思いやりのある発言、調整をお願いします。
             </p>
           </div>
 
@@ -1124,7 +1124,7 @@
                 </h3>
               </div>
               <div class="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">
-                ※このチャットはグループメンバー以外アクセスできません
+                ※このチャットはグループメンバーと管理者以外アクセスできません
               </div>
             </div>
             
@@ -1246,7 +1246,7 @@
               const cardBgClass = isGroupOuterAdmin
                 ? 'bg-amber-600 dark:bg-amber-500 text-white border border-amber-500/30'
                 : 'bg-indigo-600 dark:bg-indigo-500 text-white';
-              
+
               return `
                 <div class="flex flex-col items-end gap-1.5 max-w-[85%] ml-auto">
                   <div class="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-zinc-500">
@@ -1262,7 +1262,7 @@
               // 左側：他のグループメンバーのメッセージ (白/ライトグレー、あるいはグループ外管理者の場合はゴールド調枠付き)
               const cleanName = (n) => n ? n.replace(/\s+/g, '') : '';
               const memberInfo = state.members.find(m => m.email.toLowerCase() === msg.senderEmail.toLowerCase() || cleanName(m.name) === cleanName(msg.senderName)) || {};
-              
+
               const cardBgClass = isGroupOuterAdmin
                 ? 'bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/30 text-amber-900 dark:text-amber-200 shadow-amber-100/10'
                 : 'bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-800 dark:text-zinc-200';
@@ -1668,9 +1668,9 @@
                   <option value="" disabled selected hidden class="bg-white dark:bg-zinc-900 text-slate-405 dark:text-zinc-500">操作を選択</option>
                   <optgroup label="グループ移動" class="bg-white dark:bg-zinc-900 text-slate-450 dark:text-zinc-500">
                     ${state.tempGroups.map((otherG, otherGIdx) => {
-                      if (otherGIdx === gIdx) return '';
-                      return `<option value="move_${otherGIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">${escapeHtml(otherG.groupId)} へ移動</option>`;
-                    }).join('')}
+            if (otherGIdx === gIdx) return '';
+            return `<option value="move_${otherGIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">${escapeHtml(otherG.groupId)} へ移動</option>`;
+          }).join('')}
                   </optgroup>
                   <optgroup label="グループから外す" class="bg-white dark:bg-zinc-900 text-slate-450 dark:text-zinc-500">
                     <option value="remove" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">控えに戻す</option>
@@ -1678,8 +1678,8 @@
                   ${state.tempUnmatched && state.tempUnmatched.length > 0 ? `
                   <optgroup label="控えメンバーと交代" class="bg-white dark:bg-zinc-900 text-slate-450 dark:text-zinc-500">
                     ${state.tempUnmatched.map((unmatchedM, uIdx) => {
-                      return `<option value="swap_${uIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">控えの ${escapeHtml(unmatchedM.name)} と交代</option>`;
-                    }).join('')}
+            return `<option value="swap_${uIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">控えの ${escapeHtml(unmatchedM.name)} と交代</option>`;
+          }).join('')}
                   </optgroup>
                   ` : ''}
                 </select>
@@ -2291,7 +2291,7 @@
         state.tempGroups[fromGroupIdx].members.splice(fromMemberIdx, 1);
         if (!state.tempUnmatched) state.tempUnmatched = [];
         state.tempUnmatched.push(member);
-        
+
         markGroupAsModified(fromGroupIdx);
         showToast('メンバーを控えに戻しました', `${member.name} さんを控えメンバーに移動しました。`, 'info');
         renderView();
