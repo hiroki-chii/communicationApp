@@ -1649,23 +1649,39 @@
         let memberRows = '';
         g.members.forEach((m, mIdx) => {
           memberRows += `
-            <div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/40 text-xs gap-3">
-              <div class="min-w-0 flex-1">
+            <div class="flex flex-col p-3 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/40 text-xs gap-2.5">
+              <div class="min-w-0 w-full">
                 <div class="flex items-center gap-2">
                   <span class="font-bold text-slate-800 dark:text-zinc-200 shrink-0">${escapeHtml(m.name)}</span>
                   <span class="px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-zinc-700 text-slate-600 dark:text-zinc-400 font-medium text-[9px] truncate">${escapeHtml(m.department)}</span>
                 </div>
-                ${m.interests ? `<p class="text-[10px] text-slate-400 dark:text-zinc-500 truncate mt-1">${escapeHtml(m.interests)}</p>` : ''}
-                ${m.considerations ? `<p class="text-[9px] font-semibold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-200/40 w-max mt-1">⚠️ 配慮事項: ${escapeHtml(m.considerations)}</p>` : ''}
+                ${m.interests ? `<p class="text-[10px] text-slate-400 dark:text-zinc-500 truncate cursor-help mt-1" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests)}</p>` : ''}
+                ${m.considerations ? `
+                  <p class="text-[9px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-200/40 dark:border-amber-900/20 truncate cursor-help block max-w-full select-none mt-1" title="⚠️ 配慮事項: ${escapeHtml(m.considerations)}">
+                    ⚠️ 配慮事項: ${escapeHtml(m.considerations)}
+                  </p>
+                ` : ''}
               </div>
               
-              <div class="shrink-0 flex items-center">
-                <select class="text-[10px] p-1 rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="moveMember(${gIdx}, ${mIdx}, parseInt(this.value, 10))">
-                  <option value="-1" disabled selected>グループ移動</option>
-                  ${state.tempGroups.map((otherG, otherGIdx) => {
-            if (otherGIdx === gIdx) return '';
-            return `<option value="${otherGIdx}">${escapeHtml(otherG.groupId)} へ移動</option>`;
-          }).join('')}
+              <div class="w-full">
+                <select class="w-full text-[10px] p-1.5 rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer" onchange="handleMemberAction(${gIdx}, ${mIdx}, this.value)">
+                  <option value="" disabled selected hidden class="bg-white dark:bg-zinc-900 text-slate-405 dark:text-zinc-500">操作を選択</option>
+                  <optgroup label="グループ移動" class="bg-white dark:bg-zinc-900 text-slate-450 dark:text-zinc-500">
+                    ${state.tempGroups.map((otherG, otherGIdx) => {
+                      if (otherGIdx === gIdx) return '';
+                      return `<option value="move_${otherGIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">${escapeHtml(otherG.groupId)} へ移動</option>`;
+                    }).join('')}
+                  </optgroup>
+                  <optgroup label="グループから外す" class="bg-white dark:bg-zinc-900 text-slate-450 dark:text-zinc-500">
+                    <option value="remove" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">控えに戻す</option>
+                  </optgroup>
+                  ${state.tempUnmatched && state.tempUnmatched.length > 0 ? `
+                  <optgroup label="控えメンバーと交代" class="bg-white dark:bg-zinc-900 text-slate-450 dark:text-zinc-500">
+                    ${state.tempUnmatched.map((unmatchedM, uIdx) => {
+                      return `<option value="swap_${uIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">控えの ${escapeHtml(unmatchedM.name)} と交代</option>`;
+                    }).join('')}
+                  </optgroup>
+                  ` : ''}
                 </select>
               </div>
             </div>
@@ -1724,10 +1740,17 @@
                 <span>今回選出枠からあふれたメンバー (${state.tempUnmatched.length} 名) ——— 次回マッチング時に最優先で選出されます</span>
               </h4>
               <div class="flex flex-wrap gap-2">
-                ${state.tempUnmatched.map(m => `
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200/50 dark:border-zinc-800 shadow-sm transition-transform hover:scale-[1.02]">
+                ${state.tempUnmatched.map((m, uIdx) => `
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200/50 dark:border-zinc-800 shadow-sm transition-transform hover:scale-[1.02] relative group/unmatched">
                     <span>${escapeHtml(m.name)}</span>
                     <span class="text-[10px] text-slate-400 dark:text-zinc-500 font-medium font-sans">(${escapeHtml(m.department)})</span>
+                    ${m.considerations ? `
+                      <span class="text-amber-500 cursor-help select-none font-bold" title="⚠️ 配慮事項: ${escapeHtml(m.considerations)}">⚠️</span>
+                    ` : ''}
+                    <select class="ml-1.5 text-[9px] p-0.5 rounded border border-indigo-100/50 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 focus:outline-none cursor-pointer" onchange="addUnmatchedToGroup(${uIdx}, parseInt(this.value, 10))">
+                      <option value="" disabled selected hidden class="bg-white dark:bg-zinc-900 text-slate-405 dark:text-zinc-500">追加...</option>
+                      ${state.tempGroups.map((g, gIdx) => `<option value="${gIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">${escapeHtml(g.groupId)}</option>`).join('')}
+                    </select>
                   </span>
                 `).join('')}
               </div>
@@ -2251,13 +2274,67 @@
       state.tempGroups[fromGroupIdx].members.splice(fromMemberIdx, 1);
       state.tempGroups[toGroupIdx].members.push(member);
 
-      if (state.tempGroups[toGroupIdx].memo.indexOf('【手動微調整あり】') === -1) {
-        state.tempGroups[toGroupIdx].memo = '【手動微調整あり】' + state.tempGroups[toGroupIdx].memo;
-      }
-      if (state.tempGroups[fromGroupIdx].memo.indexOf('【手動微調整あり】') === -1) {
-        state.tempGroups[fromGroupIdx].memo = '【手動微調整あり】' + state.tempGroups[fromGroupIdx].memo;
-      }
+      markGroupAsModified(fromGroupIdx);
+      markGroupAsModified(toGroupIdx);
 
+      renderView();
+    }
+
+    // グループ微調整に「修正あり」のメモを追加する補助関数
+    function markGroupAsModified(groupIdx) {
+      if (state.tempGroups && state.tempGroups[groupIdx]) {
+        if (state.tempGroups[groupIdx].memo.indexOf('【手動微調整あり】') === -1) {
+          state.tempGroups[groupIdx].memo = '【手動微調整あり】' + state.tempGroups[groupIdx].memo;
+        }
+      }
+    }
+
+    // グループメンバーの操作ハンドラ（移動、削除、交代）
+    function handleMemberAction(fromGroupIdx, fromMemberIdx, actionValue) {
+      if (!actionValue) return;
+
+      if (actionValue.startsWith('move_')) {
+        const toGroupIdx = parseInt(actionValue.split('_')[1], 10);
+        moveMember(fromGroupIdx, fromMemberIdx, toGroupIdx);
+      } else if (actionValue === 'remove') {
+        // グループから外して控え（あふれ）に戻す
+        const member = state.tempGroups[fromGroupIdx].members[fromMemberIdx];
+        state.tempGroups[fromGroupIdx].members.splice(fromMemberIdx, 1);
+        if (!state.tempUnmatched) state.tempUnmatched = [];
+        state.tempUnmatched.push(member);
+        
+        markGroupAsModified(fromGroupIdx);
+        showToast('メンバーを控えに戻しました', `${member.name} さんを控えメンバーに移動しました。`, 'info');
+        renderView();
+      } else if (actionValue.startsWith('swap_')) {
+        // 控えメンバーと交代する
+        const unmatchedIdx = parseInt(actionValue.split('_')[1], 10);
+        if (state.tempUnmatched && state.tempUnmatched[unmatchedIdx]) {
+          const groupMember = state.tempGroups[fromGroupIdx].members[fromMemberIdx];
+          const unmatchedMember = state.tempUnmatched[unmatchedIdx];
+
+          // 入れ替え
+          state.tempGroups[fromGroupIdx].members[fromMemberIdx] = unmatchedMember;
+          state.tempUnmatched[unmatchedIdx] = groupMember;
+
+          markGroupAsModified(fromGroupIdx);
+          showToast('メンバーを交代しました', `${groupMember.name} さんと ${unmatchedMember.name} さんを交代しました。`, 'success');
+          renderView();
+        }
+      }
+    }
+
+    // 控えメンバーをグループに追加する
+    function addUnmatchedToGroup(unmatchedIdx, toGroupIdx) {
+      if (!state.tempUnmatched || !state.tempUnmatched[unmatchedIdx]) return;
+      if (toGroupIdx < 0 || toGroupIdx >= state.tempGroups.length) return;
+
+      const member = state.tempUnmatched[unmatchedIdx];
+      state.tempUnmatched.splice(unmatchedIdx, 1);
+      state.tempGroups[toGroupIdx].members.unshift(member); // 一番上（先頭）に追加
+
+      markGroupAsModified(toGroupIdx);
+      showToast('メンバーを追加しました', `${member.name} さんを ${state.tempGroups[toGroupIdx].groupId} に追加しました。`, 'success');
       renderView();
     }
 
