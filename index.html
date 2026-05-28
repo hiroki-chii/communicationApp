@@ -1529,9 +1529,30 @@
       }
 
       const defaultMode = state.settings.matching_mode || 'gemini';
-      const defaultGroupSize = state.settings.default_group_size || 4;
-      const defaultGroupCount = state.settings.default_group_count || 4;
+      const defaultGroupSize = parseInt(state.settings.default_group_size || 4, 10);
+      const defaultGroupCount = parseInt(state.settings.default_group_count || 4, 10);
       const defaultPrompt = state.settings.additional_prompt || '';
+
+      // アクティブな人数に応じた動的オプションの生成
+      const activeCount = state.activeCount || 0;
+
+      // 1グループあたりの目標人数: 最小2名、最大はアクティブな人数まで（最低2名保証）
+      // デフォルト値（初期選択）は最低値の「2名」とする
+      const maxGroupSize = Math.max(2, activeCount);
+      let groupSizeOptions = '';
+      for (let i = 2; i <= maxGroupSize; i++) {
+        const selected = i === 2 ? 'selected' : '';
+        groupSizeOptions += `<option value="${i}" ${selected}>${i} 名</option>`;
+      }
+
+      // 目標グループ数（組数）: 最小1組、最大は「あまり（あふれ）が出ない数」、すなわち Math.ceil(activeCount / 2)（最低1組保証）
+      // デフォルト値（初期選択）は最低値の「1組」とする
+      const maxGroupCount = Math.max(1, Math.ceil(activeCount / 2));
+      let groupCountOptions = '';
+      for (let i = 1; i <= maxGroupCount; i++) {
+        const selected = i === 1 ? 'selected' : '';
+        groupCountOptions += `<option value="${i}" ${selected}>${i} 組</option>`;
+      }
 
       return `
         <div class="max-w-2xl mx-auto p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark space-y-6">
@@ -1575,23 +1596,23 @@
               </div>
             </div>
 
-            <!-- グループサイズスライダー -->
+            <!-- グループサイズプルダウン -->
             <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label for="group-size" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">1グループあたりの目標人数</label>
-                <span id="group-size-val" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-lg border border-indigo-100/20">${defaultGroupSize} 名</span>
-              </div>
-              <input type="range" id="group-size" name="default_group_size" min="2" max="6" value="${defaultGroupSize}" class="w-full h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500" oninput="document.getElementById('group-size-val').textContent = this.value + ' 名'">
+              <label for="group-size" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">1グループあたりの目標人数</label>
+              <select id="group-size" name="default_group_size" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                ${groupSizeOptions}
+              </select>
             </div>
 
-            <!-- 目標グループ数（組数）スライダー -->
+            <!-- 目標グループ数（組数）プルダウン -->
             <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label for="group-count" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">目標グループ数（組数）</label>
-                <span id="group-count-val" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-lg border border-indigo-100/20">${defaultGroupCount} 組</span>
-              </div>
-              <input type="range" id="group-count" name="default_group_count" min="1" max="10" value="${defaultGroupCount}" class="w-full h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500" oninput="document.getElementById('group-count-val').textContent = this.value + ' 組'">
+              <label for="group-count" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">目標グループ数（組数）</label>
+              <select id="group-count" name="default_group_count" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                ${groupCountOptions}
+              </select>
             </div>
+
+
 
             <!-- アクティブメンバーのプレビュー -->
             <div class="p-4 bg-slate-100/70 dark:bg-zinc-900/50 rounded-xl border border-slate-200 dark:border-zinc-800 flex items-center justify-between">
@@ -1931,17 +1952,6 @@
               </div>
             </div>
 
-            <!-- デフォルト設定 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <label for="s-group-size" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">標準の1グループ人数</label>
-                <input type="number" id="s-group-size" name="default_group_size" min="2" max="10" value="${defaultGroupSize}" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-              </div>
-              <div class="space-y-1.5">
-                <label for="s-group-count" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">標準の目標グループ数（組数）</label>
-                <input type="number" id="s-group-count" name="default_group_count" min="1" max="10" value="${defaultGroupCount}" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-              </div>
-            </div>
 
             <!-- マッチングモード -->
             <div class="space-y-2">
@@ -2059,6 +2069,15 @@
       const matchingForm = document.getElementById('matching-form');
       if (matchingForm) {
         matchingForm.addEventListener('change', togglePromptVisibility);
+
+        // 1グループ人数が変更されたら、組数の上限・選択肢を再生成するイベント
+        const groupSizeSelect = document.getElementById('group-size');
+        if (groupSizeSelect) {
+          groupSizeSelect.addEventListener('change', updateGroupCountOptions);
+        }
+
+        // 画面初期表示時にも組数の上限・選択肢を再生成
+        setTimeout(updateGroupCountOptions, 100);
       }
 
       // メンバー追加・編集保存ボタン
@@ -2154,6 +2173,32 @@
         }
       }
     }
+
+    // 目標人数の変更に応じて、あまり（あふれ）が出ない上限に組数の選択肢を動的に更新する
+    function updateGroupCountOptions() {
+      const groupSizeSelect = document.getElementById('group-size');
+      const groupCountSelect = document.getElementById('group-count');
+      if (!groupSizeSelect || !groupCountSelect) return;
+
+      const groupSize = parseInt(groupSizeSelect.value, 10);
+      const activeCount = state.activeCount || 0;
+      const currentSelectedCount = parseInt(groupCountSelect.value, 10);
+
+      // 上限を「あまり（あふれ）が出ない数」、すなわち Math.ceil(activeCount / groupSize) に設定
+      // ただし、最低でも1組は選択できるようにする
+      const maxGroupCount = Math.max(1, Math.ceil(activeCount / groupSize));
+
+      let groupCountOptions = '';
+      for (let i = 1; i <= maxGroupCount; i++) {
+        // 以前選択されていた値、または上限を超えた場合は新たな上限を選択状態にする
+        const selected = (i === currentSelectedCount || (i === maxGroupCount && currentSelectedCount > maxGroupCount)) ? 'selected' : '';
+        groupCountOptions += `<option value="${i}" ${selected}>${i} 組</option>`;
+      }
+
+      groupCountSelect.innerHTML = groupCountOptions;
+    }
+
+
 
     // --- ② マッチング作成コントローラー ---
     async function handleGenerateMatching() {
@@ -2508,15 +2553,11 @@
         const adminEmailsInput = document.getElementById('s-admin-emails');
         const apiKeyInput = document.getElementById('s-api-key');
         const promptTextarea = document.getElementById('s-additional-prompt');
-        const groupSizeInput = document.getElementById('s-group-size');
-        const groupCountInput = document.getElementById('s-group-count');
 
         console.log('[DEBUG] フォーム要素の取得状況:', {
           adminEmailsInput: !!adminEmailsInput,
           apiKeyInput: !!apiKeyInput,
-          promptTextarea: !!promptTextarea,
-          groupSizeInput: !!groupSizeInput,
-          groupCountInput: !!groupCountInput
+          promptTextarea: !!promptTextarea
         });
 
         const modeGemini = document.getElementById('set-mode-gemini');
@@ -2529,8 +2570,6 @@
           admin_emails: adminEmailsInput ? adminEmailsInput.value.trim() : '',
           gemini_api_key: apiKeyInput ? apiKeyInput.value.trim() : '',
           matching_mode: matchingMode,
-          default_group_size: groupSizeInput ? groupSizeInput.value : '4',
-          default_group_count: groupCountInput ? groupCountInput.value : '4',
           additional_prompt: promptTextarea ? promptTextarea.value : ''
         };
 
@@ -2716,6 +2755,7 @@
     window.handleReinitDb = handleReinitDb;
     window.handleSendChatMessage = handleSendChatMessage;
     window.handleTogglePriority = handleTogglePriority;
+    window.updateGroupCountOptions = updateGroupCountOptions;
 
     // ==========================================
     // アプリケーション起動エントリー
