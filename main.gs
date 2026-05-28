@@ -131,6 +131,7 @@ function initDatabase() {
   }
 
   // 既存のステータス列（8列目、H列）のブーリアン移行＆チェックボックス化のマイグレーション
+  // ※ 既にブーリアン型(true/false)が入っているセルは変換対象外（触るとチェックボックスのデータ検証が失われる）
   if (memberSheet) {
     var lastRow = memberSheet.getLastRow();
     if (lastRow > 1) {
@@ -139,11 +140,13 @@ function initDatabase() {
       var dataChanged = false;
       for (var i = 0; i < statusValues.length; i++) {
         var val = statusValues[i][0];
-        // 既存の 'アクティブ' などの文字列からブーリアンへの変換
-        if (val === 'アクティブ' || val === 'TRUE' || val === true || val === 'true') {
+        // 既にブーリアン型の場合はスキップ（チェックボックスの値を壊さない）
+        if (typeof val === 'boolean') continue;
+        // 文字列型のみ変換対象とする
+        if (val === 'アクティブ' || val === 'TRUE' || val === 'true') {
           statusValues[i][0] = true;
           dataChanged = true;
-        } else if (val === '非アクティブ' || val === 'FALSE' || val === false || val === 'false' || val === '') {
+        } else if (val === '非アクティブ' || val === 'FALSE' || val === 'false' || val === '') {
           statusValues[i][0] = false;
           dataChanged = true;
         }
@@ -298,7 +301,8 @@ function checkAdminPermission() {
  */
 function getInitialData() {
   try {
-    initDatabase();
+    // ※ initDatabase() はここでは呼ばない（doGet で1回のみ呼び出す設計）
+    // 毎回呼ぶとマイグレーション処理がアクセスのたびに実行されステータスが壊れる恐れがある
     
     // getActiveUser() が空の場合は getEffectiveUser() を使用
     var userEmail = Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail();
@@ -721,8 +725,13 @@ function saveMatchingHistory(groups, matchingMethod) {
     // 今回マッチングされたメンバーIDを収集
     var matchedMemberIds = [];
     groups.forEach(function(group) {
+      // members が空のグループはスキップ（フロントエンドで除外済みのはずだが念のため）
+      if (!group.members || group.members.length === 0) return;
+      
       var memberIds = group.members.map(function(m) { return m.id; }).join(',');
       var memberNames = group.members.map(function(m) { return m.name; }).join(', ');
+      
+      Logger.log('saveMatchingHistory: グループ保存 groupId=' + group.groupId + ' members=' + memberIds);
       
       sheet.appendRow([
         todayStr,
@@ -738,11 +747,14 @@ function saveMatchingHistory(groups, matchingMethod) {
       });
     });
     
+    // 書き込みを即時同期（次の読み込みに確実に反映させる）
+    SpreadsheetApp.flush();
+    
     sheet.autoResizeColumns(1, 6);
     
     // --- 優先フラグ（次回優先）の自動更新処理 ---
     var allMembers = getMembers();
-    var activeMembers = allMembers.filter(function(m) { return m.status === 'アクティブ'; });
+    var activeMembers = allMembers.filter(function(m) { return m.status === true; });
     
     var memberSheet = ss.getSheetByName('メンバー一覧');
     if (memberSheet) {
@@ -1114,7 +1126,7 @@ function clearMatchingHistory() {
     var memberSheet = ss.getSheetByName('メンバー一覧');
     if (memberSheet && memberSheet.getLastRow() > 1) {
       var lastRow = memberSheet.getLastRow();
-      var priorityRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
+      var priorityRange = memberSheet.getRange(2, 9, lastRow - 1, 1); // 9列目が「次回優先」列
       var priorities = priorityRange.getValues();
       for (var i = 0; i < priorities.length; i++) {
         priorities[i][0] = false;

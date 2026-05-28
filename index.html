@@ -2457,7 +2457,7 @@
           const idx = state.members.findIndex(m => m.id === memberId);
           if (idx !== -1) {
             state.members[idx].status = res.nextStatus;
-            state.activeCount = state.members.filter(m => m.status === 'アクティブ').length;
+            state.activeCount = state.members.filter(m => m.status === true).length;
           }
 
           showToast('ステータス更新', `ステータスを「${res.nextStatus}」に変更しました。`, 'success');
