@@ -80,56 +80,114 @@ function initDatabase() {
   var isNewMemberSheet = false;
   if (!memberSheet) {
     memberSheet = ss.insertSheet('メンバー一覧');
-    memberSheet.appendRow(['メンバーID', '名前', 'メールアドレス', '部署・チーム', '趣味・自己紹介・興味のあること', '参加目的', 'ステータス', '次回優先']);
-    memberSheet.getRange('A1:H1').setBackground('#f1f5f9').setFontWeight('bold');
+    memberSheet.appendRow(['メンバーID', '名前', 'メールアドレス', '部署・チーム', '趣味・自己紹介・興味のあること', '参加目的', '配慮事項', 'ステータス', '次回優先']);
+    memberSheet.getRange('A1:I1').setBackground('#f1f5f9').setFontWeight('bold');
     isNewMemberSheet = true;
   } else {
-    // 既存のシートのアップグレード（8列目が無ければ追加）
-    var lastCol = memberSheet.getLastColumn();
-    var lastRow = memberSheet.getLastRow();
-    if (lastCol === 7) {
+    // 既存のシートのアップグレードとカラムの順序整理
+    // 目的: 「配慮事項」を「参加目的」の右（＝7列目：G列）に配置する。
+    var headers = memberSheet.getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 9)).getValues()[0];
+    
+    // 1. まず「次回優先」が無ければ追加
+    var priorityIndex = headers.indexOf('次回優先');
+    if (priorityIndex === -1) {
       memberSheet.getRange(1, 8).setValue('次回優先');
       memberSheet.getRange('H1').setBackground('#f1f5f9').setFontWeight('bold');
+      var lastRow = memberSheet.getLastRow();
       if (lastRow > 1) {
         var checkboxRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
         checkboxRange.insertCheckboxes();
         checkboxRange.setValue(false);
       }
+      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0]; // 再取得
+    }
+    
+    // 2. 「配慮事項」の位置を確認し、7列目（G列、インデックス6）に移設または新規挿入する
+    var considerationsIndex = headers.indexOf('配慮事項');
+    if (considerationsIndex === -1) {
+      // 存在しない場合は7列目に挿入
+      memberSheet.insertColumnAfter(6); // 6列目（F）の後に空列を挿入（＝新7列目・G列になる）
+      memberSheet.getRange(1, 7).setValue('配慮事項');
+      memberSheet.getRange('G1').setBackground('#f1f5f9').setFontWeight('bold');
+    } else if (considerationsIndex !== 6) {
+      // 7列目以外にある場合（例: 9列目）、7列目に挿入してデータを移動する
+      memberSheet.insertColumnAfter(6); // F列の後に新G列（7列目）を挿入。元の「配慮事項」は右にズレる。
+      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0]; // ズレた後のヘッダーを再取得
+      var oldColIdx = headers.indexOf('配慮事項') + 1; // 1-based of 新しい列インデックス
+      
+      var lastRow = memberSheet.getLastRow();
+      if (lastRow > 1) {
+        var oldRange = memberSheet.getRange(2, oldColIdx, lastRow - 1, 1);
+        var newRange = memberSheet.getRange(2, 7, lastRow - 1, 1);
+        oldRange.copyTo(newRange);
+      }
+      
+      memberSheet.getRange(1, 7).setValue('配慮事項');
+      memberSheet.getRange('G1').setBackground('#f1f5f9').setFontWeight('bold');
+      
+      // 元の「配慮事項」列を削除
+      memberSheet.deleteColumn(oldColIdx);
+    }
+  }
+
+  // 既存のステータス列（8列目、H列）のブーリアン移行＆チェックボックス化のマイグレーション
+  if (memberSheet) {
+    var lastRow = memberSheet.getLastRow();
+    if (lastRow > 1) {
+      var statusRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
+      var statusValues = statusRange.getValues();
+      var dataChanged = false;
+      for (var i = 0; i < statusValues.length; i++) {
+        var val = statusValues[i][0];
+        // 既存の 'アクティブ' などの文字列からブーリアンへの変換
+        if (val === 'アクティブ' || val === 'TRUE' || val === true || val === 'true') {
+          statusValues[i][0] = true;
+          dataChanged = true;
+        } else if (val === '非アクティブ' || val === 'FALSE' || val === false || val === 'false' || val === '') {
+          statusValues[i][0] = false;
+          dataChanged = true;
+        }
+      }
+      if (dataChanged) {
+        statusRange.setValues(statusValues);
+      }
+      statusRange.insertCheckboxes(); // チェックボックスを挿入（すでに挿入されていても安全）
     }
   }
 
   // デモデータの投入（メンバー一覧シートが空、または新規作成された場合）
   if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
     var demoMembers = [
-      ['M001', '山田 太郎', 'yamada.t@example.com', '開発部', '趣味はサウナとTypeScript。最近はDIYにハマっています。', '技術的な雑談, 他部署の交流', 'アクティブ', false],
-      ['M002', '佐藤 美咲', 'sato.m@example.com', '人事部', '休日はカフェ巡りやヨガをしています。旅行が大好きです。', '他部署の交流', 'アクティブ', false],
-      ['M003', '鈴木 健一', 'suzuki.k@example.com', '開発部', 'GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。', '技術的な雑談, キャリア相談', 'アクティブ', false],
-      ['M004', '高橋 玲子', 'takahashi.r@example.com', 'マーケティング部', '映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。', '他部署の交流, 雑談で息抜き', 'アクティブ', false],
-      ['M005', '田中 達也', 'tanaka.t@example.com', '営業部', '学生時代からゴルフをしています。週末はだいたいグリーンにいます。', '他部署の交流', 'アクティブ', false],
-      ['M006', '渡辺 奈々', 'watanabe.n@example.com', '総務部', '料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。', '雑談で息抜き', 'アクティブ', false],
-      ['M007', '伊藤 淳', 'ito.j@example.com', '開発部', 'Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。', '技術的な雑談, 他部署の交流', 'アクティブ', false],
-      ['M008', '山本 結衣', 'yamamoto.y@example.com', '営業部', '読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。', '他部署の交流', 'アクティブ', false],
-      ['M009', '中村 翔', 'nakamura.s@example.com', 'マーケティング部', 'キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。', '技術的な雑談, 雑談で息抜き', 'アクティブ', false],
-      ['M010', '小林 直樹', 'kobayashi.n@example.com', '人事部', 'テニスと筋トレ。最近は健康食作りにも取り組んでいます。', '他部署の交流, キャリア相談', 'アクティブ', false],
-      ['M011', '加藤 沙織', 'kato.s@example.com', '開発部', 'Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。', '技術的な雑談, 他部署の交流', 'アクティブ', false],
-      ['M012', '吉田 拓海', 'yoshida.t@example.com', '新規事業部', 'サウナ、ポッドキャストを聴くこと、スタートアップ研究。', 'キャリア相談, 他部署の交流', 'アクティブ', false],
-      ['M013', '佐々木 萌', 'sasaki.m@example.com', '広報部', '美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。', '他部署の交流, 雑談で息抜き', 'アクティブ', false],
-      ['M014', '山口 健太', 'yamaguchi.k@example.com', '開発部', 'Kubernetes、Terraform。趣味はボードゲームとキャンプです。', '技術的な雑談, 他部署の交流', 'アクティブ', false],
-      ['M015', '松本 恵', 'matsumoto.m@example.com', '営業部', 'ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。', '他部署の交流, 雑談で息抜き', 'アクティブ', false],
-      ['M016', '斎藤 翼', 'saito.t@example.com', '開発部', '自動テスト、バグハント。趣味はランニングと麻雀です。', '技術的な雑談', 'アクティブ', false]
+      ['M001', '山田 太郎', 'yamada.t@example.com', '開発部', '趣味はサウナとTypeScript。最近はDIYにハマっています。', '技術的な雑談, 他部署の交流', '', true, false],
+      ['M002', '佐藤 美咲', 'sato.m@example.com', '人事部', '休日はカフェ巡りやヨガをしています。旅行が大好きです。', '他部署の交流', '', true, false],
+      ['M003', '鈴木 健一', 'suzuki.k@example.com', '開発部', 'GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。', '技術的な雑談, キャリア相談', '', true, false],
+      ['M004', '高橋 玲子', 'takahashi.r@example.com', 'マーケティング部', '映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。', '他部署の交流, 雑談で息抜き', '', true, false],
+      ['M005', '田中 達也', 'tanaka.t@example.com', '営業部', '学生時代からゴルフをしています。週末はだいたいグリーンにいます。', '他部署 of 交流', '', true, false],
+      ['M006', '渡辺 奈々', 'watanabe.n@example.com', '総務部', '料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。', '雑談で息抜き', '', true, false],
+      ['M007', '伊藤 淳', 'ito.j@example.com', '開発部', 'Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。', '技術的な雑談, 他部署の交流', '', true, false],
+      ['M008', '山本 結衣', 'yamamoto.y@example.com', '営業部', '読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。', '他部署の交流', '', true, false],
+      ['M009', '中村 翔', 'nakamura.s@example.com', 'マーケティング部', 'キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。', '技術的な雑談, 雑談で息抜き', '', true, false],
+      ['M010', '小林 直樹', 'kobayashi.n@example.com', '人事部', 'テニスと筋トレ。最近は健康食作りにも取り組んでいます。', '他部署の交流, キャリア相談', '', true, false],
+      ['M011', '加藤 沙織', 'kato.s@example.com', '開発部', 'Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。', '技術的な雑談, 他部署の交流', '', true, false],
+      ['M012', '吉田 拓海', 'yoshida.t@example.com', '新規事業部', 'サウナ、ポッドキャストを聴くこと、スタートアップ研究。', 'キャリア相談, 他部署の交流', '', true, false],
+      ['M013', '佐々木 萌', 'sasaki.m@example.com', '広報部', '美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。', '他部署の交流, 雑談で息抜き', '', true, false],
+      ['M014', '山口 健太', 'yamaguchi.k@example.com', '開発部', 'Kubernetes、Terraform。趣味はボードゲームとキャンプです。', '技術的な雑談, 他部署の交流', '', true, false],
+      ['M015', '松本 恵', 'matsumoto.m@example.com', '営業部', 'ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。', '他部署の交流, 雑談で息抜き', '', true, false],
+      ['M016', '斎藤 翼', 'saito.t@example.com', '開発部', '自動テスト、バグハント。趣味はランニングと麻雀です。', '技術的な雑談', '', true, false]
     ];
 
     for (var i = 0; i < demoMembers.length; i++) {
       memberSheet.appendRow(demoMembers[i]);
     }
     
-    // チェックボックスを挿入
+    // チェックボックスを挿入（8列目のステータス、9列目の次回優先）
     var lastRow = memberSheet.getLastRow();
     if (lastRow > 1) {
       memberSheet.getRange(2, 8, lastRow - 1, 1).insertCheckboxes();
+      memberSheet.getRange(2, 9, lastRow - 1, 1).insertCheckboxes();
     }
     
-    memberSheet.autoResizeColumns(1, 8);
+    memberSheet.autoResizeColumns(1, 9);
   }
 
   // 3. マッチング履歴シートの作成・初期化
@@ -261,7 +319,7 @@ function getInitialData() {
       settings.gemini_api_key = settings.gemini_api_key ? '●●●●●●●●' : '';
     }
     
-    var activeCount = members.filter(function(m) { return m.status === 'アクティブ'; }).length;
+    var activeCount = members.filter(function(m) { return m.status === true; }).length;
     
     // ログイン中の本人の登録プロフィールを取得
     var myProfile = null;
@@ -301,7 +359,7 @@ function getMembers() {
   if (lastRow <= 1) return [];
   
   var lastCol = sheet.getLastColumn();
-  var colCount = Math.max(lastCol, 8); // 8列目（次回優先）まで安全に取得
+  var colCount = Math.max(lastCol, 9); // 9列目まで安全に取得
   var data = sheet.getRange(2, 1, lastRow - 1, colCount).getValues();
   
   return data.map(function(row) {
@@ -312,8 +370,9 @@ function getMembers() {
       department: row[3],
       interests: row[4],
       purpose: row[5],
-      status: row[6] || 'アクティブ',
-      priority: !!row[7] // 8列目の「次回優先」フラグ (真偽値)
+      considerations: row[6] || '', // 7列目の「配慮事項」
+      status: row[7] === true || row[7] === 'アクティブ', // 8列目の「ステータス」 (ブーリアン)
+      priority: !!row[8] // 9列目の「次回優先」フラグ (真偽値)
     };
   });
 }
@@ -467,17 +526,19 @@ function addMemberToSheet(memberObj) {
     memberObj.department || '',
     memberObj.interests || '',
     memberObj.purpose || '',
-    memberObj.status || 'アクティブ',
+    memberObj.considerations || '',
+    memberObj.status !== false,
     !!memberObj.priority
   ];
   
   sheet.appendRow(newRow);
   
-  // チェックボックスを挿入
+  // チェックボックスを挿入（8列目のステータス、9列目の次回優先）
   var targetRow = sheet.getLastRow();
-  sheet.getRange(targetRow, 8).insertCheckboxes().setValue(!!memberObj.priority);
+  sheet.getRange(targetRow, 8).insertCheckboxes().setValue(memberObj.status !== false);
+  sheet.getRange(targetRow, 9).insertCheckboxes().setValue(!!memberObj.priority);
   
-  sheet.autoResizeColumns(1, 8);
+  sheet.autoResizeColumns(1, 9);
   
   return { success: true, member: getMembers().find(function(m) { return m.id === newId; }) };
 }
@@ -512,7 +573,7 @@ function updateMemberInSheet(memberObj) {
   }
   
   var rowNum = rowIndex + 2;
-  var range = sheet.getRange(rowNum, 1, 1, 8); // 8列目まで更新
+  var range = sheet.getRange(rowNum, 1, 1, 9); // 9列目まで更新
   range.setValues([[
     memberObj.id,
     memberObj.name || '',
@@ -520,7 +581,8 @@ function updateMemberInSheet(memberObj) {
     memberObj.department || '',
     memberObj.interests || '',
     memberObj.purpose || '',
-    memberObj.status || 'アクティブ',
+    memberObj.considerations || '',
+    memberObj.status !== false, // ステータス (ブーリアン)
     !!memberObj.priority
   ]]);
   
@@ -572,14 +634,14 @@ function toggleMemberStatus(memberId) {
     var lastRow = sheet.getLastRow();
     if (lastRow <= 1) return { success: false, error: 'メンバーデータが存在しません。' };
     
-    var data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
+    var data = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
     var rowIndex = -1;
-    var currentStatus = 'アクティブ';
+    var currentStatus = true;
     
     for (var i = 0; i < data.length; i++) {
       if (data[i][0] === memberId) {
         rowIndex = i;
-        currentStatus = data[i][6]; // 7列目(インデックス6)がステータス！
+        currentStatus = data[i][7] === true || data[i][7] === 'アクティブ'; // 8列目(インデックス7)がステータス！
         break;
       }
     }
@@ -588,9 +650,9 @@ function toggleMemberStatus(memberId) {
       return { success: false, error: 'メンバーIDが見つかりません。ID: ' + memberId };
     }
     
-    var nextStatus = currentStatus === 'アクティブ' ? '非アクティブ' : 'アクティブ';
+    var nextStatus = !currentStatus;
     var rowNum = rowIndex + 2;
-    sheet.getRange(rowNum, 7).setValue(nextStatus); // 7列目を更新！
+    sheet.getRange(rowNum, 8).setValue(nextStatus); // 8列目を更新！
     
     return { success: true, memberId: memberId, nextStatus: nextStatus };
   } catch (e) {
@@ -613,14 +675,14 @@ function toggleMemberPriority(memberId) {
     var lastRow = sheet.getLastRow();
     if (lastRow <= 1) return { success: false, error: 'メンバーデータが存在しません。' };
     
-    var data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
+    var data = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
     var rowIndex = -1;
     var currentPriority = false;
     
     for (var i = 0; i < data.length; i++) {
       if (data[i][0] === memberId) {
         rowIndex = i;
-        currentPriority = !!data[i][7]; // 8列目(インデックス7)が次回優先フラグ！
+        currentPriority = !!data[i][8]; // 9列目(インデックス8)が次回優先フラグ！
         break;
       }
     }
@@ -631,7 +693,7 @@ function toggleMemberPriority(memberId) {
     
     var nextPriority = !currentPriority;
     var rowNum = rowIndex + 2;
-    sheet.getRange(rowNum, 8).setValue(nextPriority);
+    sheet.getRange(rowNum, 9).setValue(nextPriority); // 9列目を更新！
     
     return { success: true, memberId: memberId, nextPriority: nextPriority };
   } catch (e) {
@@ -687,7 +749,7 @@ function saveMatchingHistory(groups, matchingMethod) {
       var lastRow = memberSheet.getLastRow();
       if (lastRow > 1) {
         var memberIdsInSheet = memberSheet.getRange(2, 1, lastRow - 1, 1).getValues().map(function(r) { return r[0]; });
-        var priorityRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
+        var priorityRange = memberSheet.getRange(2, 9, lastRow - 1, 1);
         var priorities = priorityRange.getValues();
         
         for (var i = 0; i < memberIdsInSheet.length; i++) {
@@ -805,8 +867,9 @@ function registerSelfProfile(profileObj) {
         department: profileObj.department,
         interests: profileObj.interests || '',
         purpose: profileObj.purpose || '',
-        status: profileObj.status || 'アクティブ',
-        priority: myProfile.priority || false // 優先フラグを引き継ぐ
+        status: profileObj.status !== false,
+        priority: myProfile.priority || false, // 優先フラグを引き継ぐ
+        considerations: profileObj.considerations || ''
       };
       result = updateMemberInSheet(updateObj);
     } else {
@@ -817,8 +880,9 @@ function registerSelfProfile(profileObj) {
         department: profileObj.department,
         interests: profileObj.interests || '',
         purpose: profileObj.purpose || '',
-        status: profileObj.status || 'アクティブ',
-        priority: false // 新規登録時は優先ではない
+        status: profileObj.status !== false,
+        priority: false, // 新規登録時は優先ではない
+        considerations: profileObj.considerations || ''
       };
       result = addMemberToSheet(addObj);
     }
@@ -1145,7 +1209,7 @@ function runMatching(params) {
     
     // アクティブなメンバー一覧の取得
     var allMembers = getMembers();
-    var activeMembers = allMembers.filter(function(m) { return m.status === 'アクティブ'; });
+    var activeMembers = allMembers.filter(function(m) { return m.status === true; });
     
     if (activeMembers.length < 2) {
       return { success: false, error: 'アクティブなメンバーが少なすぎます（最低2名必要です）。' };
@@ -1258,7 +1322,8 @@ function runGeminiMatching(members, history, groupSize, groupCount, apiKey, addi
         name: m.name,
         dept: m.department,
         interests: m.interests,
-        purpose: m.purpose
+        purpose: m.purpose,
+        considerations: m.considerations || ''
       };
     });
     
@@ -1278,7 +1343,8 @@ function runGeminiMatching(members, history, groupSize, groupCount, apiKey, addi
       "3. 異なる部署・チームのメンバーが極力同じグループになるように「部署の多様性」を最優先してください。\n" +
       "4. 趣味、自己紹介、参加目的などを考慮し、共通点がある人同士を組み合わせると会話が弾みやすいので、適度に「趣味・関心の合致」を考慮してください。\n" +
       "5. 過去のマッチング履歴（ compactHistory ）を確認し、直近で同じグループになった人同士ができるだけ被らないように配慮してください。\n" +
-      "6. 出力フォーマットは指定された厳密なJSONスキーマのみとし、余計な説明文やMarkdown ofコードブロック（```json など）は含めず、純粋なJSON文字列として返してください。";
+      "6. メンバーに「配慮事項 (considerations)」が記載されている場合は、アレルギーや苦手なもの、時間制限、その他の要望を極力尊重して、可能な限り配慮が満たされるような組み合わせや、AIコメントでの言及を行ってください。\n" +
+      "7. 出力フォーマットは指定された厳密なJSONスキーマのみとし、余計な説明文やMarkdown ofコードブロック（```json など）は含めず、純粋なJSON文字列として返してください。";
 
     var prompt = 
       "【メンバーリスト】\n" + JSON.stringify(membersData) + "\n\n" +

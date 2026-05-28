@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <title>社内ランチ交流会 - マッチングポータル</title>
@@ -7,7 +8,9 @@
   <!-- Tailwind CSS & Google Fonts & Lucide Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
   <!-- Tailwind CSS Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -52,6 +55,7 @@
         opacity: 0;
         transform: translateY(4px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -93,13 +97,17 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200">
+
+<body
+  class="bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200">
 
   <!-- PC用 左サイドバー (md以上で表示) -->
-  <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shrink-0 sticky top-0 h-screen">
+  <aside
+    class="hidden md:flex flex-col w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shrink-0 sticky top-0 h-screen">
     <!-- ロゴ・アプリタイトル -->
     <div class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-zinc-800 gap-3">
-      <div class="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm animate-pulse">
+      <div
+        class="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm animate-pulse">
         <i data-lucide="coffee" class="w-4.5 h-4.5"></i>
       </div>
       <div>
@@ -107,48 +115,61 @@
         <p class="text-[10px] text-slate-400 dark:text-zinc-500" id="pc-app-subtitle">マッチングポータル</p>
       </div>
     </div>
-    
+
     <!-- ナビゲーションメニュー -->
     <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-      
+
       <!-- 一般メニューセクション -->
       <div class="space-y-1">
         <p class="px-4 text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2">一般メニュー</p>
-        <a href="#user-matching" id="nav-user-matching" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
-          <i data-lucide="calendar-heart" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+        <a href="#user-matching" id="nav-user-matching"
+          class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="calendar-heart"
+            class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
           <span>次回マッチング結果</span>
         </a>
-        <a href="#user-profile" id="nav-user-profile" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
-          <i data-lucide="user-cog" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+        <a href="#user-profile" id="nav-user-profile"
+          class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="user-cog"
+            class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
           <span>プロフィール設定</span>
         </a>
       </div>
 
       <!-- 管理者メニューセクション (isAdmin === true の場合のみJSで表示制御) -->
       <div id="pc-admin-menu-section" class="space-y-1 hidden border-t border-slate-100 dark:border-zinc-800/60 pt-4">
-        <p class="px-4 text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+        <p
+          class="px-4 text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1">
           <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
           <span>管理者メニュー</span>
         </p>
-        <a href="#dashboard" id="nav-dashboard" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
-          <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+        <a href="#dashboard" id="nav-dashboard"
+          class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="layout-dashboard"
+            class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
           <span>ダッシュボード</span>
         </a>
-        <a href="#matching" id="nav-matching" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
-          <i data-lucide="sparkles" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+        <a href="#matching" id="nav-matching"
+          class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="sparkles"
+            class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
           <span>マッチング作成</span>
         </a>
-        <a href="#members" id="nav-members" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
-          <i data-lucide="users" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+        <a href="#members" id="nav-members"
+          class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="users"
+            class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
           <span>メンバー一覧</span>
         </a>
-        <a href="#settings" id="nav-settings" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
-          <i data-lucide="settings" class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
+        <a href="#settings" id="nav-settings"
+          class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group">
+          <i data-lucide="settings"
+            class="w-4 h-4 text-slate-500 group-hover:text-slate-800 dark:group-hover:text-zinc-200"></i>
           <span>システム設定</span>
         </a>
       </div>
     </nav>
-    
+
     <!-- 左サイドバー下部 (ステータス & ユーザー情報) -->
     <div class="p-4 border-t border-slate-100 dark:border-zinc-800 space-y-3">
       <div class="px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40 text-xs flex flex-col gap-0.5 min-w-0">
@@ -167,26 +188,31 @@
   </aside>
 
   <!-- モバイル用 ヘッダー (md未満で表示) -->
-  <header class="md:hidden h-14 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-4 flex items-center justify-between sticky top-0 z-30 shrink-0">
+  <header
+    class="md:hidden h-14 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-4 flex items-center justify-between sticky top-0 z-30 shrink-0">
     <div class="flex items-center gap-2.5">
-      <div class="w-7 h-7 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+      <div
+        class="w-7 h-7 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
         <i data-lucide="coffee" class="w-3.5 h-3.5"></i>
       </div>
       <div>
         <h1 class="font-heading font-bold text-sm leading-tight">ランチ交流会</h1>
-        <p class="text-[8px] text-slate-400 dark:text-zinc-500 font-medium truncate max-w-[150px]" id="mobile-user-email">読み込み中...</p>
+        <p class="text-[8px] text-slate-400 dark:text-zinc-500 font-medium truncate max-w-[150px]"
+          id="mobile-user-email">読み込み中...</p>
       </div>
     </div>
-    
+
     <!-- ダークモード切り替えトグル & 管理者切り替え (モバイル) -->
     <div class="flex items-center gap-2">
       <!-- モバイル用 管理者切り替えトグル (管理者アカウントのみ表示) -->
-      <button id="mobile-admin-mode-toggle" class="hidden px-2.5 py-1 text-[10px] font-bold rounded-lg border border-indigo-200 dark:border-indigo-950/40 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center gap-1 transition-colors">
+      <button id="mobile-admin-mode-toggle"
+        class="hidden px-2.5 py-1 text-[10px] font-bold rounded-lg border border-indigo-200 dark:border-indigo-950/40 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center gap-1 transition-colors">
         <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
         <span id="mobile-admin-toggle-text">管理者用へ</span>
       </button>
 
-      <button id="theme-toggle-mobile" class="w-8 h-8 rounded-lg border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
+      <button id="theme-toggle-mobile"
+        class="w-8 h-8 rounded-lg border border-slate-200 dark:border-zinc-800 flex items-center justify-center text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
         <i id="theme-icon-mobile" data-lucide="sun" class="w-4 h-4"></i>
       </button>
     </div>
@@ -194,33 +220,42 @@
 
   <!-- メインコンテンツ領域 -->
   <div class="flex-1 flex flex-col min-w-0 min-h-screen">
-    
+
     <!-- PC用 ヘッダー (md以上で表示) -->
-    <header class="hidden md:flex h-16 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-8 items-center justify-between shrink-0 sticky top-0 z-20">
+    <header
+      class="hidden md:flex h-16 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-8 items-center justify-between shrink-0 sticky top-0 z-20">
       <div id="page-title-container">
         <!-- ページタイトルがJSによって動的に書き換わる -->
         <h2 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50" id="header-title">次回マッチング結果</h2>
       </div>
-      
+
       <!-- 右上のユーティリティ (テーマ切り替え等) -->
       <div class="flex items-center gap-4">
         <!-- 管理者ログインバッジ (PC) -->
-        <div id="pc-admin-badge" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100/50 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
+        <div id="pc-admin-badge"
+          class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100/50 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30">
           <i data-lucide="shield-check" class="w-4 h-4"></i>
           <span>管理者権限オン</span>
         </div>
 
         <!-- テーマモードセレクトトグル (ライト/ダーク/システム) -->
-        <div class="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-slate-200/50 dark:border-zinc-700/50">
-          <button id="theme-btn-light" class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200" title="ライトモード">
+        <div
+          class="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-slate-200/50 dark:border-zinc-700/50">
+          <button id="theme-btn-light"
+            class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200"
+            title="ライトモード">
             <i data-lucide="sun" class="w-3.5 h-3.5"></i>
             <span>ライト</span>
           </button>
-          <button id="theme-btn-dark" class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200" title="ダークモード">
+          <button id="theme-btn-dark"
+            class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200"
+            title="ダークモード">
             <i data-lucide="moon" class="w-3.5 h-3.5"></i>
             <span>ダーク</span>
           </button>
-          <button id="theme-btn-system" class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200" title="システム同期">
+          <button id="theme-btn-system"
+            class="theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200"
+            title="システム同期">
             <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
             <span>システム</span>
           </button>
@@ -232,7 +267,9 @@
     <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8 max-w-7xl w-full mx-auto" id="app-view">
       <!-- ローディング初期プレースホルダー -->
       <div class="flex flex-col items-center justify-center h-96 gap-4">
-        <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin"></div>
+        <div
+          class="w-10 h-10 border-4 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin">
+        </div>
         <p class="text-sm font-medium text-slate-500 dark:text-zinc-400 animate-pulse">データベースからデータを読み込んでいます...</p>
       </div>
     </main>
@@ -240,39 +277,48 @@
 
   <!-- モバイル用 下部タブナビゲーション (md未満で表示) -->
   <!-- 一般ユーザー用ボトムナビ (JSで表示切り替え) -->
-  <nav id="mobile-nav-user" class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2">
-    <a href="#user-matching" id="nav-user-matching-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+  <nav id="mobile-nav-user"
+    class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2">
+    <a href="#user-matching" id="nav-user-matching-mobile"
+      class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
       <i data-lucide="calendar-heart" class="w-5 h-5"></i>
       <span>次回マッチング</span>
     </a>
-    <a href="#user-profile" id="nav-user-profile-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+    <a href="#user-profile" id="nav-user-profile-mobile"
+      class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
       <i data-lucide="user-cog" class="w-5 h-5"></i>
       <span>プロフィール</span>
     </a>
   </nav>
 
   <!-- 管理者用ボトムナビ (管理者モード時のみ表示) -->
-  <nav id="mobile-nav-admin" class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2 hidden">
-    <a href="#dashboard" id="nav-dashboard-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+  <nav id="mobile-nav-admin"
+    class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2 hidden">
+    <a href="#dashboard" id="nav-dashboard-mobile"
+      class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
       <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
       <span>ダッシュボード</span>
     </a>
-    <a href="#matching" id="nav-matching-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+    <a href="#matching" id="nav-matching-mobile"
+      class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
       <i data-lucide="sparkles" class="w-5 h-5"></i>
       <span>作成</span>
     </a>
-    <a href="#members" id="nav-members-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+    <a href="#members" id="nav-members-mobile"
+      class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
       <i data-lucide="users" class="w-5 h-5"></i>
       <span>メンバー</span>
     </a>
-    <a href="#settings" id="nav-settings-mobile" class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
+    <a href="#settings" id="nav-settings-mobile"
+      class="nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none">
       <i data-lucide="settings" class="w-5 h-5"></i>
       <span>設定</span>
     </a>
   </nav>
 
   <!-- 通知トーストトレイ -->
-  <div id="toast-container" class="fixed bottom-18 md:bottom-6 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+  <div id="toast-container"
+    class="fixed bottom-18 md:bottom-6 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
   <!-- インライン展開されるJavaScriptロジック -->
   <script>
@@ -288,18 +334,18 @@
       totalCount: 0,
       activeCount: 0,
       hasApiKey: false,
-      
+
       // ユーザー/管理者 分離用の追加状態
       isAdmin: false,
       currentUserEmail: '',
       myProfile: null,
       mobileNavMode: 'user', // 'user' | 'admin' (モバイルでのナビ切り替え用)
-      
+
       // マッチング実行中の一時状態
-      tempGroups: null, 
+      tempGroups: null,
       tempMethod: '',
       isMatchingRunning: false,
-      
+
       // メンバー編集用一時状態
       editingMember: null,
     };
@@ -315,7 +361,7 @@
           setTimeout(() => resolve(getDummyResponse(functionName, args)), 600);
           return;
         }
-        
+
         google.script.run
           .withSuccessHandler(res => resolve(res))
           .withFailureHandler(err => reject(err))[functionName](...args);
@@ -328,14 +374,14 @@
     function showToast(title, message, type = 'success') {
       const container = document.getElementById('toast-container');
       if (!container) return;
-      
+
       const toast = document.createElement('div');
       toast.className = 'pointer-events-auto flex items-start gap-3 w-full p-4 rounded-xl border shadow-premium dark:shadow-premium-dark bg-white dark:bg-zinc-900 transition-all duration-300 transform translate-y-2 opacity-0 fade-in';
-      
+
       let iconColor = 'text-indigo-600 dark:text-indigo-400';
       let iconName = 'info';
       let borderColor = 'border-slate-100 dark:border-zinc-800';
-      
+
       if (type === 'success') {
         iconColor = 'text-emerald-500';
         iconName = 'check-circle-2';
@@ -349,9 +395,9 @@
         iconName = 'alert-circle';
         borderColor = 'border-amber-100 dark:border-amber-950/30';
       }
-      
+
       toast.classList.add(...borderColor.split(' '));
-      
+
       toast.innerHTML = `
         <div class="${iconColor} mt-0.5">
           <i data-lucide="${iconName}" class="w-5 h-5"></i>
@@ -364,14 +410,14 @@
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       `;
-      
+
       container.appendChild(toast);
       lucide.createIcons();
-      
+
       setTimeout(() => {
         toast.classList.remove('translate-y-2', 'opacity-0');
       }, 10);
-      
+
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-[-10px]');
         setTimeout(() => toast.remove(), 300);
@@ -392,34 +438,34 @@
           state.activeCount = res.activeCount;
           state.hasApiKey = res.hasApiKey;
           state.isAdmin = res.isAdmin;
-          
+
           state.currentUserEmail = res.currentUserEmail;
           state.myProfile = res.myProfile;
-          
+
           // 保存されていたテーマの設定を適用
           const savedTheme = localStorage.getItem('lunch-app-theme');
           if (savedTheme) {
             state.theme = savedTheme;
           }
           applyTheme(state.theme);
-          
+
           // ログインアカウントのメールとロール表示の更新
           updateUserUI();
-          
+
           // 管理者権限がある場合、メニューを表示する
           if (state.isAdmin) {
             const pcAdminMenu = document.getElementById('pc-admin-menu-section');
             if (pcAdminMenu) pcAdminMenu.classList.remove('hidden');
-            
+
             const pcAdminBadge = document.getElementById('pc-admin-badge');
             if (pcAdminBadge) pcAdminBadge.classList.remove('hidden');
-            
+
             const mobileAdminToggle = document.getElementById('mobile-admin-mode-toggle');
             if (mobileAdminToggle) mobileAdminToggle.classList.remove('hidden');
           }
-          
+
           showToast('データの同期完了', 'スプレッドシートから最新のデータを取得しました。', 'success');
-          
+
           // ルーティング開始（ハッシュが空か無効なら一般マッチングへ）
           const currentHash = window.location.hash;
           if (!currentHash || !['#user-matching', '#user-profile', '#dashboard', '#matching', '#members', '#settings'].includes(currentHash)) {
@@ -440,10 +486,10 @@
       const pcEmail = document.getElementById('pc-user-email');
       const mobEmail = document.getElementById('mobile-user-email');
       const pcRole = document.getElementById('pc-user-role-badge');
-      
+
       if (pcEmail) pcEmail.textContent = state.currentUserEmail || 'ゲストユーザー';
       if (mobEmail) mobEmail.textContent = state.currentUserEmail || 'ゲスト';
-      
+
       if (pcRole && state.isAdmin) {
         pcRole.textContent = 'SYSTEM ADMIN';
         pcRole.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30 tracking-wider uppercase mt-1 w-max';
@@ -456,16 +502,16 @@
     function applyTheme(themeMode) {
       state.theme = themeMode;
       localStorage.setItem('lunch-app-theme', themeMode);
-      
+
       const root = document.documentElement;
       const isDark = themeMode === 'dark' || (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      
+
       if (isDark) {
         root.classList.add('dark');
       } else {
         root.classList.remove('dark');
       }
-      
+
       updateThemeSelectorUI();
     }
 
@@ -479,7 +525,7 @@
           btn.className = 'theme-btn px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200';
         }
       });
-      
+
       const mobileBtnIcon = document.getElementById('theme-icon-mobile');
       if (mobileBtnIcon) {
         const root = document.documentElement;
@@ -500,7 +546,7 @@
     // ==========================================
     function handleRoute() {
       const hash = window.location.hash || '#user-matching';
-      
+
       // クエリパラメータのパース
       let viewName = hash.replace('#', '');
       let queryParams = {};
@@ -515,7 +561,7 @@
           }
         });
       }
-      
+
       // セキュリティ保護: 管理者専用ハッシュで、かつ非管理者の場合
       const adminViews = ['dashboard', 'matching', 'members', 'settings'];
       if (adminViews.includes(viewName) && !state.isAdmin) {
@@ -523,17 +569,17 @@
         window.location.hash = '#user-matching';
         return;
       }
-      
+
       // 画面遷移時にチャットポーリングを確実にクリーンアップ
       if (state.chatInterval) {
         clearInterval(state.chatInterval);
         state.chatInterval = null;
         console.log('[DEBUG] チャット自動ポーリングをクリーンアップしました。');
       }
-      
+
       state.currentView = viewName;
       state.currentQueryParams = queryParams; // パラメータを保持
-      
+
       // ナビゲーションメニューのアクティブ化（PC側）
       const allViews = ['user-matching', 'user-profile', 'dashboard', 'matching', 'members', 'settings'];
       allViews.forEach(id => {
@@ -549,7 +595,7 @@
 
       // モバイル用ボトムナビのアクティブ＆トグル制御
       updateMobileNavigationUI(viewName);
-      
+
       // タイトルの変更
       const headerTitle = document.getElementById('header-title');
       if (headerTitle) {
@@ -564,7 +610,7 @@
         };
         headerTitle.textContent = titles[viewName] || 'マッチングポータル';
       }
-      
+
       renderView();
     }
 
@@ -574,27 +620,27 @@
       const adminNav = document.getElementById('mobile-nav-admin');
       const toggleBtn = document.getElementById('mobile-admin-mode-toggle');
       const toggleText = document.getElementById('mobile-admin-toggle-text');
-      
+
       if (!userNav || !adminNav) return;
-      
+
       const adminViews = ['dashboard', 'matching', 'members', 'settings'];
-      
+
       if (adminViews.includes(viewName)) {
         // 管理者ビューのナビゲーションを表示
         userNav.classList.add('hidden');
         adminNav.classList.remove('hidden');
         state.mobileNavMode = 'admin';
-        
+
         if (toggleText) toggleText.textContent = '一般用へ';
       } else {
         // 一般ユーザービューのナビゲーションを表示
         userNav.classList.remove('hidden');
         adminNav.classList.add('hidden');
         state.mobileNavMode = 'user';
-        
+
         if (toggleText) toggleText.textContent = '管理者用へ';
       }
-      
+
       // アクティブクラスの付与（モバイル）
       const mobViewIds = ['user-matching', 'user-profile', 'dashboard', 'matching', 'members', 'settings'];
       mobViewIds.forEach(id => {
@@ -615,11 +661,11 @@
     function renderView() {
       const container = document.getElementById('app-view');
       if (!container) return;
-      
+
       container.classList.remove('fade-in');
-      
+
       let html = '';
-      
+
       switch (state.currentView) {
         // --- 一般ユーザービュー ---
         case 'user-matching':
@@ -631,7 +677,7 @@
         case 'chat':
           html = getChatViewHtml(state.currentQueryParams.roomId);
           break;
-          
+
         // --- 管理者ビュー ---
         case 'dashboard':
           html = getDashboardViewHtml();
@@ -648,10 +694,10 @@
         default:
           html = `<div class="p-8 text-center text-red-500">お探しの画面が見つかりません。</div>`;
       }
-      
+
       container.innerHTML = html;
       container.classList.add('fade-in');
-      
+
       lucide.createIcons();
       attachViewEvents();
     }
@@ -676,46 +722,64 @@
           </div>
         `;
       }
-      
+
       const latestMatchingDate = state.history[0].date;
-      
+
       // 同じ日付の全グループを抽出
       const latestGroups = state.history.filter(h => h.date === latestMatchingDate);
-      
+
       let groupCards = '';
       latestGroups.forEach(g => {
         const namesList = g.memberNames.map(name => {
           // 所属部署を取得
-          const memberInfo = state.members.find(m => m.name === name) || {};
+          const cleanName = (n) => n ? n.replace(/\s+/g, '') : '';
+          const memberInfo = state.members.find(m => cleanName(m.name) === cleanName(name)) || {};
           const dept = memberInfo.department || '不明';
-          
+
           // ログインユーザー自身かどうか判定 (大文字小文字を区別せず比較)
           const isMe = state.myProfile && name.toLowerCase() === state.myProfile.name.toLowerCase();
-          
-          const boxClass = isMe 
-            ? 'flex flex-col p-2.5 rounded-lg border-2 border-indigo-500 bg-indigo-50/15 dark:bg-indigo-950/40 text-xs relative overflow-hidden' 
-            : 'flex flex-col p-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30 text-xs';
-            
+
+          const boxClass = isMe
+            ? 'flex flex-col p-2.5 rounded-lg border-2 border-indigo-500 bg-indigo-50/15 dark:bg-indigo-950/40 text-xs relative group cursor-help'
+            : 'flex flex-col p-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30 text-xs relative group cursor-help';
+
           return `
             <div class="${boxClass}">
               <span class="font-bold ${isMe ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-zinc-100'}">${escapeHtml(name)}</span>
               <span class="text-[9px] ${isMe ? 'text-indigo-500/80 dark:text-indigo-350' : 'text-slate-400 dark:text-zinc-500'} font-medium mt-0.5">${escapeHtml(dept)}</span>
+              
+              <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
+              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
+                <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
+                  <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
+                  <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.interests || '未登録')}</p>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.purpose || '未登録')}</p>
+                </div>
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
+              </div>
             </div>
           `;
         }).join('');
-        
+
         // 自分がこのグループのメンバーに含まれているか判定 (管理者の場合はすべてのルームを開けるようにする)
         const isMyGroup = state.isAdmin || (state.myProfile && g.memberNames.map(n => n.toLowerCase()).includes(state.myProfile.name.toLowerCase()));
-        
+
         // マークを付ける「自分のグループ」かどうか
         const isReallyMyGroup = state.myProfile && g.memberNames.map(n => n.toLowerCase()).includes(state.myProfile.name.toLowerCase());
-        
+
         const roomId = `${latestMatchingDate}_${g.groupId}`;
-        
-        const cardClass = isReallyMyGroup 
-          ? 'user-group-card p-6 border-2 border-indigo-500 bg-indigo-50/5 dark:border-indigo-500 dark:bg-indigo-950/10 rounded-2xl flex flex-col justify-between gap-4 shadow-md transition-all duration-200 relative scale-[1.01]' 
+
+        const cardClass = isReallyMyGroup
+          ? 'user-group-card p-6 border-2 border-indigo-500 bg-indigo-50/5 dark:border-indigo-500 dark:bg-indigo-950/10 rounded-2xl flex flex-col justify-between gap-4 shadow-md transition-all duration-200 relative scale-[1.01]'
           : 'user-group-card p-6 border-2 border-slate-200 dark:border-zinc-800/80 rounded-2xl bg-white dark:bg-zinc-900 flex flex-col justify-between gap-4 shadow-sm hover:border-slate-350 dark:hover:border-zinc-700 hover:shadow transition-all duration-200 relative';
-        
+
         groupCards += `
           <div id="user-group-${escapeHtml(g.groupId)}" class="${cardClass}">
             <!-- あなたのグループバッジ -->
@@ -790,10 +854,10 @@
     function getUserProfileViewHtml() {
       const profile = state.myProfile;
       const isNew = !profile;
-      
+
       // 目的のパース
       const purposeList = profile ? (profile.purpose || '').split(',').map(s => s.trim()) : [];
-      
+
       const purposes = [
         '他部署の交流',
         '技術的な雑談',
@@ -821,9 +885,9 @@
               <span>${isNew ? '交流会メンバー登録' : 'プロフィールの変更 / 次回参加状況'}</span>
             </h3>
             <p class="text-xs text-slate-500 dark:text-zinc-400">
-              ${isNew 
-                ? 'あなたのGoogleアカウントからプロフィールを登録し、ランチ交流会に参加しましょう！' 
-                : '登録済みのプロフィールや、次回のランチ会への参加意思を変更できます。'}
+              ${isNew
+          ? 'あなたのGoogleアカウントからプロフィールを登録し、ランチ交流会に参加しましょう！'
+          : '登録済みのプロフィールや、次回のランチ会への参加意思を変更できます。'}
             </p>
           </div>
 
@@ -861,8 +925,8 @@
             <div class="space-y-1.5">
               <label for="self-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">次回ランチ会への参加ステータス</label>
               <select id="self-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <option value="アクティブ" ${profile && profile.status === 'アクティブ' ? 'selected' : ''}>参加する (マッチング対象になります)</option>
-                <option value="非アクティブ" ${profile && profile.status === '非アクティブ' ? 'selected' : ''}>参加しない (出張、休暇、多忙などにより一時的に除外します)</option>
+                <option value="true" ${profile && (profile.status === true || profile.status === 'アクティブ') ? 'selected' : ''}>参加する (マッチング対象になります)</option>
+                <option value="false" ${profile && (profile.status === false || profile.status === '非アクティブ') ? 'selected' : ''}>参加しない (出張、休暇、多忙などにより一時的に除外します)</option>
               </select>
             </div>
 
@@ -870,6 +934,12 @@
             <div class="space-y-1.5">
               <label for="self-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">趣味・自己紹介・興味のあること</label>
               <textarea id="self-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="趣味（サウナ、映画、キャンプ等）や得意技術などをご自由に！AIが共通の趣味の人とマッチングする手がかりにします。">${profile ? escapeHtml(profile.interests) : ''}</textarea>
+            </div>
+
+            <!-- 配慮事項 -->
+            <div class="space-y-1.5">
+              <label for="self-considerations" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">配慮事項 (任意、ない場合は空欄)</label>
+              <textarea id="self-considerations" rows="2" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="アレルギー、苦手な食べ物、時間制限（例：時短勤務のため13時まで）など、配慮してほしいことがあればご記入ください。AIがマッチング生成時に考慮します。">${profile ? escapeHtml(profile.considerations || '') : ''}</textarea>
             </div>
 
             <!-- 参加目的（複数選択） -->
@@ -894,34 +964,36 @@
       const name = document.getElementById('self-name').value.trim();
       const department = document.getElementById('self-dept').value.trim();
       const interests = document.getElementById('self-interests').value.trim();
-      const status = document.getElementById('self-status').value;
-      
+      const considerations = document.getElementById('self-considerations').value.trim();
+      const status = document.getElementById('self-status').value === 'true';
+
       // チェックボックスの集計
       const checkedPurposes = [];
       document.querySelectorAll('input[name="self_purpose"]:checked').forEach(cb => {
         checkedPurposes.push(cb.value);
       });
-      
+
       if (!name || !department) {
         showToast('入力エラー', '名前と部署は入力必須です。', 'error');
         return;
       }
-      
+
       const profileObj = {
         name,
         department,
         interests,
         purpose: checkedPurposes.join(', '),
-        status
+        status,
+        considerations
       };
-      
+
       showToast('保存中', 'プロフィール情報を登録しています...', 'warning');
-      
+
       try {
         const res = await callGas('registerSelfProfile', profileObj);
         if (res.success) {
           state.myProfile = res.myProfile;
-          
+
           // 登録完了後、全メンバーリストも再ロードして同期する
           const loadRes = await callGas('getInitialData');
           if (loadRes.success) {
@@ -929,15 +1001,15 @@
             state.totalCount = loadRes.totalCount;
             state.activeCount = loadRes.activeCount;
           }
-          
+
           showToast('保存成功', 'プロフィールの保存が完了しました！次回マッチングをお楽しみに。', 'success');
-          
+
           // 保存後は次回マッチング結果画面へ遷移
           window.location.hash = '#user-matching';
         } else {
           showToast('保存エラー', res.error || 'プロフィールの登録に失敗しました。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '保存中に例外が発生しました：' + e.toString(), 'error');
       }
     }
@@ -945,36 +1017,54 @@
     // ==========================================
     // 💬 チャットルーム機能 (一般ユーザー用 & セキュリティ保護)
     // ==========================================
-    
+
     // チャット画面の基本HTMLスケルトン生成
     function getChatViewHtml(roomId) {
       if (!roomId) {
         return `<div class="p-8 text-center text-red-500">無効なチャットルームIDです。</div>`;
       }
-      
+
       // ルームIDから開催日とグループIDをパース
       const parts = roomId.split('_');
       const dateStr = parts[0] || '';
       const groupId = parts[1] || '';
-      
+
       // 該当するグループのマッチング履歴を検索
       const matchingGroup = state.history.find(h => h.date === dateStr && h.groupId === groupId);
-      
+
       let membersBadge = '';
       let aiThemeHtml = '';
-      
+
       if (matchingGroup) {
         membersBadge = matchingGroup.memberNames.map(name => {
-          const memberInfo = state.members.find(m => m.name === name) || {};
+          const cleanName = (n) => n ? n.replace(/\s+/g, '') : '';
+          const memberInfo = state.members.find(m => cleanName(m.name) === cleanName(name)) || {};
           const dept = memberInfo.department || '他部署';
           return `
-            <span class="inline-flex flex-col px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/50 text-xs">
+            <span class="inline-flex flex-col px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/50 text-xs relative group cursor-help">
               <span class="font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(name)}</span>
               <span class="text-[9px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
+              
+              <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
+              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
+                <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
+                  <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
+                  <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.interests || '未登録')}</p>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
+                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.purpose || '未登録')}</p>
+                </div>
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
+              </div>
             </span>
           `;
         }).join('');
-        
+
         if (matchingGroup.memo) {
           aiThemeHtml = `
             <div class="p-4 rounded-xl border border-indigo-100/50 bg-indigo-50/15 dark:border-indigo-955/20 dark:bg-indigo-955/10 text-xs leading-relaxed">
@@ -989,7 +1079,7 @@
       } else {
         membersBadge = `<p class="text-xs text-slate-400 italic">メンバー情報を取得できませんでした。</p>`;
       }
-      
+
       return `
         <div class="space-y-6 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)]">
           
@@ -1052,17 +1142,17 @@
         </div>
       `;
     }
-    
+
     // チャットメッセージ履歴の読込と描画 (5秒毎ポーリング)
     async function loadChatMessages(roomId, isPolling = false) {
       const container = document.getElementById('chat-messages-container');
       if (!container) return;
-      
+
       try {
         const res = await callGas('getChatMessages', roomId);
         if (res.success) {
           const messages = res.messages || [];
-          
+
           if (messages.length === 0) {
             container.innerHTML = `
               <div class="flex-1 flex flex-col items-center justify-center gap-2 py-12 text-center text-slate-400 dark:text-zinc-500">
@@ -1074,27 +1164,27 @@
             lucide.createIcons();
             return;
           }
-          
+
           // スクリュー位置の判定：ユーザーが手動で過去ログを上に遡って読んでいるか
           const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-          
+
           let messagesHtml = '';
           messagesHtml += `<div class="space-y-4 flex-1">`;
-          
+
           messagesHtml += messages.map(msg => {
             // 自分が送信したメッセージか判定 (大文字小文字を区別せず照合)
             const isMe = msg.senderEmail.toLowerCase() === state.currentUserEmail.toLowerCase();
-            
+
             // 日本時間で見やすいフォーマットに変換 (例: 15:30)
             let timeStr = '';
             if (msg.timestamp) {
               const d = new Date(msg.timestamp);
               timeStr = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
             }
-            
+
             // 改行の対応
             const formattedMessage = escapeHtml(msg.message).replace(/\n/g, '<br>');
-            
+
             if (isMe) {
               // 右側：自分自身のメッセージ (インディゴ/ダーク)
               return `
@@ -1109,13 +1199,32 @@
               `;
             } else {
               // 左側：他のグループメンバーのメッセージ (白/ライトグレー)
+              const cleanName = (n) => n ? n.replace(/\s+/g, '') : '';
+              const memberInfo = state.members.find(m => m.email.toLowerCase() === msg.senderEmail.toLowerCase() || cleanName(m.name) === cleanName(msg.senderName)) || {};
               return `
                 <div class="flex flex-col items-start gap-1.5 max-w-[85%] mr-auto">
-                  <div class="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-zinc-500">
+                  <div class="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-zinc-500 relative group cursor-help">
                     <span class="font-bold text-slate-700 dark:text-zinc-300">${escapeHtml(msg.senderName)}</span>
                     <span class="px-1.5 py-0.2 rounded bg-slate-200/50 dark:bg-zinc-800 text-[8px] scale-90 origin-left font-semibold text-slate-500 dark:text-zinc-400">${escapeHtml(msg.department)}</span>
                     <span>•</span>
                     <span>${timeStr}</span>
+                    
+                    <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
+                    <div class="absolute bottom-full left-0 mb-2 w-64 p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
+                      <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
+                        <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(msg.senderName)}</span>
+                        <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(msg.department || '他部署')}</span>
+                      </div>
+                      <div class="space-y-1">
+                        <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
+                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.interests || '未登録')}</p>
+                      </div>
+                      <div class="space-y-1">
+                        <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
+                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed">${escapeHtml(memberInfo.purpose || '未登録')}</p>
+                      </div>
+                      <div class="absolute top-full left-6 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
+                    </div>
                   </div>
                   <div class="p-3 rounded-2xl rounded-tl-none bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 text-xs leading-relaxed shadow-sm">
                     ${formattedMessage}
@@ -1124,10 +1233,10 @@
               `;
             }
           }).join('');
-          
+
           messagesHtml += `</div>`;
           container.innerHTML = messagesHtml;
-          
+
           // 初回読込時、またはユーザーが最下部にいる場合は自動で一番下へスクロール
           if (!isPolling || isAtBottom) {
             container.scrollTop = container.scrollHeight;
@@ -1155,22 +1264,22 @@
         }
       }
     }
-    
+
     // チャットメッセージの非同期送信処理
     async function handleSendChatMessage(roomId) {
       const input = document.getElementById('chat-message-input');
       const sendBtn = document.getElementById('btn-send-message');
       if (!input || !sendBtn) return;
-      
+
       const messageText = input.value.trim();
       if (!messageText) return;
-      
+
       // UI制御：送信中状態
       input.disabled = true;
       sendBtn.disabled = true;
       const originalBtnText = sendBtn.innerHTML;
       sendBtn.innerHTML = `<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>`;
-      
+
       try {
         const res = await callGas('sendChatMessage', roomId, messageText);
         if (res.success) {
@@ -1186,7 +1295,7 @@
         input.disabled = false;
         sendBtn.disabled = false;
         sendBtn.innerHTML = originalBtnText;
-        
+
         // フォーカスを復帰
         input.focus();
       }
@@ -1213,19 +1322,19 @@
           }
           historyByDate[h.date].push(h);
         });
-        
+
         let dateSections = '';
         for (const date in historyByDate) {
           const items = historyByDate[date];
           let groupCards = '';
-          
+
           items.forEach(g => {
             const namesList = g.memberNames.map(n => `
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200/50 dark:border-zinc-700/50">
                 ${escapeHtml(n)}
               </span>
             `).join('');
-            
+
             groupCards += `
               <div class="p-5 border border-slate-100 dark:border-zinc-800/80 rounded-xl bg-white dark:bg-zinc-900 flex flex-col gap-3 shadow-sm hover:border-indigo-100 dark:hover:border-indigo-950/50 transition-colors relative group/card">
                 <div class="flex items-center justify-between">
@@ -1249,7 +1358,7 @@
               </div>
             `;
           });
-          
+
           dateSections += `
             <div class="relative pl-6 border-l-2 border-slate-200 dark:border-zinc-800 py-2 space-y-4">
               <div class="absolute -left-[9px] top-4 w-4 h-4 rounded-full border-2 border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 flex items-center justify-center">
@@ -1265,7 +1374,7 @@
             </div>
           `;
         }
-        
+
         historyHtml = `
           <div class="space-y-6">
             ${dateSections}
@@ -1327,7 +1436,7 @@
       if (state.tempGroups) {
         return getMatchingPreviewHtml();
       }
-      
+
       if (state.isMatchingRunning) {
         return `
           <div class="flex flex-col items-center justify-center h-96 gap-6 max-w-xl mx-auto text-center">
@@ -1341,9 +1450,9 @@
             <div class="space-y-2">
               <h3 class="font-heading font-bold text-lg text-slate-800 dark:text-zinc-100">マッチング案を生成しています</h3>
               <p class="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
-                ${state.settings.matching_mode === 'gemini' 
-                  ? 'Gemini AIがメンバーの部署、趣味・自己紹介、参加目的を分析し、共通の話題を見つけつつ重複を防止した最適なグループ分けとおすすめ雑談テーマを考案しています。' 
-                  : 'プログラムロジックにより、過去の重複履歴と部署の同一被りを最小限に抑えるように数千回のスワップ試行を行い、最適なグループを算出しています。'}
+                ${state.settings.matching_mode === 'gemini'
+            ? 'Gemini AIがメンバーの部署、趣味・自己紹介、参加目的を分析し、共通の話題を見つけつつ重複を防止した最適なグループ分けとおすすめ雑談テーマを考案しています。'
+            : 'プログラムロジックにより、過去の重複履歴と部署の同一被りを最小限に抑えるように数千回のスワップ試行を行い、最適なグループを算出しています。'}
               </p>
             </div>
           </div>
@@ -1416,15 +1525,15 @@
             </div>
 
             <!-- アクティブメンバーのプレビュー -->
-            <div class="p-4 bg-slate-50 dark:bg-zinc-850/50 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+            <div class="p-4 bg-slate-100/70 dark:bg-zinc-900/50 rounded-xl border border-slate-200 dark:border-zinc-800 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 <i data-lucide="info" class="w-5 h-5 text-indigo-500 shrink-0"></i>
                 <div class="text-xs">
-                  <p class="font-semibold text-slate-800 dark:text-zinc-200">マッチング対象者数: ${state.activeCount} 名</p>
-                  <p class="text-slate-500 dark:text-zinc-400 mt-0.5">※一時除外中（非アクティブ）のメンバーを除く</p>
+                  <p class="font-semibold text-slate-850 dark:text-zinc-100">マッチング対象者数: ${state.activeCount} 名</p>
+                  <p class="text-slate-600 dark:text-zinc-400 mt-0.5">※一時除外中（非アクティブ）のメンバーを除く</p>
                 </div>
               </div>
-              <a href="#members" class="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline">メンバー一覧で調整</a>
+              <a href="#members" class="text-xs font-medium text-indigo-650 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline">メンバー一覧で調整</a>
             </div>
 
             <!-- Gemini追加指示プロンプト -->
@@ -1445,7 +1554,7 @@
     // --- ④-B：マッチングプレビュー＆手動微調整 ---
     function getMatchingPreviewHtml() {
       let groupSections = '';
-      
+
       state.tempGroups.forEach((g, gIdx) => {
         let memberRows = '';
         g.members.forEach((m, mIdx) => {
@@ -1457,15 +1566,16 @@
                   <span class="px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-zinc-700 text-slate-600 dark:text-zinc-400 font-medium text-[9px] truncate">${escapeHtml(m.department)}</span>
                 </div>
                 ${m.interests ? `<p class="text-[10px] text-slate-400 dark:text-zinc-500 truncate mt-1">${escapeHtml(m.interests)}</p>` : ''}
+                ${m.considerations ? `<p class="text-[9px] font-semibold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-200/40 w-max mt-1">⚠️ 配慮事項: ${escapeHtml(m.considerations)}</p>` : ''}
               </div>
               
               <div class="shrink-0 flex items-center">
                 <select class="text-[10px] p-1 rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="moveMember(${gIdx}, ${mIdx}, parseInt(this.value, 10))">
                   <option value="-1" disabled selected>グループ移動</option>
                   ${state.tempGroups.map((otherG, otherGIdx) => {
-                    if (otherGIdx === gIdx) return '';
-                    return `<option value="${otherGIdx}">へ ${escapeHtml(otherG.groupId)}</option>`;
-                  }).join('')}
+            if (otherGIdx === gIdx) return '';
+            return `<option value="${otherGIdx}">${escapeHtml(otherG.groupId)} へ移動</option>`;
+          }).join('')}
                 </select>
               </div>
             </div>
@@ -1540,49 +1650,52 @@
     // --- ⑤-管理者：メンバー一覧画面 ---
     function getMembersViewHtml() {
       let memberRows = '';
-      
+
       if (state.members.length === 0) {
         memberRows = `
           <tr>
-            <td colspan="7" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
+            <td colspan="8" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
               メンバーが登録されていません。
             </td>
           </tr>
         `;
       } else {
         state.members.forEach(m => {
-          const isCurrentlyActive = m.status === 'アクティブ';
+          const isCurrentlyActive = m.status === true || m.status === 'アクティブ';
           const isPriority = !!m.priority;
-          
+
           memberRows += `
             <tr class="border-b border-slate-100 dark:border-zinc-800 hover:bg-slate-50/50 dark:hover:bg-zinc-800/20 text-xs">
-              <td class="px-4 py-3.5 font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(m.name)}</td>
-              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 truncate max-w-[150px]" title="${escapeHtml(m.email)}">${escapeHtml(m.email)}</td>
-              <td class="px-4 py-3.5 text-slate-700 dark:text-zinc-300">
+              <td class="px-4 py-3.5 font-bold text-slate-800 dark:text-zinc-200 whitespace-nowrap">${escapeHtml(m.name)}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 whitespace-nowrap" title="${escapeHtml(m.email)}">${escapeHtml(m.email)}</td>
+              <td class="px-4 py-3.5 text-slate-700 dark:text-zinc-300 whitespace-nowrap">
                 <span class="px-2 py-0.5 rounded-full font-medium bg-slate-100 dark:bg-zinc-800 text-[10px]">${escapeHtml(m.department)}</span>
               </td>
-              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[200px] truncate" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests || '-')}</td>
-              <td class="px-4 py-3.5">
-                <button onclick="handleToggleStatus('${escapeHtml(m.id)}')" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors select-none ${
-                  isCurrentlyActive 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30' 
-                    : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700'
-                }">
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests || '-')}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[220px] break-words whitespace-normal" title="${escapeHtml(m.considerations || '')}">
+                ${m.considerations
+              ? `<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-955/20 px-2 py-0.5 rounded-lg border border-amber-200/40 dark:border-amber-900/30">⚠️ ${escapeHtml(m.considerations)}</span>`
+              : '<span class="text-slate-405 text-slate-400 dark:text-zinc-600">-</span>'}
+              </td>
+              <td class="px-4 py-3.5 whitespace-nowrap">
+                <button onclick="handleToggleStatus('${escapeHtml(m.id)}')" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors select-none ${isCurrentlyActive
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30'
+              : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700'
+            }">
                   <span class="h-1.5 w-1.5 rounded-full ${isCurrentlyActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-zinc-500'}"></span>
-                  <span>${escapeHtml(m.status)}</span>
+                  <span>${isCurrentlyActive ? 'アクティブ' : '非アクティブ'}</span>
                 </button>
               </td>
-              <td class="px-4 py-3.5">
-                <button onclick="handleTogglePriority('${escapeHtml(m.id)}')" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors select-none ${
-                  isPriority 
-                    ? 'bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30' 
-                    : 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-zinc-800 dark:text-zinc-500 dark:border-zinc-700'
-                }">
+              <td class="px-4 py-3.5 whitespace-nowrap">
+                <button onclick="handleTogglePriority('${escapeHtml(m.id)}')" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors select-none ${isPriority
+              ? 'bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30'
+              : 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-zinc-800 dark:text-zinc-500 dark:border-zinc-700'
+            }">
                   <i data-lucide="sparkles" class="w-3.5 h-3.5 ${isPriority ? 'text-amber-500 animate-pulse' : 'text-slate-400'}"></i>
                   <span>${isPriority ? '優先' : '通常'}</span>
                 </button>
               </td>
-              <td class="px-4 py-3.5 text-right space-x-1 shrink-0">
+              <td class="px-4 py-3.5 text-right space-x-1 shrink-0 whitespace-nowrap">
                 <button onclick="openEditMemberModal('${escapeHtml(m.id)}')" class="p-1 rounded text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" title="編集">
                   <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
                 </button>
@@ -1628,16 +1741,17 @@
 
           <div class="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-premium dark:shadow-premium-dark">
             <div class="overflow-x-auto max-h-[500px]">
-              <table class="w-full text-left border-collapse">
+              <table class="w-full min-w-[950px] text-left border-collapse">
                 <thead class="sticky top-0 bg-slate-50 dark:bg-zinc-900 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase border-b border-slate-200 dark:border-zinc-800 select-none z-10">
                   <tr>
-                    <th class="px-4 py-3">名前</th>
-                    <th class="px-4 py-3">メールアドレス</th>
-                    <th class="px-4 py-3">部署</th>
-                    <th class="px-4 py-3">趣味・自己紹介</th>
-                    <th class="px-4 py-3">ステータス</th>
-                    <th class="px-4 py-3">次回優先</th>
-                    <th class="px-4 py-3 text-right">アクション</th>
+                    <th class="px-4 py-3 whitespace-nowrap">名前</th>
+                    <th class="px-4 py-3 whitespace-nowrap">メールアドレス</th>
+                    <th class="px-4 py-3 whitespace-nowrap">部署</th>
+                    <th class="px-4 py-3 whitespace-nowrap">趣味・自己紹介</th>
+                    <th class="px-4 py-3 whitespace-nowrap">配慮事項</th>
+                    <th class="px-4 py-3 whitespace-nowrap">ステータス</th>
+                    <th class="px-4 py-3 whitespace-nowrap">次回優先</th>
+                    <th class="px-4 py-3 text-right whitespace-nowrap">アクション</th>
                   </tr>
                 </thead>
                 <tbody id="member-table-body" class="divide-y divide-slate-100 dark:divide-zinc-800">
@@ -1663,37 +1777,37 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <label for="m-name" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">名前 <span class="text-red-500">*</span></label>
-                  <input type="text" id="m-name" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-955 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                  <input type="text" id="m-name" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div class="space-y-1">
                   <label for="m-email" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">メールアドレス <span class="text-red-500">*</span></label>
-                  <input type="email" id="m-email" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-955 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                  <input type="email" id="m-email" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
                 </div>
               </div>
               <div class="space-y-1">
                 <label for="m-dept" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">部署・チーム <span class="text-red-500">*</span></label>
-                <input type="text" id="m-dept" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-955 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：開発部">
+                <input type="text" id="m-dept" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：開発部">
               </div>
               <div class="space-y-1">
                 <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味・自己紹介・興味のあること</label>
-                <textarea id="m-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-955 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：趣味はサウナと温泉巡りです。最近は家庭菜園を始めました。"></textarea>
+                <textarea id="m-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：趣味はサウナと温泉巡りです。最近は家庭菜園を始めました。"></textarea>
               </div>
               <div class="space-y-1">
                 <label for="m-purpose" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">参加したい目的</label>
-                <input type="text" id="m-purpose" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-955 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：他部署の交流、技術的な雑談">
+                <input type="text" id="m-purpose" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：他部署の交流、技術的な雑談">
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <label for="m-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">ステータス</label>
-                  <select id="m-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-955 focus:outline-none">
-                    <option value="アクティブ">アクティブ</option>
-                    <option value="非アクティブ">非アクティブ</option>
+                  <select id="m-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:outline-none">
+                    <option value="true">アクティブ</option>
+                    <option value="false">非アクティブ</option>
                   </select>
                 </div>
                 <div class="space-y-1 flex flex-col justify-end pb-1">
-                  <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-955 cursor-pointer text-xs transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/40 select-none">
+                  <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-950 cursor-pointer text-xs transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/40 select-none">
                     <input type="checkbox" id="m-priority" class="w-4 h-4 text-indigo-600 dark:text-indigo-500 rounded border-slate-350 dark:border-zinc-700 focus:ring-indigo-500">
-                    <span class="font-semibold text-slate-700 dark:text-zinc-205">次回マッチングで優先参加</span>
+                    <span class="font-semibold text-slate-700 dark:text-zinc-200">次回マッチングで優先参加</span>
                   </label>
                 </div>
               </div>
@@ -1812,14 +1926,14 @@
     // --- 各画面のイベントアタッチメント ---
     function attachViewEvents() {
       console.log('[DEBUG] attachViewEvents() を呼び出しました。現在のビュー:', state.currentView);
-      
+
       // --- ① 共通UIビュー（モバイル用管理者切り替えトグルなど）のバインディング ---
       const mobileAdminToggle = document.getElementById('mobile-admin-mode-toggle');
       if (mobileAdminToggle) {
         // 多重イベント登録を防ぐため、一旦クローンしてリスナーをクリア
         const newToggle = mobileAdminToggle.cloneNode(true);
         mobileAdminToggle.parentNode.replaceChild(newToggle, mobileAdminToggle);
-        
+
         newToggle.addEventListener('click', () => {
           if (state.mobileNavMode === 'user') {
             window.location.hash = '#dashboard';
@@ -1833,7 +1947,7 @@
       if (mobileThemeToggle) {
         const newThemeToggle = mobileThemeToggle.cloneNode(true);
         mobileThemeToggle.parentNode.replaceChild(newThemeToggle, mobileThemeToggle);
-        
+
         newThemeToggle.addEventListener('click', () => {
           const root = document.documentElement;
           const isDark = root.classList.contains('dark');
@@ -1852,7 +1966,7 @@
       });
 
       // --- ② 各ビューの動的イベントバインディング (GASサンドボックス対策) ---
-      
+
       // プロフィール設定保存ボタン
       const btnSaveSelfProfile = document.getElementById('btn-save-self-profile');
       console.log('[DEBUG] btn-save-self-profile の要素有無:', !!btnSaveSelfProfile);
@@ -1932,16 +2046,16 @@
       // --- ③ チャットビュー固有のバインディング & ポーリング初期化 ---
       if (state.currentView === 'chat') {
         const roomId = state.currentQueryParams.roomId;
-        
+
         // 初回メッセージ履歴を即時ロード
         loadChatMessages(roomId, false);
-        
+
         // 5秒間隔でのリアルタイム自動更新 (ポーリング) を開始
         state.chatInterval = setInterval(() => {
           loadChatMessages(roomId, true);
         }, 5000);
         console.log('[DEBUG] チャット自動ポーリングを開始しました。RoomID:', roomId);
-        
+
         // 入力エリアでのEnterキー送信制御 (Ctrl+Enterで送信、Enter単体は改行)
         const chatInput = document.getElementById('chat-message-input');
         if (chatInput) {
@@ -1976,7 +2090,7 @@
     async function handleGenerateMatching() {
       const form = document.getElementById('matching-form');
       if (!form) return;
-      
+
       const formData = new FormData(form);
       const params = {
         mode: formData.get('matching_mode'),
@@ -1984,14 +2098,14 @@
         groupCount: formData.get('default_group_count'), // 組数指定パラメータ
         additionalPrompt: formData.get('additional_prompt') || ''
       };
-      
+
       state.isMatchingRunning = true;
-      renderView(); 
-      
+      renderView();
+
       try {
         const res = await callGas('runMatching', params);
         state.isMatchingRunning = false;
-        
+
         if (res.success) {
           state.tempGroups = res.groups;
           state.tempUnmatched = res.unmatched || []; // 今回枠からあふれたメンバー
@@ -2004,7 +2118,7 @@
         state.isMatchingRunning = false;
         showToast('エラー', '通信中に例外が発生しました：' + e.toString(), 'error');
       }
-      
+
       renderView();
     }
 
@@ -2017,19 +2131,19 @@
 
     function moveMember(fromGroupIdx, fromMemberIdx, toGroupIdx) {
       if (toGroupIdx < 0 || toGroupIdx >= state.tempGroups.length) return;
-      
+
       const member = state.tempGroups[fromGroupIdx].members[fromMemberIdx];
-      
+
       state.tempGroups[fromGroupIdx].members.splice(fromMemberIdx, 1);
       state.tempGroups[toGroupIdx].members.push(member);
-      
+
       if (state.tempGroups[toGroupIdx].memo.indexOf('【手動微調整あり】') === -1) {
         state.tempGroups[toGroupIdx].memo = '【手動微調整あり】' + state.tempGroups[toGroupIdx].memo;
       }
       if (state.tempGroups[fromGroupIdx].memo.indexOf('【手動微調整あり】') === -1) {
         state.tempGroups[fromGroupIdx].memo = '【手動微調整あり】' + state.tempGroups[fromGroupIdx].memo;
       }
-      
+
       renderView();
     }
 
@@ -2041,23 +2155,23 @@
 
     async function confirmTempMatching() {
       if (!state.tempGroups) return;
-      
+
       const validGroups = state.tempGroups.filter(g => g.members.length > 0);
-      
+
       if (validGroups.length === 0) {
         showToast('エラー', '有効なグループが存在しません。', 'error');
         return;
       }
-      
+
       showToast('保存中', 'マッチング履歴を保存しています...', 'warning');
-      
+
       try {
         const res = await callGas('saveMatchingHistory', validGroups, state.tempMethod);
         if (res.success) {
           state.tempGroups = null;
           state.tempMethod = '';
           showToast('確定・保存完了', 'マッチング結果が履歴シートに保存されました！ユーザーポータルに公開中。', 'success');
-          
+
           const loadRes = await callGas('getInitialData');
           if (loadRes.success) {
             state.members = loadRes.members;
@@ -2067,12 +2181,12 @@
             state.activeCount = loadRes.activeCount;
             state.hasApiKey = loadRes.hasApiKey;
           }
-          
+
           window.location.hash = '#user-matching';
         } else {
           showToast('保存エラー', res.error || 'スプレッドシートへの保存に失敗しました。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '保存中に例外が発生しました：' + e.toString(), 'error');
       }
     }
@@ -2082,14 +2196,14 @@
       if (!confirm(`【削除確認】\n日付: ${date}\nグループ: ${groupId}\n\nこのグループを履歴から完全に削除しますか？\n（このグループのチャット履歴もすべて削除されます。この操作は取り消せません）`)) {
         return;
       }
-      
+
       showToast('削除中', 'グループを削除しています...', 'warning');
-      
+
       try {
         const res = await callGas('deleteMatchingGroup', date, groupId);
         if (res.success) {
           showToast('削除完了', `グループ ${groupId} を正常に削除しました。`, 'success');
-          
+
           // データを再読み込みしてダッシュボードを更新
           const loadRes = await callGas('getInitialData');
           if (loadRes.success) {
@@ -2100,7 +2214,7 @@
             state.activeCount = loadRes.activeCount;
             state.hasApiKey = loadRes.hasApiKey;
           }
-          
+
           renderView();
         } else {
           showToast('削除エラー', res.error || 'グループの削除に失敗しました。', 'error');
@@ -2121,21 +2235,22 @@
       const deptVal = document.getElementById('member-dept-filter').value;
       const tbody = document.getElementById('member-table-body');
       if (!tbody) return;
-      
+
       const rows = tbody.getElementsByTagName('tr');
-      
+
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        if (row.cells.length < 6) continue;
-        
+        if (row.cells.length < 7) continue;
+
         const name = row.cells[0].textContent.toLowerCase();
         const email = row.cells[1].textContent.toLowerCase();
         const dept = row.cells[2].textContent;
         const interests = row.cells[3].textContent.toLowerCase();
-        
-        const matchesSearch = !searchVal || name.includes(searchVal) || email.includes(searchVal) || dept.toLowerCase().includes(searchVal) || interests.includes(searchVal);
+        const considerations = row.cells[4].textContent.toLowerCase();
+
+        const matchesSearch = !searchVal || name.includes(searchVal) || email.includes(searchVal) || dept.toLowerCase().includes(searchVal) || interests.includes(searchVal) || considerations.includes(searchVal);
         const matchesDept = !deptVal || dept.includes(deptVal);
-        
+
         if (matchesSearch && matchesDept) {
           row.style.display = '';
         } else {
@@ -2153,13 +2268,13 @@
             state.members[idx].status = res.nextStatus;
             state.activeCount = state.members.filter(m => m.status === 'アクティブ').length;
           }
-          
+
           showToast('ステータス更新', `ステータスを「${res.nextStatus}」に変更しました。`, 'success');
           renderView();
         } else {
           showToast('更新エラー', res.error || 'ステータスの更新に失敗しました。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '通信中に例外が発生しました：' + e.toString(), 'error');
       }
     }
@@ -2172,47 +2287,47 @@
           if (idx !== -1) {
             state.members[idx].priority = res.nextPriority;
           }
-          
+
           showToast('優先ステータス更新', `次回優先ステータスを「${res.nextPriority ? '優先' : '通常'}」に変更しました。`, 'success');
           renderView();
         } else {
           showToast('更新エラー', res.error || '優先ステータスの更新に失敗しました。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '通信中に例外が発生しました：' + e.toString(), 'error');
       }
     }
 
     function openAddMemberModal() {
       state.editingMember = null;
-      
+
       document.getElementById('member-modal-title').textContent = 'メンバーの新規代理登録';
       document.getElementById('m-name').value = '';
       document.getElementById('m-email').value = '';
       document.getElementById('m-dept').value = '';
       document.getElementById('m-interests').value = '';
       document.getElementById('m-purpose').value = '';
-      document.getElementById('m-status').value = 'アクティブ';
+      document.getElementById('m-status').value = 'true';
       document.getElementById('m-priority').checked = false; // 優先フラグリセット
-      
+
       document.getElementById('member-modal').classList.remove('hidden');
     }
 
     function openEditMemberModal(memberId) {
       const member = state.members.find(m => m.id === memberId);
       if (!member) return;
-      
+
       state.editingMember = member;
-      
+
       document.getElementById('member-modal-title').textContent = 'メンバー情報の代理編集';
       document.getElementById('m-name').value = member.name;
       document.getElementById('m-email').value = member.email;
       document.getElementById('m-dept').value = member.department;
       document.getElementById('m-interests').value = member.interests || '';
       document.getElementById('m-purpose').value = member.purpose || '';
-      document.getElementById('m-status').value = member.status || 'アクティブ';
+      document.getElementById('m-status').value = (member.status === true || member.status === 'アクティブ') ? 'true' : 'false';
       document.getElementById('m-priority').checked = !!member.priority; // 優先フラグ反映
-      
+
       document.getElementById('member-modal').classList.remove('hidden');
     }
 
@@ -2227,21 +2342,21 @@
       const dept = document.getElementById('m-dept').value.trim();
       const interests = document.getElementById('m-interests').value.trim();
       const purpose = document.getElementById('m-purpose').value.trim();
-      const status = document.getElementById('m-status').value;
+      const status = document.getElementById('m-status').value === 'true';
       const priority = document.getElementById('m-priority').checked; // 優先フラグの取得
-      
+
       if (!name || !email || !dept) {
         showToast('入力エラー', '必須マーク (*) のある項目は入力必須です。', 'error');
         return;
       }
-      
+
       const memberObj = {
         name, email, department: dept, interests, purpose, status, priority
       };
-      
+
       closeMemberModal();
       showToast('保存中', 'メンバー情報を保存しています...', 'warning');
-      
+
       try {
         let res;
         if (state.editingMember) {
@@ -2250,10 +2365,10 @@
         } else {
           res = await callGas('addMember', memberObj);
         }
-        
+
         if (res.success) {
           showToast('保存完了', 'メンバー情報を正常に保存しました！', 'success');
-          
+
           const loadRes = await callGas('getInitialData');
           if (loadRes.success) {
             state.members = loadRes.members;
@@ -2264,7 +2379,7 @@
         } else {
           showToast('保存エラー', res.error || '保存に失敗しました。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '保存処理中に例外が発生しました：' + e.toString(), 'error');
       }
     }
@@ -2272,14 +2387,14 @@
     async function handleDeleteMember(memberId) {
       const member = state.members.find(m => m.id === memberId);
       if (!member) return;
-      
+
       if (confirm(`メンバー「${member.name}」を完全に削除してよろしいですか？\n※この操作はスプレッドシートの行を直接削除します。`)) {
         showToast('削除中', 'メンバーを削除しています...', 'warning');
         try {
           const res = await callGas('deleteMember', memberId);
           if (res.success) {
             showToast('削除完了', 'メンバーを削除しました。', 'success');
-            
+
             const loadRes = await callGas('getInitialData');
             if (loadRes.success) {
               state.members = loadRes.members;
@@ -2290,7 +2405,7 @@
           } else {
             showToast('削除エラー', res.error || '削除に失敗しました。', 'error');
           }
-        } catch(e) {
+        } catch (e) {
           showToast('エラー', '削除処理中に例外が発生しました：' + e.toString(), 'error');
         }
       }
@@ -2303,9 +2418,9 @@
         showToast('エラー', 'APIキーを入力してからテストしてください。', 'error');
         return;
       }
-      
+
       showToast('テスト中', 'Gemini APIへの接続を確認中...', 'warning');
-      
+
       try {
         const res = await callGas('testGeminiConnection', key);
         if (res.success) {
@@ -2313,7 +2428,7 @@
         } else {
           showToast('接続失敗', res.error || '接続テストに失敗しました。APIキーを確認してください。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '接続テスト中に例外が発生しました：' + e.toString(), 'error');
       }
     }
@@ -2326,7 +2441,7 @@
         const promptTextarea = document.getElementById('s-additional-prompt');
         const groupSizeInput = document.getElementById('s-group-size');
         const groupCountInput = document.getElementById('s-group-count');
-        
+
         console.log('[DEBUG] フォーム要素の取得状況:', {
           adminEmailsInput: !!adminEmailsInput,
           apiKeyInput: !!apiKeyInput,
@@ -2334,13 +2449,13 @@
           groupSizeInput: !!groupSizeInput,
           groupCountInput: !!groupCountInput
         });
-        
+
         const modeGemini = document.getElementById('set-mode-gemini');
         let matchingMode = 'gemini';
         if (modeGemini) {
           matchingMode = modeGemini.checked ? 'gemini' : 'logic';
         }
-        
+
         const settingsObj = {
           admin_emails: adminEmailsInput ? adminEmailsInput.value.trim() : '',
           gemini_api_key: apiKeyInput ? apiKeyInput.value.trim() : '',
@@ -2349,21 +2464,21 @@
           default_group_count: groupCountInput ? groupCountInput.value : '4',
           additional_prompt: promptTextarea ? promptTextarea.value : ''
         };
-        
+
         showToast('保存中', '設定値を保存しています...', 'warning');
-        
+
         const res = await callGas('saveSettings', settingsObj);
         if (res.success) {
           state.settings = res.settings;
           state.hasApiKey = res.hasApiKey;
           showToast('設定保存完了', 'システム設定が正常に保存されました。', 'success');
-          
+
           // 設定保存に伴う権限の再確認などのためリロード
           await loadInitialData();
         } else {
           showToast('保存エラー', res.error || '設定の保存に失敗しました。', 'error');
         }
-      } catch(e) {
+      } catch (e) {
         showToast('エラー', '設定保存中に例外が発生しました：' + e.toString(), 'error');
         console.error(e);
       }
@@ -2380,7 +2495,7 @@
           } else {
             showToast('エラー', res.error || '履歴のクリアに失敗しました。', 'error');
           }
-        } catch(e) {
+        } catch (e) {
           showToast('エラー', '履歴クリア中に例外が発生しました：' + e.toString(), 'error');
         }
       }
@@ -2393,7 +2508,7 @@
           await callGas('initDatabase');
           showToast('リセット成功', 'データベースの初期化とデモデータの再インポートが完了しました。', 'success');
           await loadInitialData();
-        } catch(e) {
+        } catch (e) {
           showToast('リセットエラー', 'リセット処理中に例外が発生しました：' + e.toString(), 'error');
         }
       }
@@ -2418,14 +2533,14 @@
     // ==========================================
     function getDummyResponse(functionName, args) {
       const today = new Date().toISOString().split('T')[0];
-      
+
       if (functionName === 'getInitialData') {
         return {
           success: true,
           members: [
-            { id: 'M001', name: '山田 太郎', email: 'yamada.t@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談', status: 'アクティブ' },
-            { id: 'M002', name: '佐藤 美咲', email: 'sato.m@example.com', department: '人事部', interests: 'カフェ, ヨガ', purpose: '他部署交流', status: 'アクティブ' },
-            { id: 'M003', name: '鈴木 一郎', email: 'suzuki@example.com', department: '開発部', interests: 'サウナ, 読書', purpose: '技術雑談', status: 'アクティブ' }
+            { id: 'M001', name: '山田 太郎', email: 'yamada.t@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談', status: true },
+            { id: 'M002', name: '佐藤 美咲', email: 'sato.m@example.com', department: '人事部', interests: 'カフェ, ヨガ', purpose: '他部署交流', status: true },
+            { id: 'M003', name: '鈴木 一郎', email: 'suzuki@example.com', department: '開発部', interests: 'サウナ, 読書', purpose: '技術雑談', status: true }
           ],
           settings: {
             admin_emails: 'hiroki@example.com, test@example.com',
@@ -2442,10 +2557,10 @@
           hasApiKey: false,
           isAdmin: true, // ローカル開発では常に管理者として表示
           currentUserEmail: 'hiroki@example.com',
-          myProfile: { id: 'M001', name: '山田 太郎', email: 'hiroki@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談, 他部署の交流', status: 'アクティブ' }
+          myProfile: { id: 'M001', name: '山田 太郎', email: 'hiroki@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談, 他部署の交流', status: true }
         };
       }
-      
+
       if (functionName === 'runMatching') {
         return {
           success: true,
@@ -2454,15 +2569,15 @@
             {
               groupId: 'G-1',
               members: [
-                { id: 'M001', name: '山田 太郎', email: 'hiroki@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談', status: 'アクティブ' },
-                { id: 'M002', name: '佐藤 美咲', email: 'sato.m@example.com', department: '人事部', interests: 'カフェ, ヨガ', purpose: '他部署交流', status: 'アクティブ' }
+                { id: 'M001', name: '山田 太郎', email: 'hiroki@example.com', department: '開発部', interests: 'サウナ, DIY', purpose: '技術雑談', status: true },
+                { id: 'M002', name: '佐藤 美咲', email: 'sato.m@example.com', department: '人事部', interests: 'カフェ, ヨガ', purpose: '他部署交流', status: true }
               ],
               memo: '【独自ロジック】部署を分散させ、過去の被りを考慮して最適化しました。'
             }
           ]
         };
       }
-      
+
       if (functionName === 'registerSelfProfile') {
         return {
           success: true,
@@ -2473,15 +2588,16 @@
             department: args[0].department,
             interests: args[0].interests,
             purpose: args[0].purpose,
-            status: args[0].status
+            status: args[0].status,
+            considerations: args[0].considerations
           }
         };
       }
-      
+
       if (functionName === 'saveMatchingHistory' || functionName === 'saveSettings' || functionName === 'toggleMemberStatus' || functionName === 'toggleMemberPriority' || functionName === 'addMember' || functionName === 'updateMember' || functionName === 'deleteMember' || functionName === 'initDatabase') {
-        return { success: true, settings: state.settings, hasApiKey: state.hasApiKey, nextStatus: '非アクティブ', nextPriority: true };
+        return { success: true, settings: state.settings, hasApiKey: state.hasApiKey, nextStatus: false, nextPriority: true };
       }
-      
+
       if (functionName === 'testGeminiConnection') {
         return { success: true, message: '接続テスト成功: OK (Local Sandbox)' };
       }
@@ -2506,7 +2622,7 @@
           ]
         };
       }
-      
+
       return { success: false, error: '不明なダミーメソッド' };
     }
 
@@ -2541,4 +2657,5 @@
     });
   </script>
 </body>
+
 </html>
