@@ -144,6 +144,27 @@ function initDatabase() {
     }
   }
 
+  // 1.5. 部署マスタシートの作成・初期化
+  let deptSheet = ss.getSheetByName("部署マスタ");
+  if (!deptSheet) {
+    deptSheet = ss.insertSheet("部署マスタ");
+    deptSheet.appendRow(["部署ID", "部署名"]);
+    const initialDepts = [
+      ["D001", "管理室"],
+      ["D002", "BPO統括部"],
+      ["D003", "東京統括部"],
+      ["D004", "ST開発部"],
+      ["D005", "営業統括部"],
+      ["D006", "印刷統括部"],
+      ["D007", "その他"]
+    ];
+    initialDepts.forEach(row => deptSheet.appendRow(row));
+
+    // 見栄えの調整
+    deptSheet.getRange("A1:B1").setBackground("#f1f5f9").setFontWeight("bold");
+    deptSheet.autoResizeColumns(1, 2);
+  }
+
   // 2. メンバー一覧シートの作成・初期化
   let memberSheet = ss.getSheetByName("メンバー一覧");
   let isNewMemberSheet = false;
@@ -429,6 +450,7 @@ function getInitialData() {
     const settings = getSettings();
     const members = getMembers();
     const history = getMatchingHistory();
+    const departments = getDepartments();
 
     // 管理者判定
     const adminEmails = getAdminEmails(settings);
@@ -453,6 +475,7 @@ function getInitialData() {
       members: members,
       settings: settings,
       history: history,
+      departments: departments,
       totalCount: members.length,
       activeCount: activeCount,
       hasApiKey:
@@ -466,6 +489,25 @@ function getInitialData() {
     return { success: false, error: e.toString() };
   }
 }
+
+/**
+ * 部署一覧の取得
+ */
+function getDepartments() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("部署マスタ");
+  if (!sheet) return [];
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return [];
+
+  const data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+  return data.map(row => ({
+    id: row[0],
+    name: row[1],
+  }));
+}
+
 
 /**
  * メンバー一覧の取得
