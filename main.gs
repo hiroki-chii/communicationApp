@@ -22,9 +22,27 @@ function onOpen() {
     .addToUi();
 }
 
+// Webポータル画面のURLを取得する関数（設定シートに値があれば優先し、無ければ自動取得）
+function getPortalUrl() {
+  try {
+    var settings = getSettings();
+    if (settings.webapp_url && settings.webapp_url.trim() !== "") {
+      return settings.webapp_url.trim();
+    }
+  } catch (e) {
+    Logger.log("getPortalUrl エラー: " + e.toString());
+  }
+  try {
+    return ScriptApp.getService().getUrl();
+  } catch (e) {
+    Logger.log("Web App URLの自動取得に失敗しました: " + e.toString());
+    return "";
+  }
+}
+
 // Web Appの公開URLをポップアップ表示する関数
 function showWebAppUrl() {
-  var url = ScriptApp.getService().getUrl();
+  var url = getPortalUrl();
   var ui = SpreadsheetApp.getUi();
   if (url) {
     var htmlOutput = HtmlService.createHtmlOutput(
@@ -37,7 +55,7 @@ function showWebAppUrl() {
     ui.showModalDialog(htmlOutput, "ポータル画面のURL");
   } else {
     ui.alert(
-      "Webアプリケーションとしてデプロイされていません。「デプロイ」メニューからデプロイを行ってください。",
+      "Webアプリケーションとしてデプロイされていないか、URLが設定されていません。「設定」シートに webapp_url を手動で設定するか、デプロイを行ってください。",
     );
   }
 }
@@ -88,6 +106,11 @@ function initDatabase() {
       "部署ができるだけ被らないようにしてください。共通の趣味がある人を同じグループに混ぜると盛り上がるので考慮してください。",
       "Geminiへの追加指示プロンプト",
     ]);
+    setupSheet.appendRow([
+      "webapp_url",
+      "",
+      "Webポータル画面の公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）",
+    ]);
 
     // 見栄えの調整
     setupSheet.getRange("A1:C1").setBackground("#f1f5f9").setFontWeight("bold");
@@ -113,6 +136,13 @@ function initDatabase() {
         "default_group_count",
         "4",
         "標準の目標グループ数（組数）",
+      ]);
+    }
+    if (keys.indexOf("webapp_url") === -1) {
+      setupSheet.appendRow([
+        "webapp_url",
+        "",
+        "Webポータル画面の公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）",
       ]);
     }
   }
@@ -1176,12 +1206,7 @@ function saveMatchingHistory(groups, matchingMethod) {
  * @param {string} matchingMethod マッチング方法 (gemini / logic)
  */
 function sendMatchingEmails(groups, dateStr, matchingMethod) {
-  var webAppUrl = "";
-  try {
-    webAppUrl = ScriptApp.getService().getUrl();
-  } catch (e) {
-    Logger.log("Web App URLの取得に失敗しました: " + e.toString());
-  }
+  var webAppUrl = getPortalUrl();
 
   groups.forEach(function (group) {
     var members = group.members;

@@ -1,5 +1,26 @@
 # 作業・修正ログ
 
+## 2026-05-29 11:55
+
+- **修正内容**: ポータルURLの手動上書き（webapp_url 設定キー）対応
+- **対象ファイル**:
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+- **修正内容の詳細**:
+  - `ScriptApp.getService().getUrl()` が本番用の `/exec` URLを返し、テスト用（`/dev`）や別プロジェクトのURLを表示したい場合に差異が生じる問題を解決するため、設定シートでポータルURLを上書き設定できる機能を追加しました。
+  - 「設定」シートの初期化およびマイグレーション処理において、新キー `webapp_url` を自動追加するようにしました。
+  - `getPortalUrl()` ヘルパーを新設し、「設定」シートに `webapp_url` が登録されている場合はそれを最優先で使用し、空欄の場合は従来通り `ScriptApp.getService().getUrl()` で自動取得したURLを使用するように修正しました。
+  - ポップアップ表示関数 `showWebAppUrl()` およびメール送信関数 `sendMatchingEmails()` が `getPortalUrl()` を使用するように変更しました。
+  - claspにより変更内容をリモートへプッシュしました。
+
+## 2026-05-29 11:31
+
+- **修正内容**: Ui.showModalDialog 呼び出し時の権限エラー（OAuthスコープ不足）の解消
+- **対象ファイル**:
+  - [appsscript.json](file:///c:/Users/hirok/dev/communicationApp/appsscript.json)
+- **修正内容の詳細**:
+  - `SpreadsheetApp.getUi().showModalDialog` を実行する際に発生していた権限エラー（`Exception: 指定された権限では Ui.showModalDialog を呼び出すことができません。必要な権限: https://www.googleapis.com/auth/script.container.ui`）を解決するため、`appsscript.json` の `oauthScopes` 配列に `"https://www.googleapis.com/auth/script.container.ui"` を追加しました。
+  - claspにより変更内容をリモートのGoogle Apps Scriptへプッシュしました。
+
 ## 2026-05-29 08:50
 
 - **対応内容**: 現在のGASおよびフロントエンド開発環境に最適なおすすめ拡張機能の提案
