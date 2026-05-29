@@ -155,24 +155,33 @@ function initDatabase() {
       "メールアドレス",
       "部署・チーム",
       "趣味・自己紹介・興味のあること",
-      "参加目的",
       "配慮事項",
       "ステータス",
       "次回優先",
     ]);
     memberSheet
-      .getRange("A1:I1")
+      .getRange("A1:H1")
       .setBackground("#f1f5f9")
       .setFontWeight("bold");
     isNewMemberSheet = true;
   } else {
     // 既存のシートのアップグレードとカラムの順序整理
-    // 目的: 「配慮事項」を「参加目的」の右（＝7列目：G列）に配置する。
+    // 目的: 「配慮事項」を「趣味・自己紹介・興味のあること」の右（＝6列目：F列）に配置する。
     let headers = memberSheet
-      .getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 9))
+      .getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 8))
       .getValues()[0];
 
-    // 1. まず「次回優先」が無ければ追加
+    // 0. 「参加目的」列があれば削除する
+    const purposeColIdx = headers.indexOf("参加目的");
+    if (purposeColIdx !== -1) {
+      memberSheet.deleteColumn(purposeColIdx + 1);
+      // ヘッダーを再取得
+      headers = memberSheet
+        .getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 8))
+        .getValues()[0];
+    }
+
+    // 1. まず「次回優先」が無ければ追加（新8列目：H列になる）
     const priorityIndex = headers.indexOf("次回優先");
     if (priorityIndex === -1) {
       memberSheet.getRange(1, 8).setValue("次回優先");
@@ -188,16 +197,16 @@ function initDatabase() {
         .getValues()[0]; // 再取得
     }
 
-    // 2. 「配慮事項」の位置を確認し、7列目（G列、インデックス6）に移設または新規挿入する
+    // 2. 「配慮事項」の位置を確認し、6列目（F列、インデックス5）に移設または新規挿入する
     const considerationsIndex = headers.indexOf("配慮事項");
     if (considerationsIndex === -1) {
-      // 存在しない場合は7列目に挿入
-      memberSheet.insertColumnAfter(6); // F列の後に空列を挿入（＝新7列目・G列になる）
-      memberSheet.getRange(1, 7).setValue("配慮事項");
-      memberSheet.getRange("G1").setBackground("#f1f5f9").setFontWeight("bold");
-    } else if (considerationsIndex !== 6) {
-      // 7列目以外にある場合（例: 9列目）、7列目に挿入してデータを移動する
-      memberSheet.insertColumnAfter(6); // F列の後に新G列（7列目）を挿入。元の「配慮事項」は右にズレる。
+      // 存在しない場合は6列目に挿入
+      memberSheet.insertColumnAfter(5); // E列の後に空列を挿入（＝新6列目・F列になる）
+      memberSheet.getRange(1, 6).setValue("配慮事項");
+      memberSheet.getRange("F1").setBackground("#f1f5f9").setFontWeight("bold");
+    } else if (considerationsIndex !== 5) {
+      // 6列目以外にある場合、6列目に挿入してデータを移動する
+      memberSheet.insertColumnAfter(5); // E列の後に新F列（6列目）を挿入。
       headers = memberSheet
         .getRange(1, 1, 1, memberSheet.getLastColumn())
         .getValues()[0]; // ズレた後のヘッダーを再取得
@@ -206,24 +215,24 @@ function initDatabase() {
       const lastRow = memberSheet.getLastRow();
       if (lastRow > 1) {
         const oldRange = memberSheet.getRange(2, oldColIdx, lastRow - 1, 1);
-        const newRange = memberSheet.getRange(2, 7, lastRow - 1, 1);
+        const newRange = memberSheet.getRange(2, 6, lastRow - 1, 1);
         oldRange.copyTo(newRange);
       }
 
-      memberSheet.getRange(1, 7).setValue("配慮事項");
-      memberSheet.getRange("G1").setBackground("#f1f5f9").setFontWeight("bold");
+      memberSheet.getRange(1, 6).setValue("配慮事項");
+      memberSheet.getRange("F1").setBackground("#f1f5f9").setFontWeight("bold");
 
       // 元の「配慮事項」列を削除
       memberSheet.deleteColumn(oldColIdx);
     }
   }
 
-  // 既存のステータス列（8列目、H列）のブーリアン移行＆チェックボックス化のマイグレーション
-  // ※ 既にブーリアン型(true/false)が入っているセルは変換対象外（触るとチェックボックスのデータ検証が失われる）
+  // 既存のステータス列（7列目、G列）のブーリアン移行＆チェックボックス化のマイグレーション
+  // ※ 既にブーリアン型(true/false)が入っているセルは変換対象外
   if (memberSheet) {
     const lastRow = memberSheet.getLastRow();
     if (lastRow > 1) {
-      const statusRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
+      const statusRange = memberSheet.getRange(2, 7, lastRow - 1, 1);
       const statusValues = statusRange.getValues();
       let dataChanged = false;
       for (let i = 0; i < statusValues.length; i++) {
@@ -254,34 +263,34 @@ function initDatabase() {
   // デモデータの投入（メンバー一覧シートが空、または新規作成された場合）
   if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
     const demoMembers = [
-      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "技術的な雑談, 他部署の交流", "", true, false],
-      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "他部署の交流", "", true, false],
-      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "技術的な雑談, キャリア相談", "", true, false],
-      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "他部署の交流, 雑談で息抜き", "", true, false],
-      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "他部署 of 交流", "", true, false],
-      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "雑談で息抜き", "", true, false],
-      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "技術的な雑談, 他部署の交流", "", true, false],
-      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "他部署 of 交流", "", true, false],
-      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "技術的な雑談, 雑談で息抜き", "", true, false],
-      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "他部署の交流, キャリア相談", "", true, false],
-      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "技術的な雑談, 他部署の交流", "", true, false],
-      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "キャリア相談, 他部署の交流", "", true, false],
-      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "他部署の交流, 雑談で息抜き", "", true, false],
-      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "技術的な雑談, 他部署の交流", "", true, false],
-      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "他部署の交流, 雑談で息抜き", "", true, false],
-      ["M016", "斎藤 翼", "saito.t@example.com", "開発部", "自動テスト、バグハント。趣味はランニングと麻雀です。", "技術的な雑談", "", true, false],
+      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "", true, false],
+      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "", true, false],
+      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "", true, false],
+      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "", true, false],
+      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "", true, false],
+      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "", true, false],
+      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "", true, false],
+      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "", true, false],
+      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "", true, false],
+      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "", true, false],
+      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "", true, false],
+      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "", true, false],
+      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "", true, false],
+      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "", true, false],
+      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "", true, false],
+      ["M016", "斎藤 翼", "saito.t@example.com", "開発部", "自動テスト、バグハント。趣味はランニングと麻雀です。", "", true, false],
     ];
 
     demoMembers.forEach(member => memberSheet.appendRow(member));
 
-    // チェックボックスを挿入（8列目のステータス、9列目の次回優先）
+    // チェックボックスを挿入（7列目のステータス、8列目の次回優先）
     const lastRow = memberSheet.getLastRow();
     if (lastRow > 1) {
+      memberSheet.getRange(2, 7, lastRow - 1, 1).insertCheckboxes();
       memberSheet.getRange(2, 8, lastRow - 1, 1).insertCheckboxes();
-      memberSheet.getRange(2, 9, lastRow - 1, 1).insertCheckboxes();
     }
 
-    memberSheet.autoResizeColumns(1, 9);
+    memberSheet.autoResizeColumns(1, 8);
   }
 
   // 3. マッチング履歴シートの作成・初期化
@@ -470,19 +479,18 @@ function getMembers() {
   if (lastRow <= 1) return [];
 
   const lastCol = sheet.getLastColumn();
-  const colCount = Math.max(lastCol, 9); // 9列目まで安全に取得
+  const colCount = Math.max(lastCol, 8); // 8列目まで安全に取得
   const data = sheet.getRange(2, 1, lastRow - 1, colCount).getValues();
-
+ 
   return data.map(row => ({
     id: row[0],
     name: row[1],
     email: row[2],
     department: row[3],
     interests: row[4],
-    purpose: row[5],
-    considerations: row[6] || "", // 7列目の「配慮事項」
-    status: row[7] === true || row[7] === "アクティブ", // 8列目の「ステータス」 (ブーリアン)
-    priority: !!row[8], // 9列目の「次回優先」フラグ (真偽値)
+    considerations: row[5] || "", // 6列目の「配慮事項」
+    status: row[6] === true || row[6] === "アクティブ", // 7列目の「ステータス」 (ブーリアン)
+    priority: !!row[7], // 8列目の「次回優先」フラグ (真偽値)
   }));
 }
 
@@ -636,7 +644,6 @@ function addMemberToSheet(memberObj) {
     memberObj.email || "",
     memberObj.department || "",
     memberObj.interests || "",
-    memberObj.purpose || "",
     memberObj.considerations || "",
     memberObj.status !== false,
     !!memberObj.priority,
@@ -644,18 +651,18 @@ function addMemberToSheet(memberObj) {
 
   sheet.appendRow(newRow);
 
-  // チェックボックスを挿入（8列目のステータス、9列目の次回優先）
+  // チェックボックスを挿入（7列目のステータス、8列目の次回優先）
   const targetRow = sheet.getLastRow();
   sheet
-    .getRange(targetRow, 8)
+    .getRange(targetRow, 7)
     .insertCheckboxes()
     .setValue(memberObj.status !== false);
   sheet
-    .getRange(targetRow, 9)
+    .getRange(targetRow, 8)
     .insertCheckboxes()
     .setValue(!!memberObj.priority);
 
-  sheet.autoResizeColumns(1, 9);
+  sheet.autoResizeColumns(1, 8);
 
   return {
     success: true,
@@ -703,7 +710,7 @@ function updateMemberInSheet(memberObj) {
   }
 
   const rowNum = rowIndex + 2;
-  const range = sheet.getRange(rowNum, 1, 1, 9); // 9列目まで更新
+  const range = sheet.getRange(rowNum, 1, 1, 8); // 8列目まで更新
   range.setValues([
     [
       memberObj.id,
@@ -711,7 +718,6 @@ function updateMemberInSheet(memberObj) {
       memberObj.email || "",
       memberObj.department || "",
       memberObj.interests || "",
-      memberObj.purpose || "",
       memberObj.considerations || "",
       memberObj.status !== false, // ステータス (ブーリアン)
       !!memberObj.priority,
@@ -1119,7 +1125,6 @@ function registerSelfProfile(profileObj) {
         email: userEmail, // メールアドレスは強制的に自分のものにする
         department: profileObj.department,
         interests: profileObj.interests || "",
-        purpose: profileObj.purpose || "",
         status: profileObj.status !== false,
         priority: myProfile.priority || false, // 優先フラグを引き継ぐ
         considerations: profileObj.considerations || "",
@@ -1132,7 +1137,6 @@ function registerSelfProfile(profileObj) {
         email: userEmail, // メールアドレスは強制的に自分のものにする
         department: profileObj.department,
         interests: profileObj.interests || "",
-        purpose: profileObj.purpose || "",
         status: profileObj.status !== false,
         priority: false, // 新規登録時は優先ではない
         considerations: profileObj.considerations || "",
@@ -1268,10 +1272,110 @@ function getChatMessages(roomId) {
     // 送信日時でソート (古い順)
     messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-    return { success: true, messages: messages };
+    ret    // プロンプトに渡すためのデータをコンパクトに整理
+    const membersData = members.map(m => ({
+      id: m.id,
+      name: m.name,
+      dept: m.department,
+      interests: m.interests,
+      considerations: m.considerations || "",
+    }));
+
+    // 過去履歴のコンパクト化 (直近8回分程度で十分)
+    const compactHistory = history.slice(0, 8).map(h => ({
+      date: h.date,
+      groups: h.memberIds,
+    }));
+
+    const systemInstruction = `あなたは優秀な社内交流ファシリテーターです。提示されたメンバーのリストから、ランチ交流会のグループ分けを決定してください。
+【制約ルール】
+1. グループ数は【厳密に ${groupCount} 組】（groupIdは "G-1" から "G-${groupCount}"）作成してください。提示されたメンバー全員（総勢 ${members.length} 名）を、いずれかのグループに漏れなく割り当ててください。
+2. 1グループあたりの目標人数は ${groupSize} 名ですが、総人数が少ない場合は各グループが均等な人数（例：総数8名で3組なら、3名、3名、2名など、サイズ差が最大1以内）になるように美しく均してください。
+3. 異なる部署・チームのメンバーが極力同じグループになるように「部署の多様性」を最優先してください。
+4. 趣味、自己紹介などを考慮し、共通点がある人同士を組み合わせると会話が弾みやすいので、適度に「趣味・関心の合致」を考慮してください。
+5. 過去のマッチング履歴（ compactHistory ）を確認し、直近で同じグループになった人同士ができるだけ被らないように配慮してください。
+6. メンバーに「配慮事項 (considerations)」が記載されている場合は、アレルギーや苦手なもの、時間制限、その他の要望を極力尊重して、可能な限り配慮が満たされるような組み合わせを行ってください。ただし、アレルギー、苦手なもの、健康状態、時間制限、心理的安全性、その他の配慮事項に関する具体的な内容は、生成するAIコメント（memo）には絶対に含めないでください。
+7. 出力フォーマットは指定された厳密なJSONスキーマのみとし、余計な説明文やMarkdownのコードブロック（\`\`\`json など）は含めず、純粋なJSON文字列として返してください。`;
+
+    const prompt = `【メンバーリスト】
+${JSON.stringify(membersData)}
+
+【過去のマッチング履歴】
+${JSON.stringify(compactHistory)}
+
+【管理者からの追加指示】
+${additionalPrompt ? additionalPrompt : "特になし"}
+
+【期待する出力フォーマット(JSON)】
+{
+  "groups": [
+    {
+      "groupId": "G-1",
+      "members": ["M001", "M002", "M003"],
+      "memo": "（日本語で1〜2文）なぜこの組み合わせにしたのか、共通の話題やおすすめの雑談テーマなど。※注意：メンバーの配慮事項（健康、アレルギー、時間制限、心理的安全性など）に関する内容は絶対に含めないでください。"
+    }
+  ]
+}
+
+では、グループ分けを実行し、上記のJSONフォーマットに従って返答してください。`;
+
+    const payload = {
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+      systemInstruction: {
+        parts: [{ text: systemInstruction }],
+      },
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      },
+    };
+
+    const options = {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    };
+
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
+
+    if (responseCode !== 200) {
+      throw new Error(`Gemini API エラー (ステータス: ${responseCode}): ${responseBody}`);
+    }
+
+    const resultJson = JSON.parse(responseBody);
+    const candidateText = resultJson.candidates[0].content.parts[0].text;
+    const parsed = JSON.parse(candidateText.trim());
+
+    // 返却されたグループリストを加工して、実際のメンバーオブジェクト配列を紐付ける
+    const mappedGroups = parsed.groups.map(g => {
+      const actualMembers = g.members.map(mId => {
+        return members.find(m => m.id === mId) || { id: mId, name: "不明", department: "不明", interests: "" };
+      });
+      return {
+        groupId: g.groupId,
+        members: actualMembers,
+        memo: g.memo || "",
+      };
+    });
+
+    return { success: true, groups: mappedGroups };
   } catch (e) {
-    Logger.log(`getChatMessages エラー: ${e.toString()}`);
-    return { success: false, error: e.toString() };
+    Logger.log(`runGeminiMatching エラー: ${e.toString()}`);
+    // エラー時は自動で Engine B (Logic) にフォールバックする
+    Logger.log("Engine A (Gemini) が失敗したため、Engine B (Logic) に自動フォールバックします...");
+    const fallbackResult = runLogicMatching(members, history, groupSize, groupCount);
+    return {
+      success: true,
+      method: "logic_fallback",
+      groups: fallbackResult.groups,
+    };
   }
 }
 
@@ -1629,7 +1733,6 @@ function runGeminiMatching(
       name: m.name,
       dept: m.department,
       interests: m.interests,
-      purpose: m.purpose,
       considerations: m.considerations || "",
     }));
 
@@ -1644,7 +1747,7 @@ function runGeminiMatching(
 1. グループ数は【厳密に ${groupCount} 組】（groupIdは "G-1" から "G-${groupCount}"）作成してください。提示されたメンバー全員（総勢 ${members.length} 名）を、いずれかのグループに漏れなく割り当ててください。
 2. 1グループあたりの目標人数は ${groupSize} 名ですが、総人数が少ない場合は各グループが均等な人数（例：総数8名で3組なら、3名、3名、2名など、サイズ差が最大1以内）になるように美しく均してください。
 3. 異なる部署・チームのメンバーが極力同じグループになるように「部署の多様性」を最優先してください。
-4. 趣味、自己紹介、参加目的などを考慮し、共通点がある人同士を組み合わせると会話が弾みやすいので、適度に「趣味・関心の合致」を考慮してください。
+4. 趣味、自己紹介などを考慮し、共通点がある人同士を組み合わせると会話が弾みやすいので、適度に「趣味・関心の合致」を考慮してください。
 5. 過去のマッチング履歴（ compactHistory ）を確認し、直近で同じグループになった人同士ができるだけ被らないように配慮してください。
 6. メンバーに「配慮事項 (considerations)」が記載されている場合は、アレルギーや苦手なもの、時間制限、その他の要望を極力尊重して、可能な限り配慮が満たされるような組み合わせを行ってください。ただし、アレルギー、苦手なもの、健康状態、時間制限、心理的安全性、その他の配慮事項に関する具体的な内容は、生成するAIコメント（memo）には絶対に含めないでください。
 7. 出力フォーマットは指定された厳密なJSONスキーマのみとし、余計な説明文やMarkdownのコードブロック（\`\`\`json など）は含めず、純粋なJSON文字列として返してください。`;

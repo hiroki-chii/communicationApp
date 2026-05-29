@@ -330,7 +330,7 @@
             class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100/50 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30"
           >
             <i data-lucide="shield-check" class="w-4 h-4"></i>
-            <span>管理者権限オン</span>
+            <span>管理者権限</span>
           </div>
 
           <!-- テーマモードセレクトトグル (ライト/ダーク/システム) -->
@@ -980,10 +980,6 @@
                   <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
                   <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
                 </div>
-                <div class="space-y-1">
-                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.purpose || "未登録")}</p>
-                </div>
                 <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
               </div>
             </div>
@@ -1103,30 +1099,6 @@
         const profile = state.myProfile;
         const isNew = !profile;
 
-        // 目的のパース
-        const purposeList = profile
-          ? (profile.purpose || "").split(",").map((s) => s.trim())
-          : [];
-
-        const purposes = [
-          "他部署の交流",
-          "技術的な雑談",
-          "キャリア相談",
-          "雑談で息抜き",
-        ];
-
-        const purposeCheckboxes = purposes
-          .map((p) => {
-            const isChecked = purposeList.includes(p);
-            return `
-          <label class="flex items-center gap-2 p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer text-xs transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/50">
-            <input type="checkbox" name="self_purpose" value="${escapeHtml(p)}" ${isChecked ? "checked" : ""} class="w-4 h-4 text-indigo-600 dark:text-indigo-500 rounded border-slate-350 dark:border-zinc-700 focus:ring-indigo-500">
-            <span class="font-semibold text-slate-700 dark:text-zinc-200">${escapeHtml(p)}</span>
-          </label>
-        `;
-          })
-          .join("");
-
         return `
         <div class="max-w-2xl mx-auto p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark space-y-6">
           
@@ -1150,7 +1122,7 @@
               ? `
             <div class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl flex items-start gap-3">
               <i data-lucide="info" class="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5"></i>
-              <div class="text-xs text-amber-800 dark:text-amber-400 leading-relaxed">
+              <div class="text-xs text-amber-850 dark:text-amber-400 leading-relaxed">
                 <p class="font-bold">あなたはまだメンバー登録されていません</p>
                 <p class="mt-0.5">以下のフォームを入力して「登録する」ボタンを押すと、次回からマッチング対象に含まれるようになります！</p>
               </div>
@@ -1200,14 +1172,6 @@
               <textarea id="self-considerations" rows="2" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="アレルギー、苦手な食べ物、時間制限（例：時短勤務のため13時まで）など、配慮してほしいことがあればご記入ください。AIがマッチング生成時に考慮します。">${profile ? escapeHtml(profile.considerations || "") : ""}</textarea>
             </div>
 
-            <!-- 参加目的（複数選択） -->
-            <div class="space-y-2">
-              <label class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">主な参加目的 (複数選択)</label>
-              <div class="grid grid-cols-2 gap-3">
-                ${purposeCheckboxes}
-              </div>
-            </div>
-
             <button type="button" id="btn-save-self-profile" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-xs rounded-xl shadow transition-colors flex items-center justify-center gap-1.5">
               <i data-lucide="save" class="w-4 h-4"></i>
               <span>${isNew ? "プロフィールを登録して参加" : "変更を保存する"}</span>
@@ -1229,14 +1193,6 @@
           .value.trim();
         const status = document.getElementById("self-status").value === "true";
 
-        // チェックボックスの集計
-        const checkedPurposes = [];
-        document
-          .querySelectorAll('input[name="self_purpose"]:checked')
-          .forEach((cb) => {
-            checkedPurposes.push(cb.value);
-          });
-
         if (!name || !department) {
           showToast("入力エラー", "名前と部署は入力必須です。", "error");
           return;
@@ -1246,7 +1202,7 @@
           name,
           department,
           interests,
-          purpose: checkedPurposes.join(", "),
+          purpose: "",
           status,
           considerations,
         };
@@ -1347,10 +1303,6 @@
                 <div class="space-y-1">
                   <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
                   <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
-                </div>
-                <div class="space-y-1">
-                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.purpose || "未登録")}</p>
                 </div>
                 <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
               </div>
@@ -1594,10 +1546,6 @@
                       <div class="space-y-1">
                         <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
                         <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
-                      </div>
-                      <div class="space-y-1">
-                        <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">参加目的</span>
-                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.purpose || "未登録")}</p>
                       </div>
                       <div class="absolute top-full left-6 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
                     </div>
@@ -1846,7 +1794,7 @@
               <p class="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
                 ${
                   state.settings.matching_mode === "gemini"
-                    ? "メンバーの部署、趣味・自己紹介、参加目的を分析し、共通の話題を見つけつつ重複を防止した最適なグループ分けとおすすめ雑談テーマを考案しています。"
+                    ? "メンバーの部署、趣味・自己紹介を分析し、共通の話題を見つけつつ重複を防止した最適なグループ分けとおすすめ雑談テーマを考案しています。"
                     : "プログラムロジックにより、過去の重複履歴と部署の同一被りを最小限に抑えるように数千回のスワップ試行を行い、最適なグループを算出しています。"
                 }
               </p>
@@ -2271,10 +2219,6 @@
               <div class="space-y-1">
                 <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味・自己紹介・興味のあること</label>
                 <textarea id="m-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：趣味はサウナと温泉巡りです。最近は家庭菜園を始めました。"></textarea>
-              </div>
-              <div class="space-y-1">
-                <label for="m-purpose" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">参加したい目的</label>
-                <input type="text" id="m-purpose" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：他部署の交流、技術的な雑談">
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
@@ -2995,7 +2939,6 @@
         document.getElementById("m-email").value = "";
         document.getElementById("m-dept").value = "";
         document.getElementById("m-interests").value = "";
-        document.getElementById("m-purpose").value = "";
         document.getElementById("m-status").value = "true";
         document.getElementById("m-priority").checked = false; // 優先フラグリセット
 
@@ -3014,7 +2957,6 @@
         document.getElementById("m-email").value = member.email;
         document.getElementById("m-dept").value = member.department;
         document.getElementById("m-interests").value = member.interests || "";
-        document.getElementById("m-purpose").value = member.purpose || "";
         document.getElementById("m-status").value =
           member.status === true || member.status === "アクティブ"
             ? "true"
@@ -3034,7 +2976,6 @@
         const email = document.getElementById("m-email").value.trim();
         const dept = document.getElementById("m-dept").value.trim();
         const interests = document.getElementById("m-interests").value.trim();
-        const purpose = document.getElementById("m-purpose").value.trim();
         const status = document.getElementById("m-status").value === "true";
         const priority = document.getElementById("m-priority").checked; // 優先フラグの取得
 
@@ -3052,7 +2993,7 @@
           email,
           department: dept,
           interests,
-          purpose,
+          purpose: "",
           status,
           priority,
         };
