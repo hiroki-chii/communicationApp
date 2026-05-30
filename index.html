@@ -971,19 +971,7 @@
             <div class="${boxClass}">
               <span class="font-bold ${isMe ? "text-indigo-600 dark:text-indigo-400" : "text-slate-800 dark:text-zinc-100"}">${escapeHtml(name)}</span>
               <span class="text-[9px] ${isMe ? "text-indigo-500/80 dark:text-indigo-350" : "text-slate-400 dark:text-zinc-500"} font-medium mt-0.5">${escapeHtml(dept)}</span>
-              
-              <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
-              <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-64 max-h-60 overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
-                <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
-                  <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
-                  <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
-                </div>
-                <div class="space-y-1">
-                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
-                </div>
-                <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
-              </div>
+              ${renderMemberPopoverHtml(name, dept, memberInfo, popoverAlignClass, arrowAlignClass)}
             </div>
           `;
             })
@@ -1169,6 +1157,26 @@
               <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください（AI共通趣味マッチング用）。</p>
             </div>
 
+            <!-- 特技 -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="self-specialty" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">特技</label>
+                <span id="self-specialty-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
+              </div>
+              <textarea id="self-specialty" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="例：Excelマクロ、早起き、タイピング">${profile ? escapeHtml(profile.specialty || "") : ""}</textarea>
+              <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
+            </div>
+
+            <!-- 弱点 -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="self-weakness" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">弱点</label>
+                <span id="self-weakness-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
+              </div>
+              <textarea id="self-weakness" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="例：早起きが苦手、虫、人混み">${profile ? escapeHtml(profile.weakness || "") : ""}</textarea>
+              <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
+            </div>
+
             <!-- 配慮事項 -->
             <div class="space-y-1.5">
               <label for="self-considerations" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">配慮事項 (任意、ない場合は空欄)</label>
@@ -1192,6 +1200,12 @@
         const interests = document
           .getElementById("self-interests")
           .value.trim();
+        const specialty = document
+          .getElementById("self-specialty")
+          .value.trim();
+        const weakness = document
+          .getElementById("self-weakness")
+          .value.trim();
         const considerations = document
           .getElementById("self-considerations")
           .value.trim();
@@ -1202,15 +1216,14 @@
           return;
         }
 
-        if (interests.length > 25) {
-          showToast("入力エラー", "趣味は25文字以内で入力してください。", "error");
-          return;
-        }
+        if (!validateBioLengths(interests, specialty, weakness)) return;
 
         const profileObj = {
           name,
           department,
           interests,
+          specialty,
+          weakness,
           purpose: "",
           status,
           considerations,
@@ -1288,33 +1301,15 @@
                 ) || {};
               const dept = memberInfo.department || "他部署";
 
-              // 左半分か右半分かでポップオーバーの展開方向をスマートに分ける（前半メンバーは右へ、後半メンバーは左へ）
-              const isLeftHalf =
-                index < Math.ceil(matchingGroup.memberNames.length / 2);
-              const popoverAlignClass = isLeftHalf
-                ? "left-0 translate-x-0 origin-bottom-left"
-                : "right-0 left-auto translate-x-0 origin-bottom-right";
-              const arrowAlignClass = isLeftHalf
-                ? "left-6 translate-x-0"
-                : "right-6 left-auto translate-x-0";
+              // チャット画面は横幅が広く右側に十分なスペースがあるため、左側へのはみ出しを防ぐため常に左揃え（右へ展開）にする
+              const popoverAlignClass = "left-0 translate-x-0 origin-bottom-left";
+              const arrowAlignClass = "left-6 translate-x-0";
 
               return `
             <span class="inline-flex flex-col px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/50 text-xs relative group cursor-help">
               <span class="font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(name)}</span>
               <span class="text-[9px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
-              
-              <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
-              <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-64 max-h-60 overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
-                <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
-                  <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
-                  <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
-                </div>
-                <div class="space-y-1">
-                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
-                  <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
-                </div>
-                <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
-              </div>
+              ${renderMemberPopoverHtml(name, dept, memberInfo, popoverAlignClass, arrowAlignClass)}
             </span>
           `;
             })
@@ -1545,19 +1540,7 @@
                     ${adminBadgeHtml}
                     <span>•</span>
                     <span>${timeStr}</span>
-                    
-                    <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
-                    <div class="absolute bottom-full left-0 mb-2 w-64 max-h-60 overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-2 text-xs text-left normal-case leading-normal font-sans">
-                      <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
-                        <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(msg.senderName)}</span>
-                        <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(msg.department || "他部署")}</span>
-                      </div>
-                      <div class="space-y-1">
-                        <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
-                        <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
-                      </div>
-                      <div class="absolute top-full left-6 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
-                    </div>
+                    ${renderMemberPopoverHtml(msg.senderName, msg.department || "他部署", memberInfo, "left-0", "left-6")}
                   </div>
                   <div class="p-3 rounded-2xl rounded-tl-none ${cardBgClass} text-xs leading-relaxed shadow-sm">
                     ${formattedMessage}
@@ -2081,7 +2064,7 @@
         if (state.members.length === 0) {
           memberRows = `
           <tr>
-            <td colspan="8" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
+            <td colspan="10" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
               メンバーが登録されていません。
             </td>
           </tr>
@@ -2100,6 +2083,8 @@
                 <span class="px-2 py-0.5 rounded-full font-medium bg-slate-100 dark:bg-zinc-800 text-[10px]">${escapeHtml(m.department)}</span>
               </td>
               <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests || "-")}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.specialty || "")}">${escapeHtml(m.specialty || "-")}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.weakness || "")}">${escapeHtml(m.weakness || "-")}</td>
               <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[220px] break-words whitespace-normal" title="${escapeHtml(m.considerations || "")}">
                 ${
                   m.considerations
@@ -2186,6 +2171,8 @@
                     <th class="px-4 py-3 whitespace-nowrap">メールアドレス</th>
                     <th class="px-4 py-3 whitespace-nowrap">部署</th>
                     <th class="px-4 py-3 whitespace-nowrap">趣味</th>
+                    <th class="px-4 py-3 whitespace-nowrap">特技</th>
+                    <th class="px-4 py-3 whitespace-nowrap">弱点</th>
                     <th class="px-4 py-3 whitespace-nowrap">配慮事項</th>
                     <th class="px-4 py-3 whitespace-nowrap">ステータス</th>
                     <th class="px-4 py-3 whitespace-nowrap">次回優先</th>
@@ -2229,6 +2216,22 @@
                   <span id="m-interests-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
                 </div>
                 <textarea id="m-interests" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：サウナ、映画鑑賞、キャンプ"></textarea>
+                <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内</p>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <label for="m-specialty" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">特技</label>
+                  <span id="m-specialty-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
+                </div>
+                <textarea id="m-specialty" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：Excelマクロ、早起き、タイピング"></textarea>
+                <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内</p>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                  <label for="m-weakness" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">弱点</label>
+                  <span id="m-weakness-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
+                </div>
+                <textarea id="m-weakness" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：早起きが苦手、虫、人混み"></textarea>
                 <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内</p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2592,9 +2595,9 @@
           }
         }
 
-        // 趣味のリアルタイムカウンター初期化 (プロフィール画面表示時)
+        // 趣味・特技・弱点のリアルタイムカウンター初期化 (プロフィール画面表示時)
         if (state.currentView === "user-profile") {
-          setupInterestsCounter("self-interests", "self-interests-counter");
+          setupMemberFormCounters("self");
         }
       }
 
@@ -2915,13 +2918,15 @@
 
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
-          if (row.cells.length < 7) continue;
+          if (row.cells.length < 9) continue;
 
           const name = row.cells[0].textContent.toLowerCase();
           const email = row.cells[1].textContent.toLowerCase();
           const dept = row.cells[2].textContent;
           const interests = row.cells[3].textContent.toLowerCase();
-          const considerations = row.cells[4].textContent.toLowerCase();
+          const specialty = row.cells[4].textContent.toLowerCase();
+          const weakness = row.cells[5].textContent.toLowerCase();
+          const considerations = row.cells[6].textContent.toLowerCase();
 
           const matchesSearch =
             !searchVal ||
@@ -2929,6 +2934,8 @@
             email.includes(searchVal) ||
             dept.toLowerCase().includes(searchVal) ||
             interests.includes(searchVal) ||
+            specialty.includes(searchVal) ||
+            weakness.includes(searchVal) ||
             considerations.includes(searchVal);
           
           let matchesDept = !deptVal;
@@ -2963,7 +2970,7 @@
 
             showToast(
               "ステータス更新",
-              `ステータスを「${res.nextStatus}」に変更しました。`,
+              `ステータスを「${res.nextStatus ? "アクティブ" : "非アクティブ"}」に変更しました。`,
               "success",
             );
             renderView();
@@ -3122,11 +3129,64 @@
         textarea.oninput = updateCount;
       }
 
+      /**
+       * メンバーフォーム（一般プロフィール設定 / 管理者代理登録）の趣味・特技・弱点カウンターを一括でセットアップする
+       */
+      function setupMemberFormCounters(prefix) {
+        setupInterestsCounter(`${prefix}-interests`, `${prefix}-interests-counter`);
+        setupInterestsCounter(`${prefix}-specialty`, `${prefix}-specialty-counter`);
+        setupInterestsCounter(`${prefix}-weakness`, `${prefix}-weakness-counter`);
+      }
+
+      /**
+       * 趣味・特技・弱点（Bio情報）の文字数制限（全角25文字）を一括バリデーションする
+       */
+      function validateBioLengths(interests, specialty, weakness) {
+        const limit = 25;
+        if (interests.length > limit) {
+          showToast("入力エラー", `趣味は${limit}文字以内で入力してください。`, "error");
+          return false;
+        }
+        if (specialty.length > limit) {
+          showToast("入力エラー", `特技は${limit}文字以内で入力してください。`, "error");
+          return false;
+        }
+        if (weakness.length > limit) {
+          showToast("入力エラー", `弱点は${limit}文字以内で入力してください。`, "error");
+          return false;
+        }
+        return true;
+      }
+
+      /**
+       * メンバーの詳細情報を表示する共通ポップオーバーHTMLを生成する
+       * 趣味・特技・弱点を一括でフォーマット表示する
+       */
+      function renderMemberPopoverHtml(name, dept, memberInfo, popoverAlignClass, arrowAlignClass) {
+        return `
+          <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
+          <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-56 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-1.5 text-xs text-left normal-case leading-normal font-sans">
+            <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
+              <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
+              <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
+            </div>
+            <div class="space-y-0.5">
+              <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
+              <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
+            </div>
+            <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
+          </div>
+        `;
+      }
+
       // グローバルへ公開
       window.toggleDeptOtherInput = toggleDeptOtherInput;
       window.renderDepartmentFieldHtml = renderDepartmentFieldHtml;
       window.getSelectedDepartment = getSelectedDepartment;
       window.setupInterestsCounter = setupInterestsCounter;
+      window.setupMemberFormCounters = setupMemberFormCounters;
+      window.validateBioLengths = validateBioLengths;
+      window.renderMemberPopoverHtml = renderMemberPopoverHtml;
 
       function openAddMemberModal() {
         state.editingMember = null;
@@ -3141,10 +3201,12 @@
           .getElementById("m-dept-other-container")
           .classList.add("hidden");
         document.getElementById("m-interests").value = "";
+        document.getElementById("m-specialty").value = "";
+        document.getElementById("m-weakness").value = "";
         document.getElementById("m-status").value = "true";
         document.getElementById("m-priority").checked = false; // 優先フラグリセット
 
-        setupInterestsCounter("m-interests", "m-interests-counter");
+        setupMemberFormCounters("m");
         document.getElementById("member-modal").classList.remove("hidden");
       }
 
@@ -3176,13 +3238,15 @@
             .classList.add("hidden");
         }
         document.getElementById("m-interests").value = member.interests || "";
+        document.getElementById("m-specialty").value = member.specialty || "";
+        document.getElementById("m-weakness").value = member.weakness || "";
         document.getElementById("m-status").value =
           member.status === true || member.status === "アクティブ"
             ? "true"
             : "false";
         document.getElementById("m-priority").checked = !!member.priority; // 優先フラグ反映
 
-        setupInterestsCounter("m-interests", "m-interests-counter");
+        setupMemberFormCounters("m");
         document.getElementById("member-modal").classList.remove("hidden");
       }
 
@@ -3197,6 +3261,8 @@
         const dept = getSelectedDepartment("m");
         if (dept === null) return;
         const interests = document.getElementById("m-interests").value.trim();
+        const specialty = document.getElementById("m-specialty").value.trim();
+        const weakness = document.getElementById("m-weakness").value.trim();
         const status = document.getElementById("m-status").value === "true";
         const priority = document.getElementById("m-priority").checked; // 優先フラグの取得
 
@@ -3209,16 +3275,15 @@
           return;
         }
 
-        if (interests.length > 25) {
-          showToast("入力エラー", "趣味は25文字以内で入力してください。", "error");
-          return;
-        }
+        if (!validateBioLengths(interests, specialty, weakness)) return;
 
         const memberObj = {
           name,
           email,
           department: dept,
           interests,
+          specialty,
+          weakness,
           purpose: "",
           status,
           priority,
