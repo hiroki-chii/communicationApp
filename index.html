@@ -1161,8 +1161,12 @@
 
             <!-- 趣味 -->
             <div class="space-y-1.5">
-              <label for="self-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">趣味</label>
-              <textarea id="self-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="趣味（サウナ、映画、キャンプ等）や得意技術などをご自由に！AIが共通の趣味の人とマッチングする手がかりにします。">${profile ? escapeHtml(profile.interests) : ""}</textarea>
+              <div class="flex items-center justify-between">
+                <label for="self-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">趣味</label>
+                <span id="self-interests-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
+              </div>
+              <textarea id="self-interests" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="例：サウナ、映画鑑賞、キャンプ">${profile ? escapeHtml(profile.interests) : ""}</textarea>
+              <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください（AI共通趣味マッチング用）。</p>
             </div>
 
             <!-- 配慮事項 -->
@@ -1195,6 +1199,11 @@
 
         if (!name || !department) {
           showToast("入力エラー", "名前と部署は入力必須です。", "error");
+          return;
+        }
+
+        if (interests.length > 25) {
+          showToast("入力エラー", "趣味は25文字以内で入力してください。", "error");
           return;
         }
 
@@ -2215,8 +2224,12 @@
               </div>
               ${renderDepartmentFieldHtml("m", "")}
               <div class="space-y-1">
-                <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味</label>
-                <textarea id="m-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：趣味はサウナと温泉巡りです。最近は家庭菜園を始めました。"></textarea>
+                <div class="flex items-center justify-between">
+                  <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味</label>
+                  <span id="m-interests-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
+                </div>
+                <textarea id="m-interests" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：サウナ、映画鑑賞、キャンプ"></textarea>
+                <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内</p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
@@ -2577,6 +2590,11 @@
               }
             });
           }
+        }
+
+        // 趣味のリアルタイムカウンター初期化 (プロフィール画面表示時)
+        if (state.currentView === "user-profile") {
+          setupInterestsCounter("self-interests", "self-interests-counter");
         }
       }
 
@@ -3081,10 +3099,34 @@
         return dept;
       }
 
+      // 趣味の入力カウンター制御ヘルパー
+      function setupInterestsCounter(textareaId, counterId) {
+        const textarea = document.getElementById(textareaId);
+        const counter = document.getElementById(counterId);
+        if (!textarea || !counter) return;
+
+        const updateCount = () => {
+          const len = textarea.value.length;
+          counter.textContent = `${len} / 25`;
+          if (len >= 25) {
+            counter.className = "text-[10px] font-mono font-bold text-red-500 animate-pulse-subtle";
+          } else if (len >= 20) {
+            counter.className = "text-[10px] font-mono font-semibold text-amber-500";
+          } else {
+            counter.className = "text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500";
+          }
+        };
+
+        // 初期カウントとイベント登録 (oninputで多重登録を防止)
+        updateCount();
+        textarea.oninput = updateCount;
+      }
+
       // グローバルへ公開
       window.toggleDeptOtherInput = toggleDeptOtherInput;
       window.renderDepartmentFieldHtml = renderDepartmentFieldHtml;
       window.getSelectedDepartment = getSelectedDepartment;
+      window.setupInterestsCounter = setupInterestsCounter;
 
       function openAddMemberModal() {
         state.editingMember = null;
@@ -3102,6 +3144,7 @@
         document.getElementById("m-status").value = "true";
         document.getElementById("m-priority").checked = false; // 優先フラグリセット
 
+        setupInterestsCounter("m-interests", "m-interests-counter");
         document.getElementById("member-modal").classList.remove("hidden");
       }
 
@@ -3139,6 +3182,7 @@
             : "false";
         document.getElementById("m-priority").checked = !!member.priority; // 優先フラグ反映
 
+        setupInterestsCounter("m-interests", "m-interests-counter");
         document.getElementById("member-modal").classList.remove("hidden");
       }
 
@@ -3162,6 +3206,11 @@
             "必須マーク (*) のある項目は入力必須です。",
             "error",
           );
+          return;
+        }
+
+        if (interests.length > 25) {
+          showToast("入力エラー", "趣味は25文字以内で入力してください。", "error");
           return;
         }
 
