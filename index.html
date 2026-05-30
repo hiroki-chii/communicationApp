@@ -1138,6 +1138,16 @@
 
             ${renderDepartmentFieldHtml("self", profile ? profile.department : "")}
 
+            <!-- 参加形式 -->
+            <div class="space-y-1">
+              <label for="self-participation-type" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">参加形式 <span class="text-red-500">*</span></label>
+              <select id="self-participation-type" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                <option value="対面" ${profile && profile.participationType === "対面" ? "selected" : ""}>対面</option>
+                <option value="リモート" ${profile && profile.participationType === "リモート" ? "selected" : ""}>リモート</option>
+                <option value="どちらでも" ${!profile || profile.participationType === "どちらでも" || !profile.participationType ? "selected" : ""}>どちらでも</option>
+              </select>
+            </div>
+
             <!-- 参加意思ステータス -->
             <div class="space-y-1.5">
               <label for="self-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">次回ランチ会への参加ステータス</label>
@@ -1154,7 +1164,7 @@
                 <span id="self-interests-counter" class="text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500">0 / 25</span>
               </div>
               <textarea id="self-interests" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="例：サウナ、映画鑑賞、キャンプ">${profile ? escapeHtml(profile.interests) : ""}</textarea>
-              <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください（AI共通趣味マッチング用）。</p>
+              <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
             </div>
 
             <!-- 特技 -->
@@ -1177,6 +1187,25 @@
               <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
             </div>
 
+            <!-- 価値観評価 (5項目) -->
+            <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-zinc-800/60">
+              <h4 class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1.5 select-none">
+                <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-500"></i>
+                <span>仕事・人生の価値観（５段階評価）</span>
+              </h4>
+              <p class="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed">
+                あなたの仕事や生活における重視度を1（低い）〜5（高い）で教えてください。AIが共通点や多様性を分析してマッチングに活用します。
+              </p>
+
+              <div class="space-y-4">
+                ${renderRatingRadioGroupHtml("self", "motivation", "やりがい（仕事内容・面白さ）", profile ? profile.motivation : 3, false)}
+                ${renderRatingRadioGroupHtml("self", "teamwork", "チームワーク（他者との協働）", profile ? profile.teamwork : 3, false)}
+                ${renderRatingRadioGroupHtml("self", "private", "プライベート（WLB・個人の時間）", profile ? profile.private : 3, false)}
+                ${renderRatingRadioGroupHtml("self", "evaluation", "評価（給与・対価・承認）", profile ? profile.evaluation : 3, false)}
+                ${renderRatingRadioGroupHtml("self", "growth", "成長（キャリア・スキルアップ）", profile ? profile.growth : 3, false)}
+              </div>
+            </div>
+
             <!-- 配慮事項 -->
             <div class="space-y-1.5">
               <label for="self-considerations" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">配慮事項 (任意、ない場合は空欄)</label>
@@ -1197,19 +1226,20 @@
         const name = document.getElementById("self-name").value.trim();
         const department = getSelectedDepartment("self");
         if (department === null) return;
+        const participationType = document.getElementById("self-participation-type").value;
         const interests = document
           .getElementById("self-interests")
           .value.trim();
         const specialty = document
           .getElementById("self-specialty")
           .value.trim();
-        const weakness = document
-          .getElementById("self-weakness")
-          .value.trim();
+        const weakness = document.getElementById("self-weakness").value.trim();
         const considerations = document
           .getElementById("self-considerations")
           .value.trim();
         const status = document.getElementById("self-status").value === "true";
+
+        const ratings = getValueRatings("self");
 
         if (!name || !department) {
           showToast("入力エラー", "名前と部署は入力必須です。", "error");
@@ -1221,10 +1251,15 @@
         const profileObj = {
           name,
           department,
+          participationType,
           interests,
           specialty,
           weakness,
-          purpose: "",
+          motivation: ratings.motivation,
+          teamwork: ratings.teamwork,
+          private: ratings.private,
+          evaluation: ratings.evaluation,
+          growth: ratings.growth,
           status,
           considerations,
         };
@@ -1237,12 +1272,7 @@
             state.myProfile = res.myProfile;
 
             // 登録完了後、全メンバーリストも再ロードして同期する
-            const loadRes = await callGas("getInitialData");
-            if (loadRes.success) {
-              state.members = loadRes.members;
-              state.totalCount = loadRes.totalCount;
-              state.activeCount = loadRes.activeCount;
-            }
+            await refreshStateFromServer();
 
             showToast(
               "保存成功",
@@ -1302,7 +1332,8 @@
               const dept = memberInfo.department || "他部署";
 
               // チャット画面は横幅が広く右側に十分なスペースがあるため、左側へのはみ出しを防ぐため常に左揃え（右へ展開）にする
-              const popoverAlignClass = "left-0 translate-x-0 origin-bottom-left";
+              const popoverAlignClass =
+                "left-0 translate-x-0 origin-bottom-left";
               const arrowAlignClass = "left-6 translate-x-0";
 
               return `
@@ -2064,7 +2095,7 @@
         if (state.members.length === 0) {
           memberRows = `
           <tr>
-            <td colspan="10" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
+            <td colspan="11" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
               メンバーが登録されていません。
             </td>
           </tr>
@@ -2081,6 +2112,9 @@
               <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 whitespace-nowrap" title="${escapeHtml(m.email)}">${escapeHtml(m.email)}</td>
               <td class="px-4 py-3.5 text-slate-700 dark:text-zinc-300 whitespace-nowrap">
                 <span class="px-2 py-0.5 rounded-full font-medium bg-slate-100 dark:bg-zinc-800 text-[10px]">${escapeHtml(m.department)}</span>
+              </td>
+              <td class="px-4 py-3.5 text-slate-700 dark:text-zinc-300 whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded-full font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 text-[10px]">${escapeHtml(m.participationType || "どちらでも")}</span>
               </td>
               <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests || "-")}</td>
               <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.specialty || "")}">${escapeHtml(m.specialty || "-")}</td>
@@ -2170,6 +2204,7 @@
                     <th class="px-4 py-3 whitespace-nowrap">名前</th>
                     <th class="px-4 py-3 whitespace-nowrap">メールアドレス</th>
                     <th class="px-4 py-3 whitespace-nowrap">部署</th>
+                    <th class="px-4 py-3 whitespace-nowrap">参加形式</th>
                     <th class="px-4 py-3 whitespace-nowrap">趣味</th>
                     <th class="px-4 py-3 whitespace-nowrap">特技</th>
                     <th class="px-4 py-3 whitespace-nowrap">弱点</th>
@@ -2210,6 +2245,15 @@
                 </div>
               </div>
               ${renderDepartmentFieldHtml("m", "")}
+              <!-- 参加形式 -->
+              <div class="space-y-1">
+                <label for="m-participation-type" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">参加形式 <span class="text-red-500">*</span></label>
+                <select id="m-participation-type" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                  <option value="対面">対面</option>
+                  <option value="リモート">リモート</option>
+                  <option value="どちらでも" selected>どちらでも</option>
+                </select>
+              </div>
               <div class="space-y-1">
                 <div class="flex items-center justify-between">
                   <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味</label>
@@ -2234,6 +2278,19 @@
                 <textarea id="m-weakness" rows="2" maxlength="25" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：早起きが苦手、虫、人混み"></textarea>
                 <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内</p>
               </div>
+
+              <!-- 価値観評価 (5項目) -->
+              <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60">
+                <p class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider select-none">仕事・人生の価値観（５段階評価）</p>
+                <div class="space-y-3">
+                  ${renderRatingRadioGroupHtml("m", "motivation", "やりがい", null, true)}
+                  ${renderRatingRadioGroupHtml("m", "teamwork", "チームワーク", null, true)}
+                  ${renderRatingRadioGroupHtml("m", "private", "プライベート", null, true)}
+                  ${renderRatingRadioGroupHtml("m", "evaluation", "評価", null, true)}
+                  ${renderRatingRadioGroupHtml("m", "growth", "成長", null, true)}
+                </div>
+              </div>
+
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <label for="m-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">ステータス</label>
@@ -2372,10 +2429,6 @@
 
       // --- 各画面のイベントアタッチメント ---
       function attachViewEvents() {
-        console.log(
-          "[DEBUG] attachViewEvents() を呼び出しました。現在のビュー:",
-          state.currentView,
-        );
 
         // --- ① 共通UIビュー（モバイル用管理者切り替えトグルなど）のバインディング ---
         const mobileAdminToggle = document.getElementById(
@@ -2431,34 +2484,16 @@
         const btnSaveSelfProfile = document.getElementById(
           "btn-save-self-profile",
         );
-        console.log(
-          "[DEBUG] btn-save-self-profile の要素有無:",
-          !!btnSaveSelfProfile,
-        );
         if (btnSaveSelfProfile) {
-          btnSaveSelfProfile.addEventListener("click", () => {
-            console.log(
-              "[DEBUG] btn-save-self-profile click イベント検知！ handleSaveSelfProfile() を呼び出します。",
-            );
-            handleSaveSelfProfile();
-          });
+          btnSaveSelfProfile.addEventListener("click", handleSaveSelfProfile);
         }
 
         // マッチング自動生成ボタン
         const btnGenerateMatching = document.getElementById(
           "btn-generate-matching",
         );
-        console.log(
-          "[DEBUG] btn-generate-matching の要素有無:",
-          !!btnGenerateMatching,
-        );
         if (btnGenerateMatching) {
-          btnGenerateMatching.addEventListener("click", () => {
-            console.log(
-              "[DEBUG] btn-generate-matching click イベント検知！ handleGenerateMatching() を呼び出します。",
-            );
-            handleGenerateMatching();
-          });
+          btnGenerateMatching.addEventListener("click", handleGenerateMatching);
         }
         // マッチングフォーム自体の change イベント (プロンプト表示切り替え用)
         const matchingForm = document.getElementById("matching-form");
@@ -2477,67 +2512,32 @@
 
         // メンバー追加・編集保存ボタン
         const btnSubmitMember = document.getElementById("btn-submit-member");
-        console.log("[DEBUG] btn-submit-member の要素有無:", !!btnSubmitMember);
         if (btnSubmitMember) {
-          btnSubmitMember.addEventListener("click", () => {
-            console.log(
-              "[DEBUG] btn-submit-member click イベント検知！ handleSubmitMember() を呼び出します。",
-            );
-            handleSubmitMember();
-          });
+          btnSubmitMember.addEventListener("click", handleSubmitMember);
         }
 
         // システム設定保存ボタン
         const btnSaveSettings = document.getElementById("btn-save-settings");
-        console.log("[DEBUG] btn-save-settings の要素有無:", !!btnSaveSettings);
         if (btnSaveSettings) {
-          console.log(
-            "[DEBUG] btn-save-settings に対する click イベントリスナーをバインドします。",
-          );
-          btnSaveSettings.addEventListener("click", () => {
-            console.log(
-              "[DEBUG] btn-save-settings click イベント検知！ handleSaveSettings() を呼び出します。",
-            );
-            handleSaveSettings();
-          });
+          btnSaveSettings.addEventListener("click", handleSaveSettings);
         }
 
         // APIキーの接続テストボタン
         const btnTestApiKey = document.getElementById("btn-test-api-key");
-        console.log("[DEBUG] btn-test-api-key の要素有無:", !!btnTestApiKey);
         if (btnTestApiKey) {
-          console.log(
-            "[DEBUG] btn-test-api-key に対する click イベントリスナーをバインドします。",
-          );
-          btnTestApiKey.addEventListener("click", () => {
-            console.log(
-              "[DEBUG] btn-test-api-key click イベント検知！ testApiKey() を呼び出します。",
-            );
-            testApiKey();
-          });
+          btnTestApiKey.addEventListener("click", testApiKey);
         }
 
         // マッチング履歴クリアボタン
         const btnClearHistory = document.getElementById("btn-clear-history");
         if (btnClearHistory) {
-          btnClearHistory.addEventListener("click", () => {
-            handleClearHistory();
-          });
+          btnClearHistory.addEventListener("click", handleClearHistory);
         }
 
         // データベース再初期化ボタン
         const btnReinitDb = document.getElementById("btn-reinit-db");
-        console.log("[DEBUG] btn-reinit-db の要素有無:", !!btnReinitDb);
         if (btnReinitDb) {
-          console.log(
-            "[DEBUG] btn-reinit-db に対する click イベントリスナーをバインドします。",
-          );
-          btnReinitDb.addEventListener("click", () => {
-            console.log(
-              "[DEBUG] btn-reinit-db click イベント検知！ handleReinitDb() を呼び出します。",
-            );
-            handleReinitDb();
-          });
+          btnReinitDb.addEventListener("click", handleReinitDb);
         }
 
         // --- ④-B 管理者：部署マスタ設定イベント ---
@@ -2576,10 +2576,6 @@
           state.chatInterval = setInterval(() => {
             loadChatMessages(roomId, true);
           }, 5000);
-          console.log(
-            "[DEBUG] チャット自動ポーリングを開始しました。RoomID:",
-            roomId,
-          );
 
           // 入力エリアでのEnterキー送信制御 (Ctrl+Enterで送信、Enter単体は改行)
           const chatInput = document.getElementById("chat-message-input");
@@ -2918,30 +2914,32 @@
 
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
-          if (row.cells.length < 9) continue;
+          if (row.cells.length < 10) continue;
 
           const name = row.cells[0].textContent.toLowerCase();
           const email = row.cells[1].textContent.toLowerCase();
           const dept = row.cells[2].textContent;
-          const interests = row.cells[3].textContent.toLowerCase();
-          const specialty = row.cells[4].textContent.toLowerCase();
-          const weakness = row.cells[5].textContent.toLowerCase();
-          const considerations = row.cells[6].textContent.toLowerCase();
+          const participationType = row.cells[3].textContent.toLowerCase();
+          const interests = row.cells[4].textContent.toLowerCase();
+          const specialty = row.cells[5].textContent.toLowerCase();
+          const weakness = row.cells[6].textContent.toLowerCase();
+          const considerations = row.cells[7].textContent.toLowerCase();
 
           const matchesSearch =
             !searchVal ||
             name.includes(searchVal) ||
             email.includes(searchVal) ||
             dept.toLowerCase().includes(searchVal) ||
+            participationType.includes(searchVal) ||
             interests.includes(searchVal) ||
             specialty.includes(searchVal) ||
             weakness.includes(searchVal) ||
             considerations.includes(searchVal);
-          
+
           let matchesDept = !deptVal;
           if (deptVal) {
             if (deptVal === "その他") {
-              const knownDepts = state.departments.map(d => d.name);
+              const knownDepts = state.departments.map((d) => d.name);
               matchesDept = !knownDepts.includes(dept) || dept === "その他";
             } else {
               matchesDept = dept.includes(deptVal);
@@ -3116,11 +3114,14 @@
           const len = textarea.value.length;
           counter.textContent = `${len} / 25`;
           if (len >= 25) {
-            counter.className = "text-[10px] font-mono font-bold text-red-500 animate-pulse-subtle";
+            counter.className =
+              "text-[10px] font-mono font-bold text-red-500 animate-pulse-subtle";
           } else if (len >= 20) {
-            counter.className = "text-[10px] font-mono font-semibold text-amber-500";
+            counter.className =
+              "text-[10px] font-mono font-semibold text-amber-500";
           } else {
-            counter.className = "text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500";
+            counter.className =
+              "text-[10px] font-mono font-medium text-slate-400 dark:text-zinc-500";
           }
         };
 
@@ -3133,9 +3134,18 @@
        * メンバーフォーム（一般プロフィール設定 / 管理者代理登録）の趣味・特技・弱点カウンターを一括でセットアップする
        */
       function setupMemberFormCounters(prefix) {
-        setupInterestsCounter(`${prefix}-interests`, `${prefix}-interests-counter`);
-        setupInterestsCounter(`${prefix}-specialty`, `${prefix}-specialty-counter`);
-        setupInterestsCounter(`${prefix}-weakness`, `${prefix}-weakness-counter`);
+        setupInterestsCounter(
+          `${prefix}-interests`,
+          `${prefix}-interests-counter`,
+        );
+        setupInterestsCounter(
+          `${prefix}-specialty`,
+          `${prefix}-specialty-counter`,
+        );
+        setupInterestsCounter(
+          `${prefix}-weakness`,
+          `${prefix}-weakness-counter`,
+        );
       }
 
       /**
@@ -3144,15 +3154,27 @@
       function validateBioLengths(interests, specialty, weakness) {
         const limit = 25;
         if (interests.length > limit) {
-          showToast("入力エラー", `趣味は${limit}文字以内で入力してください。`, "error");
+          showToast(
+            "入力エラー",
+            `趣味は${limit}文字以内で入力してください。`,
+            "error",
+          );
           return false;
         }
         if (specialty.length > limit) {
-          showToast("入力エラー", `特技は${limit}文字以内で入力してください。`, "error");
+          showToast(
+            "入力エラー",
+            `特技は${limit}文字以内で入力してください。`,
+            "error",
+          );
           return false;
         }
         if (weakness.length > limit) {
-          showToast("入力エラー", `弱点は${limit}文字以内で入力してください。`, "error");
+          showToast(
+            "入力エラー",
+            `弱点は${limit}文字以内で入力してください。`,
+            "error",
+          );
           return false;
         }
         return true;
@@ -3162,7 +3184,13 @@
        * メンバーの詳細情報を表示する共通ポップオーバーHTMLを生成する
        * 趣味・特技・弱点を一括でフォーマット表示する
        */
-      function renderMemberPopoverHtml(name, dept, memberInfo, popoverAlignClass, arrowAlignClass) {
+      function renderMemberPopoverHtml(
+        name,
+        dept,
+        memberInfo,
+        popoverAlignClass,
+        arrowAlignClass,
+      ) {
         return `
           <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
           <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-56 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-1.5 text-xs text-left normal-case leading-normal font-sans">
@@ -3172,11 +3200,107 @@
             </div>
             <div class="space-y-0.5">
               <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
-              <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
+              <p class="text-slate-650 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
             </div>
             <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
           </div>
         `;
+      }
+
+      /**
+       * 仕事・人生の価値観（5項目）のラジオボタン選択値を取得する共通ヘルパー
+       */
+      function getValueRatings(prefix) {
+        return {
+          motivation: parseInt(document.querySelector(`input[name="${prefix}-motivation"]:checked`)?.value || "3", 10),
+          teamwork: parseInt(document.querySelector(`input[name="${prefix}-teamwork"]:checked`)?.value || "3", 10),
+          private: parseInt(document.querySelector(`input[name="${prefix}-private"]:checked`)?.value || "3", 10),
+          evaluation: parseInt(document.querySelector(`input[name="${prefix}-evaluation"]:checked`)?.value || "3", 10),
+          growth: parseInt(document.querySelector(`input[name="${prefix}-growth"]:checked`)?.value || "3", 10)
+        };
+      }
+
+      /**
+       * 仕事・人生の価値観ラジオボタンをデフォルト値にリセットする共通ヘルパー
+       */
+      function resetValueRatingsRadios(prefix, defaultVal = 3) {
+        const keys = ["motivation", "teamwork", "private", "evaluation", "growth"];
+        keys.forEach(k => {
+          const radios = document.getElementsByName(`${prefix}-${k}`);
+          radios.forEach(r => {
+            r.checked = Number(r.value) === defaultVal;
+          });
+        });
+      }
+
+      /**
+       * 仕事・人生の価値観ラジオボタンにデータを反映（セット）する共通ヘルパー
+       */
+      function setValueRatingsRadios(prefix, ratingsObj) {
+        const keys = ["motivation", "teamwork", "private", "evaluation", "growth"];
+        keys.forEach(k => {
+          const targetVal = Number(ratingsObj ? ratingsObj[k] : null) || 3;
+          const radios = document.getElementsByName(`${prefix}-${k}`);
+          radios.forEach(r => {
+            r.checked = Number(r.value) === targetVal;
+          });
+        });
+      }
+
+      // 価値観の5段階評価ラジオボタンHTMLを生成する共通ヘルパー
+      function renderRatingRadioGroupHtml(prefix, name, label, currentValue, isCompact = false) {
+        const val = Number(currentValue) || 3;
+        const labelClass = isCompact 
+          ? "text-[11px] font-semibold text-slate-600 dark:text-zinc-400 w-24 shrink-0"
+          : "text-[11px] font-semibold text-slate-600 dark:text-zinc-400 sm:w-44 shrink-0";
+        
+        let html = `
+          <div class="flex flex-col sm:flex-row sm:items-center ${isCompact ? 'space-y-1 sm:space-y-0' : 'space-y-2 sm:space-y-0'} py-1">
+            <span class="${labelClass}">${escapeHtml(label)}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] text-slate-400 dark:text-zinc-500">1 (低い)</span>
+              <div class="flex items-center gap-3">
+        `;
+        
+        for (let i = 1; i <= 5; i++) {
+          const checked = val === i ? "checked" : "";
+          html += `
+            <label class="flex items-center gap-1 cursor-pointer select-none">
+              <input type="radio" name="${prefix}-${name}" value="${i}" ${checked} class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-500 border-slate-300 dark:border-zinc-700 focus:ring-indigo-500 bg-white dark:bg-zinc-950">
+              <span class="text-xs text-slate-600 dark:text-zinc-400 font-semibold font-mono">${i}</span>
+            </label>
+          `;
+        }
+        
+        html += `
+              </div>
+              <span class="text-[10px] text-slate-400 dark:text-zinc-500">5 (高い)</span>
+            </div>
+          </div>
+        `;
+        return html;
+      }
+
+      // サーバーサイドデータを再取得し、画面を同期描画する共通ヘルパー
+      async function refreshStateFromServer() {
+        try {
+          const res = await callGas("getInitialData");
+          if (res.success) {
+            state.members = res.members || [];
+            state.totalCount = res.totalCount || 0;
+            state.activeCount = res.activeCount || 0;
+            state.departments = res.departments || [];
+            state.settings = res.settings || {};
+            state.hasApiKey = res.hasApiKey || false;
+            state.isAdmin = res.isAdmin || false;
+            state.currentUserEmail = res.currentUserEmail || "";
+            state.myProfile = res.myProfile || null;
+            state.history = res.history || [];
+          }
+          renderView();
+        } catch (e) {
+          showToast("同期エラー", "サーバーデータの再取得に失敗しました：" + e.toString(), "error");
+        }
       }
 
       // グローバルへ公開
@@ -3187,6 +3311,11 @@
       window.setupMemberFormCounters = setupMemberFormCounters;
       window.validateBioLengths = validateBioLengths;
       window.renderMemberPopoverHtml = renderMemberPopoverHtml;
+      window.getValueRatings = getValueRatings;
+      window.resetValueRatingsRadios = resetValueRatingsRadios;
+      window.setValueRatingsRadios = setValueRatingsRadios;
+      window.renderRatingRadioGroupHtml = renderRatingRadioGroupHtml;
+      window.refreshStateFromServer = refreshStateFromServer;
 
       function openAddMemberModal() {
         state.editingMember = null;
@@ -3200,9 +3329,14 @@
         document
           .getElementById("m-dept-other-container")
           .classList.add("hidden");
+        document.getElementById("m-participation-type").value = "どちらでも";
         document.getElementById("m-interests").value = "";
         document.getElementById("m-specialty").value = "";
         document.getElementById("m-weakness").value = "";
+
+        // 共通ヘルパーを使用して価値観ラジオボタンを初期化 (デフォルト3)
+        resetValueRatingsRadios("m");
+
         document.getElementById("m-status").value = "true";
         document.getElementById("m-priority").checked = false; // 優先フラグリセット
 
@@ -3237,9 +3371,14 @@
             .getElementById("m-dept-other-container")
             .classList.add("hidden");
         }
+        document.getElementById("m-participation-type").value = member.participationType || "どちらでも";
         document.getElementById("m-interests").value = member.interests || "";
         document.getElementById("m-specialty").value = member.specialty || "";
         document.getElementById("m-weakness").value = member.weakness || "";
+
+        // 共通ヘルパーを使用して価値観ラジオボタンの反映
+        setValueRatingsRadios("m", member);
+
         document.getElementById("m-status").value =
           member.status === true || member.status === "アクティブ"
             ? "true"
@@ -3260,9 +3399,14 @@
         const email = document.getElementById("m-email").value.trim();
         const dept = getSelectedDepartment("m");
         if (dept === null) return;
+        const participationType = document.getElementById("m-participation-type").value;
         const interests = document.getElementById("m-interests").value.trim();
         const specialty = document.getElementById("m-specialty").value.trim();
         const weakness = document.getElementById("m-weakness").value.trim();
+
+        // 共通ヘルパーを使用して価値観ラジオボタンの取得 (未選択時はデフォルト3)
+        const ratings = getValueRatings("m");
+
         const status = document.getElementById("m-status").value === "true";
         const priority = document.getElementById("m-priority").checked; // 優先フラグの取得
 
@@ -3281,9 +3425,15 @@
           name,
           email,
           department: dept,
+          participationType,
           interests,
           specialty,
           weakness,
+          motivation: ratings.motivation,
+          teamwork: ratings.teamwork,
+          private: ratings.private,
+          evaluation: ratings.evaluation,
+          growth: ratings.growth,
           purpose: "",
           status,
           priority,
@@ -3308,13 +3458,7 @@
               "success",
             );
 
-            const loadRes = await callGas("getInitialData");
-            if (loadRes.success) {
-              state.members = loadRes.members;
-              state.totalCount = loadRes.totalCount;
-              state.activeCount = loadRes.activeCount;
-            }
-            renderView();
+            await refreshStateFromServer();
           } else {
             showToast(
               "保存エラー",
@@ -3346,13 +3490,7 @@
             if (res.success) {
               showToast("削除完了", "メンバーを削除しました。", "success");
 
-              const loadRes = await callGas("getInitialData");
-              if (loadRes.success) {
-                state.members = loadRes.members;
-                state.totalCount = loadRes.totalCount;
-                state.activeCount = loadRes.activeCount;
-              }
-              renderView();
+              await refreshStateFromServer();
             } else {
               showToast(
                 "削除エラー",
@@ -3517,7 +3655,9 @@
         if (!container) return;
 
         // 「その他」という部署名を除いた部署一覧で描画する
-        const displayDepts = state.departments.filter(d => d.name !== "その他");
+        const displayDepts = state.departments.filter(
+          (d) => d.name !== "その他",
+        );
 
         if (displayDepts.length === 0) {
           container.innerHTML = `<p class="p-4 text-xs text-slate-400 dark:text-zinc-500 italic text-center">登録されている部署はありません。</p>`;
@@ -3554,31 +3694,51 @@
           return;
         }
 
-        showToast("追加中", "新しい部署を部署マスタに追加しています...", "warning");
+        showToast(
+          "追加中",
+          "新しい部署を部署マスタに追加しています...",
+          "warning",
+        );
 
         try {
           const res = await callGas("addDepartment", deptName);
           if (res.success) {
             input.value = "";
             state.departments = res.departments || [];
-            showToast("追加完了", `「${deptName}」を部署マスタに追加しました。`, "success");
-            
+            showToast(
+              "追加完了",
+              `「${deptName}」を部署マスタに追加しました。`,
+              "success",
+            );
+
             // リストを再描画
             renderSettingsDeptList();
           } else {
-            showToast("追加エラー", res.error || "部署の追加に失敗しました。", "error");
+            showToast(
+              "追加エラー",
+              res.error || "部署の追加に失敗しました。",
+              "error",
+            );
           }
         } catch (e) {
-          showToast("エラー", "通信中に例外が発生しました：" + e.toString(), "error");
+          showToast(
+            "エラー",
+            "通信中に例外が発生しました：" + e.toString(),
+            "error",
+          );
         }
       }
 
       // 部署を削除する
       async function handleDeleteDept(deptId) {
-        const dept = state.departments.find(d => d.id === deptId);
+        const dept = state.departments.find((d) => d.id === deptId);
         if (!dept) return;
 
-        if (!confirm(`【部署の削除確認】\n部署「${dept.name}」を部署マスタから削除しますか？\n※既にこの部署に所属しているメンバーがいる場合、表示やマッチング時に「その他」扱いとなる可能性があります。`)) {
+        if (
+          !confirm(
+            `【部署の削除確認】\n部署「${dept.name}」を部署マスタから削除しますか？\n※既にこの部署に所属しているメンバーがいる場合、表示やマッチング時に「その他」扱いとなる可能性があります。`,
+          )
+        ) {
           return;
         }
 
@@ -3589,14 +3749,22 @@
           if (res.success) {
             state.departments = res.departments || [];
             showToast("削除完了", `部署を正常に削除しました。`, "success");
-            
+
             // リストを再描画
             renderSettingsDeptList();
           } else {
-            showToast("削除エラー", res.error || "部署の削除に失敗しました。", "error");
+            showToast(
+              "削除エラー",
+              res.error || "部署の削除に失敗しました。",
+              "error",
+            );
           }
         } catch (e) {
-          showToast("エラー", "通信中に例外が発生しました：" + e.toString(), "error");
+          showToast(
+            "エラー",
+            "通信中に例外が発生しました：" + e.toString(),
+            "error",
+          );
         }
       }
 
@@ -3672,14 +3840,17 @@
                 memo: "異なる部署で共通の趣味（サウナ）があるメンバーをマッチングしました。",
               },
             ],
-            departments: state.departments.length > 0 ? state.departments : [
-              { id: "D001", name: "管理室" },
-              { id: "D002", name: "BPO統括部" },
-              { id: "D003", name: "東京統括部" },
-              { id: "D004", name: "ST開発部" },
-              { id: "D005", name: "営業統括部" },
-              { id: "D006", name: "印刷統括部" }
-            ],
+            departments:
+              state.departments.length > 0
+                ? state.departments
+                : [
+                    { id: "D001", name: "管理室" },
+                    { id: "D002", name: "BPO統括部" },
+                    { id: "D003", name: "東京統括部" },
+                    { id: "D004", name: "ST開発部" },
+                    { id: "D005", name: "営業統括部" },
+                    { id: "D006", name: "印刷統括部" },
+                  ],
             totalCount: 3,
             activeCount: 3,
             hasApiKey: false,
@@ -3774,7 +3945,7 @@
               { id: "D003", name: "東京統括部" },
               { id: "D004", name: "ST開発部" },
               { id: "D005", name: "営業統括部" },
-              { id: "D006", name: "印刷統括部" }
+              { id: "D006", name: "印刷統括部" },
             ];
           }
           const newDept = {
@@ -3798,10 +3969,10 @@
               { id: "D003", name: "東京統括部" },
               { id: "D004", name: "ST開発部" },
               { id: "D005", name: "営業統括部" },
-              { id: "D006", name: "印刷統括部" }
+              { id: "D006", name: "印刷統括部" },
             ];
           }
-          state.departments = state.departments.filter(d => d.id !== args[0]);
+          state.departments = state.departments.filter((d) => d.id !== args[0]);
 
           return {
             success: true,

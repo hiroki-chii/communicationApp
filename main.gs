@@ -195,185 +195,131 @@ function initDatabase() {
   let memberSheet = ss.getSheetByName("メンバー一覧");
   let isNewMemberSheet = false;
   
+  const targetHeaders = [
+    "メンバーID", "名前", "メールアドレス", "部署・チーム", "参加形式", "趣味", "特技", "弱点", "やりがい", "チームワーク", "プライベート", "評価", "成長", "配慮事項", "ステータス", "次回優先"
+  ];
+
   if (!memberSheet) {
     memberSheet = ss.insertSheet("メンバー一覧");
-    memberSheet.appendRow([
-      "メンバーID",
-      "名前",
-      "メールアドレス",
-      "部署・チーム",
-      "趣味",
-      "特技",
-      "弱点",
-      "配慮事項",
-      "ステータス",
-      "次回優先",
-    ]);
-    memberSheet.getRange("A1:J1").setBackground("#f1f5f9").setFontWeight("bold");
+    memberSheet.appendRow(targetHeaders);
+    memberSheet.getRange("A1:P1").setBackground("#f1f5f9").setFontWeight("bold");
     isNewMemberSheet = true;
   } else {
-    // 既存シートのヘッダー取得とマイグレーション
-    let headers = memberSheet.getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 10)).getValues()[0];
+    // 既存シートのヘッダー取得と安全なリビルド・マイグレーション
+    const lastCol = memberSheet.getLastColumn();
+    const lastRow = memberSheet.getLastRow();
+    let headers = lastCol > 0 ? memberSheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
 
-    // 旧趣味ヘッダー（「趣味・自己紹介・興味のあること」「趣味・自己紹介」等）の自動移行
-    const legacyHobbyHeaders = ["趣味・自己紹介・興味のあること", "趣味・自己紹介"];
-    let headerUpdated = false;
-    legacyHobbyHeaders.forEach(oldHeader => {
-      const idx = headers.indexOf(oldHeader);
-      if (idx !== -1) {
-        memberSheet.getRange(1, idx + 1).setValue("趣味");
-        headerUpdated = true;
+    // ヘッダーが完全に正しい順番かつ16列であるかチェックする
+    let needsMigration = false;
+    if (headers.length !== targetHeaders.length) {
+      needsMigration = true;
+    } else {
+      for (let i = 0; i < targetHeaders.length; i++) {
+        if (headers[i] !== targetHeaders[i]) {
+          needsMigration = true;
+          break;
+        }
       }
-    });
-
-    if (headerUpdated) {
-      headers = memberSheet.getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 10)).getValues()[0];
     }
 
-    // 「参加目的」列の自動削除
-    const purposeColIdx = headers.indexOf("参加目的");
-    if (purposeColIdx !== -1) {
-      memberSheet.deleteColumn(purposeColIdx + 1);
-      headers = memberSheet.getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 10)).getValues()[0];
+    // 「参加目的」列の存在チェック（旧仕様の遺物）
+    if (headers.indexOf("参加目的") !== -1) {
+      needsMigration = true;
     }
 
-    // --- 「特技」「弱点」列の挿入 ---
-    // 「特技」がなければ挿入
-    let specialtyIdx = headers.indexOf("特技");
-    if (specialtyIdx === -1) {
-      // 趣味（E列/5列目）の次に挿入する
-      const hobbyIdx = headers.indexOf("趣味") + 1; // 1-indexed
-      memberSheet.insertColumnAfter(hobbyIdx);
-      memberSheet.getRange(1, hobbyIdx + 1).setValue("特技");
-      memberSheet.getRange(1, hobbyIdx + 1).setBackground("#f1f5f9").setFontWeight("bold");
-      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-    }
-    
-    // 「弱点」がなければ挿入
-    let weaknessIdx = headers.indexOf("弱点");
-    if (weaknessIdx === -1) {
-      // 特技の次に挿入する
-      const specialtyIdx2 = headers.indexOf("特技") + 1; // 1-indexed
-      memberSheet.insertColumnAfter(specialtyIdx2);
-      memberSheet.getRange(1, specialtyIdx2 + 1).setValue("弱点");
-      memberSheet.getRange(1, specialtyIdx2 + 1).setBackground("#f1f5f9").setFontWeight("bold");
-      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-    }
+    if (needsMigration && lastRow >= 1) {
+      Logger.log("メンバー一覧シートの列ズレ・未移行ヘッダーを検出しました。安全なリビルドマイグレーションを実行します。");
+      const fullData = memberSheet.getDataRange().getValues();
+      const currentHeaders = fullData[0];
+      const headerMap = {};
+      currentHeaders.forEach((h, idx) => {
+        if (h) headerMap[h] = idx;
+      });
 
-    // 「配慮事項」列の位置自動調整 (H列 / 8列目にあるべき)
-    const considerationsIndex = headers.indexOf("配慮事項");
-    if (considerationsIndex === -1) {
-      memberSheet.insertColumnAfter(7); // 7列目（弱点）の後ろ（8列目）に空列を挿入
-      memberSheet.getRange(1, 8).setValue("配慮事項");
-      memberSheet.getRange("H1").setBackground("#f1f5f9").setFontWeight("bold");
-    } else if (considerationsIndex !== 7) { // 0-indexed で 7 = 8列目
-      memberSheet.insertColumnAfter(7); // 正しい位置へ退避用の空列を挿入
-      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-      const oldColIdx = headers.indexOf("配慮事項") + 1;
+      // 新しい正しい並びの二次元配列を構築
+      const newValues = fullData.map((row, rIdx) => {
+        if (rIdx === 0) return targetHeaders; // 1行目は正しいヘッダー
+        
+        return targetHeaders.map(h => {
+          const oldIdx = headerMap[h];
+          if (oldIdx !== undefined) {
+            let val = row[oldIdx];
+            
+            // ５つの価値観評価項目は数値型(1〜5)へ変換し、チェックボックスなどの誤った型を排除
+            if (["やりがい", "チームワーク", "プライベート", "評価", "成長"].includes(h)) {
+              if (typeof val === "boolean") return 3; // ブーリアン型（誤ったチェックボックス）はデフォルト3
+              const num = Number(val);
+              return isNaN(num) || val === "" ? 3 : num;
+            }
+            // ステータスはブーリアン型へ
+            if (h === "ステータス") {
+              return val === true || val === "true" || val === "アクティブ" || val === "TRUE";
+            }
+            // 次回優先はブーリアン型へ
+            if (h === "次回優先") {
+              return val === true || val === "true" || val === "TRUE";
+            }
+            return val;
+          } else {
+            // 存在しなかった列はデフォルト値
+            if (h === "参加形式") return "どちらでも";
+            if (["やりがい", "チームワーク", "プライベート", "評価", "成長"].includes(h)) return 3;
+            if (h === "ステータス") return true;
+            if (h === "次回優先") return false;
+            return "";
+          }
+        });
+      });
 
-      const lastRow = memberSheet.getLastRow();
-      if (lastRow > 1) {
-        const oldRange = memberSheet.getRange(2, oldColIdx, lastRow - 1, 1);
-        const newRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
-        oldRange.copyTo(newRange);
+      // 既存のシートデータと「データ検証ルール（チェックボックス等）」を完全に初期化
+      memberSheet.clearContents();
+      memberSheet.getRange(1, 1, Math.max(lastRow, 2), Math.max(lastCol, 16)).clearDataValidations();
+
+      // 正しいサイズに調整した範囲に上書き書き込み
+      memberSheet.getRange(1, 1, newValues.length, 16).setValues(newValues);
+      
+      // 不要な余剰列を削除してぴったり16列に整える
+      const currentCols = memberSheet.getLastColumn();
+      if (currentCols > 16) {
+        memberSheet.deleteColumns(17, currentCols - 16);
       }
-
-      memberSheet.getRange(1, 8).setValue("配慮事項");
-      memberSheet.getRange("H1").setBackground("#f1f5f9").setFontWeight("bold");
-      memberSheet.deleteColumn(oldColIdx); // 旧列の物理削除
     }
-
-    // 「ステータス」および「次回優先」の位置自動調整 (I列 / 9列目 と J列 / 10列目)
-    headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-    const statusIndex = headers.indexOf("ステータス");
-    if (statusIndex === -1) {
-      memberSheet.insertColumnAfter(8);
-      memberSheet.getRange(1, 9).setValue("ステータス");
-      memberSheet.getRange("I1").setBackground("#f1f5f9").setFontWeight("bold");
-    } else if (statusIndex !== 8) {
-      memberSheet.insertColumnAfter(8);
-      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-      const oldColIdx = headers.indexOf("ステータス") + 1;
-      const lastRow = memberSheet.getLastRow();
-      if (lastRow > 1) {
-        const oldRange = memberSheet.getRange(2, oldColIdx, lastRow - 1, 1);
-        const newRange = memberSheet.getRange(2, 9, lastRow - 1, 1);
-        oldRange.copyTo(newRange);
-      }
-      memberSheet.getRange(1, 9).setValue("ステータス");
-      memberSheet.getRange("I1").setBackground("#f1f5f9").setFontWeight("bold");
-      memberSheet.deleteColumn(oldColIdx);
-    }
-
-    headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-    const priorityIndex = headers.indexOf("次回優先");
-    if (priorityIndex === -1) {
-      memberSheet.insertColumnAfter(9);
-      memberSheet.getRange(1, 10).setValue("次回優先");
-      memberSheet.getRange("J1").setBackground("#f1f5f9").setFontWeight("bold");
-    } else if (priorityIndex !== 9) {
-      memberSheet.insertColumnAfter(9);
-      headers = memberSheet.getRange(1, 1, 1, memberSheet.getLastColumn()).getValues()[0];
-      const oldColIdx = headers.indexOf("次回優先") + 1;
-      const lastRow = memberSheet.getLastRow();
-      if (lastRow > 1) {
-        const oldRange = memberSheet.getRange(2, oldColIdx, lastRow - 1, 1);
-        const newRange = memberSheet.getRange(2, 10, lastRow - 1, 1);
-        oldRange.copyTo(newRange);
-      }
-      memberSheet.getRange(1, 10).setValue("次回優先");
-      memberSheet.getRange("J1").setBackground("#f1f5f9").setFontWeight("bold");
-      memberSheet.deleteColumn(oldColIdx);
-    }
+    memberSheet.getRange("A1:P1").setBackground("#f1f5f9").setFontWeight("bold");
   }
 
-  // ステータス列（9列目: I列）のブーリアン移行とチェックボックスマイグレーション
+  // ブーリアン型データのチェックボックス挿入と古いゴミ検証ルールの再整備
   if (memberSheet) {
     const lastRow = memberSheet.getLastRow();
     if (lastRow > 1) {
-      const statusRange = memberSheet.getRange(2, 9, lastRow - 1, 1);
-      const statusValues = statusRange.getValues();
-      let dataChanged = false;
+      // 念のためK〜O列に誤ってチェックボックスが残らないよう、O・P列以外はクレンジング
+      memberSheet.getRange(2, 9, lastRow - 1, 5).clearDataValidations();
       
-      for (let i = 0; i < statusValues.length; i++) {
-        const val = statusValues[i][0];
-        if (typeof val === "boolean") continue; // すでにブーリアン変換済みの場合は無視
-        
-        if (val === "アクティブ" || val === "TRUE" || val === "true") {
-          statusValues[i][0] = true;
-          dataChanged = true;
-        } else if (val === "非アクティブ" || val === "FALSE" || val === "false" || val === "") {
-          statusValues[i][0] = false;
-          dataChanged = true;
-        }
-      }
-      
-      if (dataChanged) {
-        statusRange.setValues(statusValues);
-      }
-      statusRange.insertCheckboxes();
+      // 正しい列（15列目: O列＝ステータス、16列目: P列＝次回優先）にのみチェックボックスをバインド
+      memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
+      memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
     }
   }
 
   // デモデータの自動挿入（シートが新規作成されたか空の場合）
   if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
     const demoMembers = [
-      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "DIY", "早起き", "", true, false],
-      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "ヨガ", "方向音痴", "", true, false],
-      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "コーヒー焙煎", "人混み", "", true, false],
-      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "トレンド分析", "虫", "", true, false],
-      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "ゴルフ", "低血圧", "", true, false],
-      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "カレー作り", "ホラー映画", "", true, false],
-      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "カメラ撮影", "片付け", "", true, false],
-      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "アロマテラピー", "絶叫マシン", "", true, false],
-      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "BBQ", "機械オンチ", "", true, false],
-      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "筋トレ", "甘いもの", "", true, false],
-      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "謎解き", "球技", "", true, false],
-      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "スタートアップ研究", "計算", "", true, false],
-      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "イラスト作成", "人前でのスピーチ", "", true, false],
-      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "キャンプ", "英語", "", true, false],
-      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "激辛グルメ", "寒さ", "", true, false],
-      ["M016", "斎藤翼", "saito.t@example.com", "開発部", "自動テスト、バグハント。趣味はランニングと麻雀です。", "麻雀", "朝に弱い", "", true, false],
+      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "対面", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "DIY", "早起き", 4, 3, 3, 5, 4, "", true, false],
+      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "リモート", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "ヨガ", "方向音痴", 3, 5, 4, 3, 3, "", true, false],
+      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "どちらでも", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "コーヒー焙煎", "人混み", 4, 4, 3, 4, 5, "", true, false],
+      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "対面", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "トレンド分析", "虫", 4, 3, 4, 4, 4, "", true, false],
+      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "リモート", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "ゴルフ", "低血圧", 3, 4, 5, 4, 3, "", true, false],
+      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "どちらでも", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "カレー作り", "ホラー映画", 5, 3, 4, 3, 3, "", true, false],
+      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "対面", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "カメラ撮影", "片付け", 4, 4, 3, 3, 4, "", true, false],
+      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "リモート", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "アロマテラピー", "絶叫マシン", 3, 3, 4, 5, 4, "", true, false],
+      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "どちらでも", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "BBQ", "機械オンチ", 5, 4, 4, 3, 4, "", true, false],
+      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "対面", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "筋トレ", "甘いもの", 3, 5, 3, 4, 4, "", true, false],
+      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "リモート", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "謎解き", "球技", 4, 3, 3, 4, 5, "", true, false],
+      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "どちらでも", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "スタートアップ研究", "計算", 5, 3, 4, 4, 5, "", true, false],
+      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "対面", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "イラスト作成", "人前でのスピーチ", 4, 4, 4, 3, 4, "", true, false],
+      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "リモート", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "キャンプ", "英語", 4, 5, 3, 3, 4, "", true, false],
+      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "どちらでも", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "激辛グルメ", "寒さ", 3, 3, 5, 4, 3, "", true, false],
+      ["M016", "斎藤翼", "saito.t@example.com", "開発部", "対面", "自動テスト、バグハント。趣味はランニングと麻雀です。", "麻雀", "朝に弱い", 4, 4, 3, 4, 4, "", true, false],
     ];
 
     demoMembers.forEach(member => memberSheet.appendRow(member));
@@ -381,10 +327,10 @@ function initDatabase() {
     // チェックボックスの確実な挿入
     const lastRow = memberSheet.getLastRow();
     if (lastRow > 1) {
-      memberSheet.getRange(2, 9, lastRow - 1, 1).insertCheckboxes();
-      memberSheet.getRange(2, 10, lastRow - 1, 1).insertCheckboxes();
+      memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
+      memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
     }
-    memberSheet.autoResizeColumns(1, 10);
+    memberSheet.autoResizeColumns(1, 16);
   }
 
   // 4. 「マッチング履歴」シートの初期化
@@ -647,7 +593,7 @@ function getMembers() {
   if (lastRow <= 1) return [];
 
   const lastCol = sheet.getLastColumn();
-  const colCount = Math.max(lastCol, 10); // 10列目（次回優先）まで安全に取得する
+  const colCount = Math.max(lastCol, 16); // 16列目（次回優先）まで安全に取得する
   const data = sheet.getRange(2, 1, lastRow - 1, colCount).getValues();
  
   return data.map(row => ({
@@ -655,12 +601,18 @@ function getMembers() {
     name: row[1],
     email: row[2],
     department: row[3],
-    interests: row[4],
-    specialty: row[5] || "",
-    weakness: row[6] || "",
-    considerations: row[7] || "",
-    status: row[8] === true || row[8] === "アクティブ", // 9列目 (I列)
-    priority: !!row[9], // 10列目 (J列)
+    participationType: row[4] || "どちらでも", // 参加形式 (5列目)
+    interests: row[5],
+    specialty: row[6] || "",
+    weakness: row[7] || "",
+    motivation: Number(row[8]) || 3, // やりがい (デフォルト3)
+    teamwork: Number(row[9]) || 3,   // チームワーク
+    private: Number(row[10]) || 3,    // プライベート
+    evaluation: Number(row[11]) || 3,// 評価
+    growth: Number(row[12]) || 3,    // 成長
+    considerations: row[13] || "",   // 配慮事項 (14列目)
+    status: row[14] === true || row[14] === "アクティブ", // 15列目 (O列)
+    priority: !!row[15], // 16列目 (P列)
   }));
 }
 
@@ -794,6 +746,52 @@ function addMember(memberObj) {
 }
 
 /**
+ * メンバー一覧シートから指定IDのデータ行番号（2始まり）を検索する共通ヘルパー。
+ * 全てのメンバー操作関数（更新・削除・トグル）で共通利用し、行検索の重複コードを排除する。
+ * 
+ * @param {Sheet} sheet メンバー一覧シートオブジェクト
+ * @param {string} memberId 検索対象のメンバーID
+ * @return {number} データ行番号（2始まり）。見つからない場合は -1
+ */
+function findMemberRowIndex(sheet, memberId) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return -1;
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+  const index = ids.indexOf(memberId);
+  return index === -1 ? -1 : index + 2;
+}
+
+/**
+ * メンバーオブジェクトからスプレッドシートの1行分の値配列（16列）を構築する共通ヘルパー。
+ * 追加（addMemberToSheet）と更新（updateMemberInSheet）で行データ構築ロジックの重複を排除する。
+ * 
+ * @param {string} id メンバーID
+ * @param {Object} obj メンバー情報オブジェクト
+ * @return {Array} スプレッドシートの1行分の値配列（16列）
+ */
+function buildMemberRow(id, obj) {
+  return [
+    id,
+    obj.name || "",
+    obj.email || "",
+    obj.department || "",
+    obj.participationType || "どちらでも",
+    obj.interests || "",
+    obj.specialty || "",
+    obj.weakness || "",
+    Number(obj.motivation) || 3,
+    Number(obj.teamwork) || 3,
+    Number(obj.private) || 3,
+    Number(obj.evaluation) || 3,
+    Number(obj.growth) || 3,
+    obj.considerations || "",
+    obj.status !== false,
+    !!obj.priority,
+  ];
+}
+
+/**
  * メンバー一覧シートにメンバー行を実際に追加する。
  * 
  * @param {Object} memberObj 追加するメンバー情報
@@ -807,30 +805,16 @@ function addMemberToSheet(memberObj) {
   }
 
   const newId = getNextId(sheet, "M", /^M(\d+)$/);
-  const statusVal = memberObj.status !== false;
-  const priorityVal = !!memberObj.priority;
-
-  const newRow = [
-    newId,
-    memberObj.name || "",
-    memberObj.email || "",
-    memberObj.department || "",
-    memberObj.interests || "",
-    memberObj.specialty || "",   // 特技
-    memberObj.weakness || "",    // 弱点
-    memberObj.considerations || "",
-    statusVal,   // 9列目
-    priorityVal, // 10列目
-  ];
+  const newRow = buildMemberRow(newId, memberObj);
 
   sheet.appendRow(newRow);
 
-  // チェックボックスを正しく挿入して値を同期
+  // チェックボックスを正しく挿入して値を同期（buildMemberRowで生成済みの値を再利用）
   const targetRow = sheet.getLastRow();
-  sheet.getRange(targetRow, 9).insertCheckboxes().setValue(statusVal);
-  sheet.getRange(targetRow, 10).insertCheckboxes().setValue(priorityVal);
+  sheet.getRange(targetRow, 15).insertCheckboxes().setValue(newRow[14]); // ステータス
+  sheet.getRange(targetRow, 16).insertCheckboxes().setValue(newRow[15]); // 次回優先
 
-  sheet.autoResizeColumns(1, 10);
+  sheet.autoResizeColumns(1, 16);
 
   return {
     success: true,
@@ -867,32 +851,13 @@ function updateMemberInSheet(memberObj) {
     return { success: false, error: "メンバー一覧シートが見つかりません。" };
   }
 
-  const lastRow = sheet.getLastRow();
-  if (lastRow <= 1) {
-    return { success: false, error: "メンバーデータが存在しません。" };
-  }
-
-  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
-  const rowIndex = ids.indexOf(memberObj.id);
-
-  if (rowIndex === -1) {
+  const rowNum = findMemberRowIndex(sheet, memberObj.id);
+  if (rowNum === -1) {
     return { success: false, error: `メンバーIDが見つかりません。ID: ${memberObj.id}` };
   }
 
-  const rowNum = rowIndex + 2;
-  const range = sheet.getRange(rowNum, 1, 1, 10); // 10列目まで更新
-  range.setValues([[
-    memberObj.id,
-    memberObj.name || "",
-    memberObj.email || "",
-    memberObj.department || "",
-    memberObj.interests || "",
-    memberObj.specialty || "",   // 特技
-    memberObj.weakness || "",    // 弱点
-    memberObj.considerations || "",
-    memberObj.status !== false, // ステータス（9列目: I列）
-    !!memberObj.priority,       // 次回優先（10列目: J列）
-  ]]);
+  const row = buildMemberRow(memberObj.id, memberObj);
+  sheet.getRange(rowNum, 1, 1, 16).setValues([row]);
 
   return { success: true, member: memberObj };
 }
@@ -913,19 +878,12 @@ function deleteMember(memberId) {
       return { success: false, error: "メンバー一覧シートが見つかりません。" };
     }
 
-    const lastRow = sheet.getLastRow();
-    if (lastRow <= 1) {
-      return { success: false, error: "メンバーデータが存在しません。" };
-    }
-
-    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
-    const rowIndex = ids.indexOf(memberId);
-
-    if (rowIndex === -1) {
+    const rowNum = findMemberRowIndex(sheet, memberId);
+    if (rowNum === -1) {
       return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
     }
 
-    sheet.deleteRow(rowIndex + 2);
+    sheet.deleteRow(rowNum);
     return { success: true, deletedId: memberId };
   } catch (e) {
     Logger.log(`deleteMember エラー: ${e.toString()}`);
@@ -934,7 +892,7 @@ function deleteMember(memberId) {
 }
 
 /**
- * メンバーの参加ステータス（G列/7列目）を反転トグルする (管理者専用)。
+ * メンバーの参加ステータス（O列/15列目）を反転トグルする (管理者専用)。
  * 
  * @param {string} memberId メンバーID
  * @return {Object} 処理結果オブジェクト
@@ -949,21 +907,13 @@ function toggleMemberStatus(memberId) {
       return { success: false, error: "メンバー一覧シートが見つかりません。" };
     }
 
-    const lastRow = sheet.getLastRow();
-    if (lastRow <= 1) {
-      return { success: false, error: "メンバーデータが存在しません。" };
-    }
-
-    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
-    const rowIndex = ids.indexOf(memberId);
-
-    if (rowIndex === -1) {
+    const rowNum = findMemberRowIndex(sheet, memberId);
+    if (rowNum === -1) {
       return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
     }
 
-    const cell = sheet.getRange(rowIndex + 2, 9); // I列 (9列目)
-    const currentStatus = cell.getValue() === true;
-    const nextStatus = !currentStatus;
+    const cell = sheet.getRange(rowNum, 15); // O列（15列目: ステータス）
+    const nextStatus = !(cell.getValue() === true);
     cell.setValue(nextStatus);
 
     return { success: true, memberId, nextStatus };
@@ -974,7 +924,7 @@ function toggleMemberStatus(memberId) {
 }
 
 /**
- * メンバーの次回優先ステータス（H列/8列目）を反転トグルする (管理者専用)。
+ * メンバーの次回優先ステータス（P列/16列目）を反転トグルする (管理者専用)。
  * 
  * @param {string} memberId メンバーID
  * @return {Object} 処理結果オブジェクト
@@ -989,21 +939,13 @@ function toggleMemberPriority(memberId) {
       return { success: false, error: "メンバー一覧シートが見つかりません。" };
     }
 
-    const lastRow = sheet.getLastRow();
-    if (lastRow <= 1) {
-      return { success: false, error: "メンバーデータが存在しません。" };
-    }
-
-    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
-    const rowIndex = ids.indexOf(memberId);
-
-    if (rowIndex === -1) {
+    const rowNum = findMemberRowIndex(sheet, memberId);
+    if (rowNum === -1) {
       return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
     }
 
-    const cell = sheet.getRange(rowIndex + 2, 10); // J列 (10列目)
-    const currentPriority = cell.getValue() === true;
-    const nextPriority = !currentPriority;
+    const cell = sheet.getRange(rowNum, 16); // P列（16列目: 次回優先）
+    const nextPriority = !(cell.getValue() === true);
     cell.setValue(nextPriority);
 
     return { success: true, memberId, nextPriority };
@@ -1066,7 +1008,7 @@ function saveMatchingHistory(groups, matchingMethod) {
     if (memberSheet && memberSheet.getLastRow() > 1) {
       const lastRow = memberSheet.getLastRow();
       const memberIdsInSheet = memberSheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
-      const priorityRange = memberSheet.getRange(2, 10, lastRow - 1, 1); // 10列目 (J列) が「次回優先」列
+      const priorityRange = memberSheet.getRange(2, 16, lastRow - 1, 1); // 16列目 (P列) が「次回優先」列
       const priorities = priorityRange.getValues();
 
       for (let i = 0; i < memberIdsInSheet.length; i++) {
@@ -1244,9 +1186,15 @@ function registerSelfProfile(profileObj) {
         name: profileObj.name,
         email: userEmail,
         department: profileObj.department,
+        participationType: profileObj.participationType || "どちらでも",
         interests: profileObj.interests || "",
         specialty: profileObj.specialty || "",
         weakness: profileObj.weakness || "",
+        motivation: Number(profileObj.motivation) || 3,
+        teamwork: Number(profileObj.teamwork) || 3,
+        private: Number(profileObj.private) || 3,
+        evaluation: Number(profileObj.evaluation) || 3,
+        growth: Number(profileObj.growth) || 3,
         status: profileObj.status !== false,
         priority: myProfile.priority || false,
         considerations: profileObj.considerations || "",
@@ -1258,9 +1206,15 @@ function registerSelfProfile(profileObj) {
         name: profileObj.name,
         email: userEmail,
         department: profileObj.department,
+        participationType: profileObj.participationType || "どちらでも",
         interests: profileObj.interests || "",
         specialty: profileObj.specialty || "",
         weakness: profileObj.weakness || "",
+        motivation: Number(profileObj.motivation) || 3,
+        teamwork: Number(profileObj.teamwork) || 3,
+        private: Number(profileObj.private) || 3,
+        evaluation: Number(profileObj.evaluation) || 3,
+        growth: Number(profileObj.growth) || 3,
         status: profileObj.status !== false,
         priority: false,
         considerations: profileObj.considerations || "",
@@ -1463,11 +1417,11 @@ function clearMatchingHistory() {
       chatSheet.deleteRows(2, chatSheet.getLastRow() - 1);
     }
 
-    // 全メンバーの「次回優先」フラグ（8列目: H列）のリセット
+    // 全メンバーの「次回優先」フラグ（16列目: P列）のリセット
     const memberSheet = ss.getSheetByName("メンバー一覧");
     if (memberSheet && memberSheet.getLastRow() > 1) {
       const lastRow = memberSheet.getLastRow();
-      const priorityRange = memberSheet.getRange(2, 8, lastRow - 1, 1);
+      const priorityRange = memberSheet.getRange(2, 16, lastRow - 1, 1);
       const priorities = priorityRange.getValues();
       for (let i = 0; i < priorities.length; i++) {
         priorities[i][0] = false;
@@ -1674,6 +1628,13 @@ function runGeminiMatching(members, history, groupSize, groupCount, apiKey, addi
       interests: m.interests,
       specialty: m.specialty || "",
       weakness: m.weakness || "",
+      values: {
+        motivation: m.motivation || 3,
+        teamwork: m.teamwork || 3,
+        private: m.private || 3,
+        evaluation: m.evaluation || 3,
+        growth: m.growth || 3,
+      },
       considerations: m.considerations || "",
     }));
 
@@ -1687,7 +1648,7 @@ function runGeminiMatching(members, history, groupSize, groupCount, apiKey, addi
 1. グループ数は【厳密に ${groupCount} 組】（groupIdは "G-1" から "G-${groupCount}"）作成してください。提示されたメンバー全員（総勢 ${members.length} 名）を、いずれかのグループに漏れなく割り当ててください。
 2. 1グループあたりの目標人数は ${groupSize} 名ですが、総人数が少ない場合は各グループが均等な人数（サイズ差が最大1以内）になるように美しく均してください。
 3. 異なる部署・チームのメンバーが極力同じグループになるように「部署の多様性」を最優先してください。
-4. 趣味、特技、弱点、自己紹介などを考慮し、共通点がある人同士を組み合わせると会話が弾みやすいので、適度に「趣味・特技・弱点・関心の合致」を考慮してください。
+4. 趣味、特技、弱点、自己紹介、および「仕事・人生の価値観（values）」を考慮し、共通点がある人同士、あるいは相乗効果が得られそうな組み合わせにすると会話が弾みやすいので、適度にこれら「趣味・特技・弱点・価値観（やりがい、チームワーク、プライベート、評価、成長）の合致・バランス」を考慮してください。
 5. 過去のマッチング履歴（ compactHistory ）を確認し、直近で同じグループになった人同士ができるだけ被らないように配慮してください。
 6. メンバーに「配慮事項 (considerations)」が記載されている場合は、アレルギーや時間制限などの要望を極力尊重し、可能な限り配慮が満たされるような組み合わせを行ってください。ただし、アレルギー、健康状態、時間制限などの配慮事項に関する具体的な内容は、生成するAIコメント（memo）には絶対に含めないでください。
 7. 出力フォーマットは指定された厳密なJSONスキーマのみとし、余計な説明文やMarkdown of JSONブロックを含めず、純粋なJSON文字列として返してください。`;
