@@ -202,7 +202,7 @@ function initDatabase() {
       "名前",
       "メールアドレス",
       "部署・チーム",
-      "趣味・自己紹介・興味のあること",
+      "趣味",
       "配慮事項",
       "ステータス",
       "次回優先",
@@ -212,6 +212,21 @@ function initDatabase() {
   } else {
     // 既存シートのヘッダー取得とマイグレーション
     let headers = memberSheet.getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 8)).getValues()[0];
+
+    // 旧趣味ヘッダー（「趣味・自己紹介・興味のあること」「趣味・自己紹介」等）の自動移行
+    const legacyHobbyHeaders = ["趣味・自己紹介・興味のあること", "趣味・自己紹介"];
+    let headerUpdated = false;
+    legacyHobbyHeaders.forEach(oldHeader => {
+      const idx = headers.indexOf(oldHeader);
+      if (idx !== -1) {
+        memberSheet.getRange(1, idx + 1).setValue("趣味");
+        headerUpdated = true;
+      }
+    });
+
+    if (headerUpdated) {
+      headers = memberSheet.getRange(1, 1, 1, Math.max(memberSheet.getLastColumn(), 8)).getValues()[0];
+    }
 
     // 「参加目的」列の自動削除
     const purposeColIdx = headers.indexOf("参加目的");
@@ -878,24 +893,17 @@ function toggleMemberStatus(memberId) {
       return { success: false, error: "メンバーデータが存在しません。" };
     }
 
-    const data = sheet.getRange(2, 1, lastRow - 1, 7).getValues(); // 7列目(G列)まで取得
-    let rowIndex = -1;
-    let currentStatus = true;
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i][0] === memberId) {
-        rowIndex = i;
-        currentStatus = data[i][6] === true || data[i][6] === "アクティブ"; // 7列目(G列)
-        break;
-      }
-    }
+    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+    const rowIndex = ids.indexOf(memberId);
 
     if (rowIndex === -1) {
       return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
     }
 
+    const cell = sheet.getRange(rowIndex + 2, 7); // G列 (7列目)
+    const currentStatus = cell.getValue() === true;
     const nextStatus = !currentStatus;
-    sheet.getRange(rowIndex + 2, 7).setValue(nextStatus); // 7列目を更新
+    cell.setValue(nextStatus);
 
     return { success: true, memberId, nextStatus };
   } catch (e) {
@@ -925,24 +933,17 @@ function toggleMemberPriority(memberId) {
       return { success: false, error: "メンバーデータが存在しません。" };
     }
 
-    const data = sheet.getRange(2, 1, lastRow - 1, 8).getValues(); // 8列目(H列)まで取得
-    let rowIndex = -1;
-    let currentPriority = false;
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i][0] === memberId) {
-        rowIndex = i;
-        currentPriority = !!data[i][7]; // 8列目(H列)
-        break;
-      }
-    }
+    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+    const rowIndex = ids.indexOf(memberId);
 
     if (rowIndex === -1) {
       return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
     }
 
+    const cell = sheet.getRange(rowIndex + 2, 8); // H列 (8列目)
+    const currentPriority = cell.getValue() === true;
     const nextPriority = !currentPriority;
-    sheet.getRange(rowIndex + 2, 8).setValue(nextPriority); // 8列目を更新
+    cell.setValue(nextPriority);
 
     return { success: true, memberId, nextPriority };
   } catch (e) {

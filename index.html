@@ -979,7 +979,7 @@
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
                 </div>
                 <div class="space-y-1">
-                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
+                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
                   <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
                 </div>
                 <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
@@ -1159,9 +1159,9 @@
               </select>
             </div>
 
-            <!-- 趣味・自己紹介 -->
+            <!-- 趣味 -->
             <div class="space-y-1.5">
-              <label for="self-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">趣味・自己紹介・興味のあること</label>
+              <label for="self-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">趣味</label>
               <textarea id="self-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="趣味（サウナ、映画、キャンプ等）や得意技術などをご自由に！AIが共通の趣味の人とマッチングする手がかりにします。">${profile ? escapeHtml(profile.interests) : ""}</textarea>
             </div>
 
@@ -1301,7 +1301,7 @@
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
                 </div>
                 <div class="space-y-1">
-                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
+                  <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
                   <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
                 </div>
                 <div class="absolute top-full ${arrowAlignClass} border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
@@ -1544,7 +1544,7 @@
                         <span class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(msg.department || "他部署")}</span>
                       </div>
                       <div class="space-y-1">
-                        <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味・自己紹介</span>
+                        <span class="text-[9px] font-semibold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">趣味</span>
                         <p class="text-slate-600 dark:text-zinc-300 font-medium whitespace-normal leading-relaxed break-words">${escapeHtml(memberInfo.interests || "未登録")}</p>
                       </div>
                       <div class="absolute top-full left-6 border-[6px] border-transparent border-t-white dark:border-t-zinc-950"></div>
@@ -1794,7 +1794,7 @@
               <p class="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
                 ${
                   state.settings.matching_mode === "gemini"
-                    ? "メンバーの部署、趣味・自己紹介を分析し、共通の話題を見つけつつ重複を防止した最適なグループ分けとおすすめ雑談テーマを考案しています。"
+                    ? "メンバーの部署、趣味を分析し、共通の話題を見つけつつ重複を防止した最適なグループ分けとおすすめ雑談テーマを考案しています。"
                     : "プログラムロジックにより、過去の重複履歴と部署の同一被りを最小限に抑えるように数千回のスワップ試行を行い、最適なグループを算出しています。"
                 }
               </p>
@@ -1858,7 +1858,7 @@
                         <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
                         <span>Gemini インテリジェント選出</span>
                       </div>
-                      <p class="text-[11px] text-slate-500 dark:text-zinc-400 mt-2 leading-relaxed">趣味・自己紹介・部署の相性をGeminiが深く読み解き、盛り上がる最適なチームを編成。選出理由も提案します。</p>
+                      <p class="text-[11px] text-slate-500 dark:text-zinc-400 mt-2 leading-relaxed">趣味・部署の相性をGeminiが深く読み解き、盛り上がる最適なチームを編成。選出理由も提案します。</p>
                     </div>
                     ${!state.hasApiKey ? '<span class="absolute right-2 top-2 text-[9px] px-1.5 py-0.5 rounded font-semibold bg-red-100 text-red-700 dark:bg-red-955/50 dark:text-red-400 border border-red-200/20">APIキー未設定</span>' : ""}
                   </label>
@@ -2176,7 +2176,7 @@
                     <th class="px-4 py-3 whitespace-nowrap">名前</th>
                     <th class="px-4 py-3 whitespace-nowrap">メールアドレス</th>
                     <th class="px-4 py-3 whitespace-nowrap">部署</th>
-                    <th class="px-4 py-3 whitespace-nowrap">趣味・自己紹介</th>
+                    <th class="px-4 py-3 whitespace-nowrap">趣味</th>
                     <th class="px-4 py-3 whitespace-nowrap">配慮事項</th>
                     <th class="px-4 py-3 whitespace-nowrap">ステータス</th>
                     <th class="px-4 py-3 whitespace-nowrap">次回優先</th>
@@ -2215,7 +2215,7 @@
               </div>
               ${renderDepartmentFieldHtml("m", "")}
               <div class="space-y-1">
-                <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味・自己紹介・興味のあること</label>
+                <label for="m-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">趣味</label>
                 <textarea id="m-interests" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：趣味はサウナと温泉巡りです。最近は家庭菜園を始めました。"></textarea>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
