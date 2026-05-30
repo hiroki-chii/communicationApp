@@ -144,10 +144,6 @@ function initDatabase() {
     const defaultSettings = [
       ["admin_emails", activeEmail, "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）"],
       ["gemini_api_key", "", "Google AI Studioから取得したGemini APIキー。空の場合は独自ロジックで動作します。"],
-      ["matching_mode", "gemini", 'マッチングモード ("gemini" または "logic")'],
-      ["default_group_size", "4", "1グループあたりの基本目標人数"],
-      ["default_group_count", "4", "標準の目標グループ数（組数）"],
-      ["additional_prompt", "部署ができるだけ被らないようにしてください。共通の趣味がある人を同じグループに混ぜると盛り上がるので考慮してください。", "Geminiへの追加指示プロンプト"],
       ["webapp_url", "", "Webポータル画面の公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）"]
     ];
     defaultSettings.forEach(row => setupSheet.appendRow(row));
@@ -167,8 +163,16 @@ function initDatabase() {
     };
 
     appendMissingKey("admin_emails", activeEmail, "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）");
-    appendMissingKey("default_group_count", "4", "標準の目標グループ数（組数）");
-    appendMissingKey("webapp_url", "", "Webポータル画面の公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）");
+    appendMissingKey("webapp_url", "", "Webポータル画面 of 公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）");
+
+    // 不要な設定キー（matching_mode, default_group_size, default_group_count, additional_prompt）があれば削除
+    const obsoleteKeys = ["matching_mode", "default_group_size", "default_group_count", "additional_prompt"];
+    for (let i = lastRow; i >= 2; i--) {
+      const cellVal = setupSheet.getRange(i, 1).getValue();
+      if (obsoleteKeys.includes(cellVal)) {
+        setupSheet.deleteRow(i);
+      }
+    }
   }
 
   // 2. 「部署マスタ」シートの初期化（「その他」はUI専用項目のためマスタには持たない）
@@ -1512,8 +1516,8 @@ function runMatching(params) {
     checkAdminPermission();
 
     const settings = getSettings();
-    const groupSize = parseInt(params.groupSize || settings.default_group_size || 4, 10);
-    let groupCount = parseInt(params.groupCount || settings.default_group_count || 4, 10);
+    const groupSize = parseInt(params.groupSize || 4, 10);
+    let groupCount = parseInt(params.groupCount || 4, 10);
     const mode = params.mode || "gemini";
     const additionalPrompt = params.additionalPrompt || "";
 
