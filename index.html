@@ -2163,6 +2163,7 @@
                       `<option value="${escapeHtml(d.name)}">${escapeHtml(d.name)}</option>`,
                   )
                   .join("")}
+                <option value="その他">その他</option>
               </select>
             </div>
           </div>
@@ -2294,6 +2295,40 @@
                   <span>設定を保存する</span>
                 </button>
               </form>
+            </div>
+          </div>
+
+          <!-- 部署マスタ設定カード -->
+          <div class="max-w-2xl mx-auto rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark mt-4">
+            <!-- ヘッダー -->
+            <div class="p-6 space-y-1 border-b border-slate-100 dark:border-zinc-800">
+              <h3 class="font-heading font-bold text-base text-slate-900 dark:text-zinc-50 flex items-center gap-2">
+                <i data-lucide="building-2" class="w-5 h-5 text-indigo-500"></i>
+                <span>部署マスタ設定 (管理者専用)</span>
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">ランチ交流会で選択できる所属部署の一覧を管理します。</p>
+            </div>
+
+            <!-- コンテンツ -->
+            <div class="p-6 space-y-4">
+              <!-- 新規部署の追加フォーム -->
+              <div class="flex gap-2">
+                <input type="text" id="new-dept-name" placeholder="新しい部署名を入力 (例: 新規事業部)" class="flex-1 p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <button type="button" id="btn-add-dept" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-1.5 shrink-0">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <span>追加</span>
+                </button>
+              </div>
+
+              <!-- 部署一覧リスト -->
+              <div class="space-y-2">
+                <label class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">現在の登録部署一覧</label>
+                <div class="border border-slate-100 dark:border-zinc-800 rounded-xl overflow-hidden bg-slate-50/30 dark:bg-zinc-950/20 max-h-60 overflow-y-auto">
+                  <div class="divide-y divide-slate-100 dark:divide-zinc-800/60" id="settings-dept-list">
+                    <!-- JavaScriptで動的に描画されます -->
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -2487,6 +2522,31 @@
             );
             handleReinitDb();
           });
+        }
+
+        // --- ④-B 管理者：部署マスタ設定イベント ---
+        if (state.currentView === "settings") {
+          // 部署一覧を動的に描画
+          renderSettingsDeptList();
+
+          // 部署追加ボタンのバインド
+          const btnAddDept = document.getElementById("btn-add-dept");
+          if (btnAddDept) {
+            btnAddDept.addEventListener("click", () => {
+              handleAddDept();
+            });
+
+            // Enterキーでの追加もサポート
+            const newDeptInput = document.getElementById("new-dept-name");
+            if (newDeptInput) {
+              newDeptInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddDept();
+                }
+              });
+            }
+          }
         }
 
         // --- ③ チャットビュー固有のバインディング & ポーリング初期化 ---
@@ -2852,7 +2912,16 @@
             dept.toLowerCase().includes(searchVal) ||
             interests.includes(searchVal) ||
             considerations.includes(searchVal);
-          const matchesDept = !deptVal || dept.includes(deptVal);
+          
+          let matchesDept = !deptVal;
+          if (deptVal) {
+            if (deptVal === "その他") {
+              const knownDepts = state.departments.map(d => d.name);
+              matchesDept = !knownDepts.includes(dept) || dept === "その他";
+            } else {
+              matchesDept = dept.includes(deptVal);
+            }
+          }
 
           if (matchesSearch && matchesDept) {
             row.style.display = "";
@@ -2929,7 +2998,9 @@
 
       function toggleDeptOtherInput(prefix) {
         const select = document.getElementById(`${prefix}-dept`);
-        const container = document.getElementById(`${prefix}-dept-other-container`);
+        const container = document.getElementById(
+          `${prefix}-dept-other-container`,
+        );
         const otherInput = document.getElementById(`${prefix}-dept-other`);
 
         if (!select || !container) return;
@@ -2954,28 +3025,27 @@
        * 一般用（'self'）と管理者用（'m'）で再利用し、複雑な埋め込みロジックを排除
        */
       function renderDepartmentFieldHtml(prefix, currentDept) {
-        const knownDepts = state.departments.map(d => d.name);
+        const knownDepts = state.departments.map((d) => d.name);
         const isOther = currentDept && !knownDepts.includes(currentDept);
         const otherVal = isOther ? currentDept : "";
-        const showOther = isOther || (currentDept === "その他");
+        const showOther = isOther || currentDept === "その他";
+
+        // 「その他」の選択判定（マスタにない部署、または「その他」という値が入っている場合）
+        const isOtherSelected = isOther || currentDept === "その他";
 
         return `
           <div class="space-y-2">
             <div class="space-y-1">
-              <label for="${prefix}-dept" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">所属部署・チーム <span class="text-red-500">*</span></label>
+              <label for="${prefix}-dept" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">所属部署<span class="text-red-500">*</span></label>
               <select id="${prefix}-dept" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none" onchange="toggleDeptOtherInput('${prefix}')">
                 <option value="" disabled ${!currentDept ? "selected" : ""}>所属部署を選択してください</option>
-                ${state.departments.map(d => {
-                  let isSelected = false;
-                  if (currentDept) {
-                    if (d.name === "その他" && isOther) {
-                      isSelected = true;
-                    } else if (currentDept === d.name) {
-                      isSelected = true;
-                    }
-                  }
-                  return `<option value="${escapeHtml(d.name)}" ${isSelected ? "selected" : ""}>${escapeHtml(d.name)}</option>`;
-                }).join("")}
+                ${state.departments
+                  .map((d) => {
+                    const isSelected = currentDept === d.name;
+                    return `<option value="${escapeHtml(d.name)}" ${isSelected ? "selected" : ""}>${escapeHtml(d.name)}</option>`;
+                  })
+                  .join("")}
+                <option value="その他" ${isOtherSelected ? "selected" : ""}>その他</option>
               </select>
             </div>
 
@@ -3000,7 +3070,11 @@
           const otherInput = document.getElementById(`${prefix}-dept-other`);
           dept = otherInput ? otherInput.value.trim() : "";
           if (!dept) {
-            showToast("入力エラー", "部署名（その他）を具体的に入力してください。", "error");
+            showToast(
+              "入力エラー",
+              "部署名（その他）を具体的に入力してください。",
+              "error",
+            );
             return null; // バリデーションエラー時は意図的に null を返して中断させる
           }
         }
@@ -3021,7 +3095,9 @@
         document.getElementById("m-email").value = "";
         document.getElementById("m-dept").value = "";
         document.getElementById("m-dept-other").value = "";
-        document.getElementById("m-dept-other-container").classList.add("hidden");
+        document
+          .getElementById("m-dept-other-container")
+          .classList.add("hidden");
         document.getElementById("m-interests").value = "";
         document.getElementById("m-status").value = "true";
         document.getElementById("m-priority").checked = false; // 優先フラグリセット
@@ -3039,17 +3115,22 @@
           "メンバー情報の代理編集";
         document.getElementById("m-name").value = member.name;
         document.getElementById("m-email").value = member.email;
-        
+
         const knownDepts = state.departments.map((d) => d.name);
-        const isOther = member.department && !knownDepts.includes(member.department);
+        const isOther =
+          member.department && !knownDepts.includes(member.department);
         if (isOther) {
           document.getElementById("m-dept").value = "その他";
           document.getElementById("m-dept-other").value = member.department;
-          document.getElementById("m-dept-other-container").classList.remove("hidden");
+          document
+            .getElementById("m-dept-other-container")
+            .classList.remove("hidden");
         } else {
           document.getElementById("m-dept").value = member.department || "";
           document.getElementById("m-dept-other").value = "";
-          document.getElementById("m-dept-other-container").classList.add("hidden");
+          document
+            .getElementById("m-dept-other-container")
+            .classList.add("hidden");
         }
         document.getElementById("m-interests").value = member.interests || "";
         document.getElementById("m-status").value =
@@ -3315,6 +3396,99 @@
         }
       }
 
+      // --- ⑥-B 管理者：部署マスタ設定コントローラー ---
+      // 部署一覧をHTMLにレンダリングする
+      function renderSettingsDeptList() {
+        const container = document.getElementById("settings-dept-list");
+        if (!container) return;
+
+        // 「その他」という部署名を除いた部署一覧で描画する
+        const displayDepts = state.departments.filter(d => d.name !== "その他");
+
+        if (displayDepts.length === 0) {
+          container.innerHTML = `<p class="p-4 text-xs text-slate-400 dark:text-zinc-500 italic text-center">登録されている部署はありません。</p>`;
+          return;
+        }
+
+        let html = "";
+        displayDepts.forEach((d) => {
+          html += `
+            <div class="flex items-center justify-between px-4 py-2.5 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] font-bold text-slate-400 dark:text-zinc-500">${escapeHtml(d.id)}</span>
+                <span class="font-medium text-slate-800 dark:text-zinc-200">${escapeHtml(d.name)}</span>
+              </div>
+              <button type="button" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 transition-all" title="削除" onclick="handleDeleteDept('${escapeHtml(d.id)}')">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        lucide.createIcons();
+      }
+
+      // 新しい部署を追加する
+      async function handleAddDept() {
+        const input = document.getElementById("new-dept-name");
+        if (!input) return;
+
+        const deptName = input.value.trim();
+        if (!deptName) {
+          showToast("入力エラー", "部署名を入力してください。", "error");
+          return;
+        }
+
+        showToast("追加中", "新しい部署を部署マスタに追加しています...", "warning");
+
+        try {
+          const res = await callGas("addDepartment", deptName);
+          if (res.success) {
+            input.value = "";
+            state.departments = res.departments || [];
+            showToast("追加完了", `「${deptName}」を部署マスタに追加しました。`, "success");
+            
+            // リストを再描画
+            renderSettingsDeptList();
+          } else {
+            showToast("追加エラー", res.error || "部署の追加に失敗しました。", "error");
+          }
+        } catch (e) {
+          showToast("エラー", "通信中に例外が発生しました：" + e.toString(), "error");
+        }
+      }
+
+      // 部署を削除する
+      async function handleDeleteDept(deptId) {
+        const dept = state.departments.find(d => d.id === deptId);
+        if (!dept) return;
+
+        if (!confirm(`【部署の削除確認】\n部署「${dept.name}」を部署マスタから削除しますか？\n※既にこの部署に所属しているメンバーがいる場合、表示やマッチング時に「その他」扱いとなる可能性があります。`)) {
+          return;
+        }
+
+        showToast("削除中", "部署を削除しています...", "warning");
+
+        try {
+          const res = await callGas("deleteDepartment", deptId);
+          if (res.success) {
+            state.departments = res.departments || [];
+            showToast("削除完了", `部署を正常に削除しました。`, "success");
+            
+            // リストを再描画
+            renderSettingsDeptList();
+          } else {
+            showToast("削除エラー", res.error || "部署の削除に失敗しました。", "error");
+          }
+        } catch (e) {
+          showToast("エラー", "通信中に例外が発生しました：" + e.toString(), "error");
+        }
+      }
+
+      // グローバルへ公開
+      window.handleDeleteDept = handleDeleteDept;
+
       // ==========================================
       // ユーティリティ関数
       // ==========================================
@@ -3383,6 +3557,14 @@
                 method: "Logic (Demo)",
                 memo: "異なる部署で共通の趣味（サウナ）があるメンバーをマッチングしました。",
               },
+            ],
+            departments: state.departments.length > 0 ? state.departments : [
+              { id: "D001", name: "管理室" },
+              { id: "D002", name: "BPO統括部" },
+              { id: "D003", name: "東京統括部" },
+              { id: "D004", name: "ST開発部" },
+              { id: "D005", name: "営業統括部" },
+              { id: "D006", name: "印刷統括部" }
             ],
             totalCount: 3,
             activeCount: 3,
@@ -3466,6 +3648,51 @@
             hasApiKey: state.hasApiKey,
             nextStatus: false,
             nextPriority: true,
+          };
+        }
+
+        if (functionName === "addDepartment") {
+          // 初期化されていない場合はダミーをセット
+          if (!state.departments || state.departments.length === 0) {
+            state.departments = [
+              { id: "D001", name: "管理室" },
+              { id: "D002", name: "BPO統括部" },
+              { id: "D003", name: "東京統括部" },
+              { id: "D004", name: "ST開発部" },
+              { id: "D005", name: "営業統括部" },
+              { id: "D006", name: "印刷統括部" }
+            ];
+          }
+          const newDept = {
+            id: `D${("000" + (state.departments.length + 1)).slice(-3)}`,
+            name: args[0],
+          };
+          state.departments.push(newDept);
+
+          return {
+            success: true,
+            department: newDept,
+            departments: state.departments,
+          };
+        }
+
+        if (functionName === "deleteDepartment") {
+          if (!state.departments || state.departments.length === 0) {
+            state.departments = [
+              { id: "D001", name: "管理室" },
+              { id: "D002", name: "BPO統括部" },
+              { id: "D003", name: "東京統括部" },
+              { id: "D004", name: "ST開発部" },
+              { id: "D005", name: "営業統括部" },
+              { id: "D006", name: "印刷統括部" }
+            ];
+          }
+          state.departments = state.departments.filter(d => d.id !== args[0]);
+
+          return {
+            success: true,
+            deletedId: args[0],
+            departments: state.departments,
           };
         }
 
