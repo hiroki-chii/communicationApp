@@ -59,8 +59,7 @@ function getAdminEmails(settings) {
  */
 function isAdminUser(email, settings) {
   if (!email) return false;
-  const adminEmails = getAdminEmails(settings);
-  return adminEmails.includes(email.toLowerCase());
+  return getAdminEmails(settings).includes(email.toLowerCase());
 }
 
 /**
@@ -89,7 +88,7 @@ function checkAdminPermission() {
 function getPortalUrl() {
   try {
     const settings = getSettings();
-    if (settings.webapp_url && settings.webapp_url.trim() !== "") {
+    if (settings.webapp_url && settings.webapp_url.trim()) {
       return settings.webapp_url.trim();
     }
   } catch (e) {
@@ -163,14 +162,17 @@ function initDatabase() {
     };
 
     appendMissingKey("admin_emails", activeEmail, "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）");
-    appendMissingKey("webapp_url", "", "Webポータル画面 of 公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）");
+    appendMissingKey("webapp_url", "", "Webポータル画面 of 公開URL（未入力の場合は自動取得 of URLを使用します。/dev を指定したい場合は手動で入力してください）");
 
-    // 不要な設定キー（matching_mode, default_group_size, default_group_count, additional_prompt）があれば削除
+    // 【最適化】ループ内でのgetValue()を廃止し、getValues()の一括取得から判定して不要キーを逆順に削除
     const obsoleteKeys = ["matching_mode", "default_group_size", "default_group_count", "additional_prompt"];
-    for (let i = lastRow; i >= 2; i--) {
-      const cellVal = setupSheet.getRange(i, 1).getValue();
-      if (obsoleteKeys.includes(cellVal)) {
-        setupSheet.deleteRow(i);
+    if (lastRow > 1) {
+      const keyValues = setupSheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (let i = lastRow; i >= 2; i--) {
+        const cellVal = keyValues[i - 2][0];
+        if (obsoleteKeys.includes(cellVal)) {
+          setupSheet.deleteRow(i);
+        }
       }
     }
   }
@@ -584,7 +586,7 @@ function deleteDepartment(deptId) {
 
 /**
  * メンバー一覧を「メンバー一覧」シートから取得する。
- * カラムインデックス: 7列目(G列)=ステータス, 8列目(H列)=次回優先。
+ * カラムインデックス: G列(15列目)=ステータス, H列(16列目)=次回優先。
  * 
  * @return {Object[]} メンバーオブジェクトの配列
  */
@@ -1004,7 +1006,7 @@ function saveMatchingHistory(groups, matchingMethod) {
     SpreadsheetApp.flush();
     sheet.autoResizeColumns(1, 6);
 
-    // --- 次回優先フラグ（10列目: J列）の自動更新マイグレーション ---
+    // --- 次回優先フラグ（16列目: P列）の自動更新マイグレーション ---
     const allMembers = getMembers();
     const activeMembers = allMembers.filter(m => m.status === true);
     const memberSheet = ss.getSheetByName("メンバー一覧");
@@ -1401,7 +1403,7 @@ function sendChatMessage(roomId, messageText) {
 
 /**
  * 過去のマッチング履歴およびチャットメッセージを全件物理削除クリアする (管理者専用)。
- * 同時に全メンバーの「次回優先」フラグ（8列目: H列）をすべてクリア（false）する。
+ * 同時に全メンバーの「次回優先」フラグ（16列目: P列）をすべてクリア（false）する。
  * 
  * @return {Object} 処理結果オブジェクト
  */
@@ -1763,17 +1765,20 @@ function runLogicMatching(members, history, targetSize, targetCount) {
     groups[i % numGroups].push(shuffledIds[i]);
   }
 
+  // 【最適化】配列メンバーを Map に一括変換して、ループ内探索を O(1) に高速化する
+  const memberMap = new Map(members.map(m => [m.id, m]));
+
   // スコア計算クロージャ
   const calculateTotalPenalty = (currentGroups) => {
     let totalPenalty = 0;
 
     currentGroups.forEach(group => {
       for (let i = 0; i < group.length; i++) {
-        const m1 = members.find(m => m.id === group[i]);
+        const m1 = memberMap.get(group[i]);
         if (!m1) continue;
 
         for (let j = i + 1; j < group.length; j++) {
-          const m2 = members.find(m => m.id === group[j]);
+          const m2 = memberMap.get(group[j]);
           if (!m2) continue;
 
           // 過去の重複ペナルティ
@@ -1830,7 +1835,7 @@ function runLogicMatching(members, history, targetSize, targetCount) {
   }
 
   const finalGroups = groups.map((grpIds, idx) => {
-    const matchedMembers = grpIds.map(id => members.find(m => m.id === id)).filter(Boolean);
+    const matchedMembers = grpIds.map(id => memberMap.get(id)).filter(Boolean);
     const depts = matchedMembers.map(m => m.department);
     const uniqueDepts = [...new Set(depts)];
 
