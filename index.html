@@ -1226,7 +1226,9 @@
         const name = document.getElementById("self-name").value.trim();
         const department = getSelectedDepartment("self");
         if (department === null) return;
-        const participationType = document.getElementById("self-participation-type").value;
+        const participationType = document.getElementById(
+          "self-participation-type",
+        ).value;
         const interests = document
           .getElementById("self-interests")
           .value.trim();
@@ -2092,10 +2094,27 @@
       function getMembersViewHtml() {
         let memberRows = "";
 
+        const getRatingBadgeHtml = (val) => {
+          const num = Number(val) || 3;
+          let colorClass = "";
+          if (num === 5) {
+            colorClass = "bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500";
+          } else if (num === 4) {
+            colorClass = "bg-sky-500 text-white border-sky-500 dark:bg-sky-400 dark:border-sky-400";
+          } else if (num === 3) {
+            colorClass = "bg-slate-400 text-white border-slate-400 dark:bg-zinc-550 dark:border-zinc-550";
+          } else if (num === 2) {
+            colorClass = "bg-amber-500 text-white border-amber-500 dark:bg-amber-400 dark:border-amber-400";
+          } else {
+            colorClass = "bg-rose-600 text-white border-rose-600 dark:bg-rose-500 dark:border-rose-500";
+          }
+          return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-mono font-bold border ${colorClass} select-none shadow-sm">${num}</span>`;
+        };
+
         if (state.members.length === 0) {
           memberRows = `
           <tr>
-            <td colspan="11" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
+            <td colspan="16" class="p-8 text-center text-sm text-slate-400 dark:text-zinc-500">
               メンバーが登録されていません。
             </td>
           </tr>
@@ -2116,10 +2135,15 @@
               <td class="px-4 py-3.5 text-slate-700 dark:text-zinc-300 whitespace-nowrap">
                 <span class="px-2 py-0.5 rounded-full font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 text-[10px]">${escapeHtml(m.participationType || "どちらでも")}</span>
               </td>
-              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests || "-")}</td>
-              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.specialty || "")}">${escapeHtml(m.specialty || "-")}</td>
-              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[280px] break-words whitespace-normal" title="${escapeHtml(m.weakness || "")}">${escapeHtml(m.weakness || "-")}</td>
-              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 max-w-[220px] break-words whitespace-normal" title="${escapeHtml(m.considerations || "")}">
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 w-[320px] min-w-[320px] max-w-[320px] break-words whitespace-normal" title="${escapeHtml(m.interests)}">${escapeHtml(m.interests || "-")}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 w-[320px] min-w-[320px] max-w-[320px] break-words whitespace-normal" title="${escapeHtml(m.specialty || "")}">${escapeHtml(m.specialty || "-")}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 w-[320px] min-w-[320px] max-w-[320px] break-words whitespace-normal" title="${escapeHtml(m.weakness || "")}">${escapeHtml(m.weakness || "-")}</td>
+              <td class="px-4 py-3.5 text-center whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">${getRatingBadgeHtml(m.motivation)}</td>
+              <td class="px-4 py-3.5 text-center whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">${getRatingBadgeHtml(m.teamwork)}</td>
+              <td class="px-4 py-3.5 text-center whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">${getRatingBadgeHtml(m.private)}</td>
+              <td class="px-4 py-3.5 text-center whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">${getRatingBadgeHtml(m.evaluation)}</td>
+              <td class="px-4 py-3.5 text-center whitespace-nowrap w-[100px] min-w-[100px] max-w-[100px]">${getRatingBadgeHtml(m.growth)}</td>
+              <td class="px-4 py-3.5 text-slate-500 dark:text-zinc-400 w-[320px] min-w-[320px] max-w-[320px] break-words whitespace-normal" title="${escapeHtml(m.considerations || "")}">
                 ${
                   m.considerations
                     ? `<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-955/20 px-2 py-0.5 rounded-lg border border-amber-200/40 dark:border-amber-900/30">⚠️ ${escapeHtml(m.considerations)}</span>`
@@ -2208,6 +2232,11 @@
                     <th class="px-4 py-3 whitespace-nowrap">趣味</th>
                     <th class="px-4 py-3 whitespace-nowrap">特技</th>
                     <th class="px-4 py-3 whitespace-nowrap">弱点</th>
+                    <th class="px-4 py-3 whitespace-nowrap text-center w-[100px] min-w-[100px] max-w-[100px]">やりがい</th>
+                    <th class="px-4 py-3 whitespace-nowrap text-center w-[100px] min-w-[100px] max-w-[100px]">チームワーク</th>
+                    <th class="px-4 py-3 whitespace-nowrap text-center w-[100px] min-w-[100px] max-w-[100px]">プライベート</th>
+                    <th class="px-4 py-3 whitespace-nowrap text-center w-[100px] min-w-[100px] max-w-[100px]">評価</th>
+                    <th class="px-4 py-3 whitespace-nowrap text-center w-[100px] min-w-[100px] max-w-[100px]">成長</th>
                     <th class="px-4 py-3 whitespace-nowrap">配慮事項</th>
                     <th class="px-4 py-3 whitespace-nowrap">ステータス</th>
                     <th class="px-4 py-3 whitespace-nowrap">次回優先</th>
@@ -2429,7 +2458,6 @@
 
       // --- 各画面のイベントアタッチメント ---
       function attachViewEvents() {
-
         // --- ① 共通UIビュー（モバイル用管理者切り替えトグルなど）のバインディング ---
         const mobileAdminToggle = document.getElementById(
           "mobile-admin-mode-toggle",
@@ -3212,11 +3240,31 @@
        */
       function getValueRatings(prefix) {
         return {
-          motivation: parseInt(document.querySelector(`input[name="${prefix}-motivation"]:checked`)?.value || "3", 10),
-          teamwork: parseInt(document.querySelector(`input[name="${prefix}-teamwork"]:checked`)?.value || "3", 10),
-          private: parseInt(document.querySelector(`input[name="${prefix}-private"]:checked`)?.value || "3", 10),
-          evaluation: parseInt(document.querySelector(`input[name="${prefix}-evaluation"]:checked`)?.value || "3", 10),
-          growth: parseInt(document.querySelector(`input[name="${prefix}-growth"]:checked`)?.value || "3", 10)
+          motivation: parseInt(
+            document.querySelector(`input[name="${prefix}-motivation"]:checked`)
+              ?.value || "3",
+            10,
+          ),
+          teamwork: parseInt(
+            document.querySelector(`input[name="${prefix}-teamwork"]:checked`)
+              ?.value || "3",
+            10,
+          ),
+          private: parseInt(
+            document.querySelector(`input[name="${prefix}-private"]:checked`)
+              ?.value || "3",
+            10,
+          ),
+          evaluation: parseInt(
+            document.querySelector(`input[name="${prefix}-evaluation"]:checked`)
+              ?.value || "3",
+            10,
+          ),
+          growth: parseInt(
+            document.querySelector(`input[name="${prefix}-growth"]:checked`)
+              ?.value || "3",
+            10,
+          ),
         };
       }
 
@@ -3224,10 +3272,16 @@
        * 仕事・人生の価値観ラジオボタンをデフォルト値にリセットする共通ヘルパー
        */
       function resetValueRatingsRadios(prefix, defaultVal = 3) {
-        const keys = ["motivation", "teamwork", "private", "evaluation", "growth"];
-        keys.forEach(k => {
+        const keys = [
+          "motivation",
+          "teamwork",
+          "private",
+          "evaluation",
+          "growth",
+        ];
+        keys.forEach((k) => {
           const radios = document.getElementsByName(`${prefix}-${k}`);
-          radios.forEach(r => {
+          radios.forEach((r) => {
             r.checked = Number(r.value) === defaultVal;
           });
         });
@@ -3237,31 +3291,43 @@
        * 仕事・人生の価値観ラジオボタンにデータを反映（セット）する共通ヘルパー
        */
       function setValueRatingsRadios(prefix, ratingsObj) {
-        const keys = ["motivation", "teamwork", "private", "evaluation", "growth"];
-        keys.forEach(k => {
+        const keys = [
+          "motivation",
+          "teamwork",
+          "private",
+          "evaluation",
+          "growth",
+        ];
+        keys.forEach((k) => {
           const targetVal = Number(ratingsObj ? ratingsObj[k] : null) || 3;
           const radios = document.getElementsByName(`${prefix}-${k}`);
-          radios.forEach(r => {
+          radios.forEach((r) => {
             r.checked = Number(r.value) === targetVal;
           });
         });
       }
 
       // 価値観の5段階評価ラジオボタンHTMLを生成する共通ヘルパー
-      function renderRatingRadioGroupHtml(prefix, name, label, currentValue, isCompact = false) {
+      function renderRatingRadioGroupHtml(
+        prefix,
+        name,
+        label,
+        currentValue,
+        isCompact = false,
+      ) {
         const val = Number(currentValue) || 3;
-        const labelClass = isCompact 
+        const labelClass = isCompact
           ? "text-[11px] font-semibold text-slate-600 dark:text-zinc-400 w-24 shrink-0"
           : "text-[11px] font-semibold text-slate-600 dark:text-zinc-400 sm:w-44 shrink-0";
-        
+
         let html = `
-          <div class="flex flex-col sm:flex-row sm:items-center ${isCompact ? 'space-y-1 sm:space-y-0' : 'space-y-2 sm:space-y-0'} py-1">
+          <div class="flex flex-col sm:flex-row sm:items-center ${isCompact ? "space-y-1 sm:space-y-0" : "space-y-2 sm:space-y-0"} py-1">
             <span class="${labelClass}">${escapeHtml(label)}</span>
             <div class="flex items-center gap-3">
               <span class="text-[10px] text-slate-400 dark:text-zinc-500">1 (低い)</span>
               <div class="flex items-center gap-3">
         `;
-        
+
         for (let i = 1; i <= 5; i++) {
           const checked = val === i ? "checked" : "";
           html += `
@@ -3271,7 +3337,7 @@
             </label>
           `;
         }
-        
+
         html += `
               </div>
               <span class="text-[10px] text-slate-400 dark:text-zinc-500">5 (高い)</span>
@@ -3299,7 +3365,11 @@
           }
           renderView();
         } catch (e) {
-          showToast("同期エラー", "サーバーデータの再取得に失敗しました：" + e.toString(), "error");
+          showToast(
+            "同期エラー",
+            "サーバーデータの再取得に失敗しました：" + e.toString(),
+            "error",
+          );
         }
       }
 
@@ -3371,7 +3441,8 @@
             .getElementById("m-dept-other-container")
             .classList.add("hidden");
         }
-        document.getElementById("m-participation-type").value = member.participationType || "どちらでも";
+        document.getElementById("m-participation-type").value =
+          member.participationType || "どちらでも";
         document.getElementById("m-interests").value = member.interests || "";
         document.getElementById("m-specialty").value = member.specialty || "";
         document.getElementById("m-weakness").value = member.weakness || "";
@@ -3399,7 +3470,9 @@
         const email = document.getElementById("m-email").value.trim();
         const dept = getSelectedDepartment("m");
         if (dept === null) return;
-        const participationType = document.getElementById("m-participation-type").value;
+        const participationType = document.getElementById(
+          "m-participation-type",
+        ).value;
         const interests = document.getElementById("m-interests").value.trim();
         const specialty = document.getElementById("m-specialty").value.trim();
         const weakness = document.getElementById("m-weakness").value.trim();
