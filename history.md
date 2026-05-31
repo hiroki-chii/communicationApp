@@ -1,5 +1,15 @@
 # 作業・修正ログ
 
+## 2026-05-31 15:07
+
+- **対応内容**: 画面左上のロゴアイコンをSVG画像（logo.svg）に置き換え
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [assets/logo.svg](file:///c:/Users/hirok/dev/communicationApp/assets/logo.svg)（新規追加）
+- **修正内容の詳細**:
+  - **アイコンの削除**: PCサイドバー（`<aside>`）ヘッダー部分にあった indigo 背景＋coffeeアイコン（`<i data-lucide="coffee">`）の `<div>` を削除しました。
+  - **SVG画像の配置**: Google Driveより提供いただいた `logo.svg`（黄緑＆オレンジのブランドロゴ）を `assets/logo.svg` へ保存し、`<img src="assets/logo.svg">` タグに置き換えました。サイズは既存のアイコンと同じ `w-8 h-8`（32×32px）に固定し、`object-contain` で縦横比を維持して表示します。
+
 ## 2026-05-31 12:59
 
 - **対応内容**: 画面左上のロゴ画像の点滅（アニメーション）廃止
