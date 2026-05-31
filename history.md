@@ -1,5 +1,14 @@
 # 作業・修正ログ
 
+## 2026-05-31 15:35
+
+- **対応内容**: スマホ用ヘッダーのロゴをブランドSVGに置き換え
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+- **修正内容の詳細**:
+  - **対象箇所**: モバイル用ヘッダー（`class="md:hidden h-14 ..."`）内の indigo背景 + coffeeアイコン（`<i data-lucide="coffee">`）の `<div>` を削除。
+  - **SVG埋め込み**: PC版（w-8 h-8）と同じ透過インラインSVGを `w-7 h-7`（28px）サイズでスマホヘッダーに配置しました。
+
 ## 2026-05-31 15:07
 
 - **対応内容**: 画面左上のロゴアイコンをSVG画像（logo.svg）に置き換え
