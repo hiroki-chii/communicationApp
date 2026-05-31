@@ -24,6 +24,23 @@
         darkMode: "class",
         theme: {
           extend: {
+            colors: {
+              // 添付画像（オレンジ＆グリーン）を基調としたカラーパレットのカスタマイズ
+              // アプリ全体の主要なテーマカラー（既存のindigoクラス群）を上書きしてナチュラルな配色へ統合します
+              indigo: {
+                50: "#FAF7ED",   // 非常に淡いクリーム（添付画像の背景イメージ）
+                100: "#FCEFD8",  // 薄いオレンジ
+                200: "#F8DAA9",  // 柔らかなオレンジ
+                300: "#F3C07B",  // 中間オレンジ
+                400: "#EC9E48",  // やや鮮やかなオレンジ
+                500: "#8ECA54",  // グリーン（ロゴのスプーン・フォークの黄緑色）
+                600: "#E58B32",  // オレンジ（プライマリカラー、ロゴのN3・文字のオレンジ）
+                700: "#C87422",  // ホバー用の少し濃いオレンジ
+                800: "#A35A16",  // 濃いオレンジ
+                900: "#7E420C",  // さらに濃いオレンジ
+                950: "#4B2404",  // 非常に濃いオレンジ
+              }
+            },
             fontFamily: {
               sans: [
                 "Inter",
@@ -107,7 +124,7 @@
   </head>
 
   <body
-    class="bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200"
+    class="bg-[#FAF9F5] text-stone-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200"
   >
     <!-- PC用 左サイドバー (md以上で表示) -->
     <aside
