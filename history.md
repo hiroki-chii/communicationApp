@@ -1,5 +1,60 @@
 # 作業・修正ログ
 
+## 2026-06-01 10:15
+
+- **対応内容**: 残りの低優先度リファクタリング項目の完了（コードクレンジングおよびクリーンアップ）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html) (更新)
+- **修正内容の詳細**:
+  - **🟡 重複排除（DRY化）: `cleanName()` のユーティリティ統合**:
+    - `index.html` 内の4箇所以上で重複して局所定義されていた `const cleanName = (n) => ...` ラムダ関数を完全に排除しました。
+    - グローバルユーティリティ関数として `cleanName(n)` を1つ新しく定義し、全ての呼び出し箇所からそちらを参照するよう統一しました。
+  - **🟡 デッドコードの削除: `markGroupAsModified()` の完全撤去**:
+    - 空のままで機能していなかった不要な `markGroupAsModified()` 関数定義、およびマッチング編集時等に呼び出されていた5箇所の不要な呼び出しロジックをすべて安全に撤去しました。
+  - **🟡 コードの近代化・クレンジング**:
+    - 設定保存関数 `handleSaveSettings()` 内に残存していた開発用の `console.log()` デバッグ出力（2箇所）を完全に削除しました。
+    - `handleClearHistory()` 内で1箇所だけ残っていた旧式の `var res` 宣言を、モダンな `const res` に書き換えて記述規則を統一しました。
+
+## 2026-06-01 10:05
+
+- **対応内容**: 中優先度リファクタリング項目の修正（DRYの徹底および無効Tailwind CSSクラスの一掃）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html) (更新)
+- **修正内容の詳細**:
+  - **🟠 DRY原則の適用: `refreshStateFromServer()` 共通関数の適用徹底**:
+    - `confirmTempMatching()` (マッチング確定時) および `handleDeleteMatchingGroup()` (グループ削除時) の2箇所で重複して書かれていた重厚な state プロパティへのデータ手動代入ブロックを、既存の共通データ同期関数 **`refreshStateFromServer()`** を呼び出す形にリファクタリングして統合しました。
+  - **🟠 UI・デザイン品質向上: Tailwind CSS Play CDNでの存在しない無効クラスの一括クレンジング**:
+    - Tailwind 標準パレットに存在せず無視されていた無効なクラス群（`slate-405`, `slate-105`, `zinc-850`, `zinc-550`, `indigo-955`, `amber-955`, `border-3` など計10箇所以上）を検出し、それぞれ標準に沿った最も近い有効クラス（`slate-400`, `zinc-800`, `zinc-500`, `indigo-900`, `amber-900`, `border-2` など）へ安全に置き換え・クレンジングしました。これにより、特にダークモード時の未定義スタイル浮きや境界線の崩れが完全に修正されました。
+
+## 2026-06-01 09:55
+
+- **対応内容**: 高優先度リファクタリング項目の修正（セキュリティ堅牢化およびバグ修復）
+- **対象ファイル**:
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs) (更新)
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html) (更新)
+- **修正内容の詳細**:
+  - **🔴 堅牢性: `initDatabase()` の保護と管理者チェック強化 (main.gs & index.html)**:
+    - 誰でも呼び出せてしまう恐れのある `initDatabase()` の代わりに、管理者権限チェック（`checkAdminPermission()`）を事前に行う安全な中間関数 **`resetDatabase()`** を `main.gs` に新設しました。
+    - フロントエンドの危険ゾーンにある「初期化 (デモデータ復元)」ボタン（`handleReinitDb()` 内）からの GAS 呼び出し先を `initDatabase` から新設したセキュアな `resetDatabase` に変更し、一般ユーザーからの不正実行を完全にガードしました。
+  - **🔴 バグ修正: メンバー検索機能 `filterMembersTable()` のインデックスずれ修復 (index.html)**:
+    - 16列に拡張された管理者メンバー管理テーブルの実際の構造に合わせて、列数チェック（`cells.length`）の閾値を `10` から正しい **`16`** へ変更しました。
+    - 「配慮事項」のカラムインデックスが `cells[7]`（8列目）と誤っていた箇所を、実際の13列目である **`cells[12]`** に修正しました。これにより、検索条件に指定したキーワードで「配慮事項」の内容も正しく部分一致検索フィルタリングできるようバグを完全に修復しました。
+
+## 2026-06-01 09:35
+
+- **対応内容**: リファクタリング前の修正箇所洗い出し分析（実装未着手）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html) (分析対象)
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs) (分析対象)
+- **修正内容の詳細**:
+  - 全コード（index.html: 4220行、main.gs: 1942行）を精読し、以下の5カテゴリ・約30項目の修正すべき点を洗い出しました。
+  - **DRY原則違反（6件）**: `cleanName`ラムダの5箇所重複、`refreshStateFromServer`の未使用（手動データ再読み込みが2箇所）、SVGロゴの12KB二重展開、ナビアクティブ化ロジック重複、`cleanMatchingMemo`のフロント/サーバー二重処理、`getActiveSpreadsheet()`の20箇所以上の繰り返し
+  - **パフォーマンス問題（4件）**: チャットポーリング時の`getMembers()`毎回呼び出し、`sendChatMessage`での`getChatMessages`二重呼び出し、`appendRow()`ループ、`lucide.createIcons()`の過剰呼び出し
+  - **セキュリティ・堅牢性（3件）**: `onclick`属性でのHTML エスケープのみ使用（JS文字列エスケープ未対応）、`initDatabase()`に管理者チェックなし、`var`宣言の残存
+  - **保守性・可読性（5件）**: 4220行単一ファイル、Tailwind CSSクラスの魔法文字列、`state`の型定義欠如、`markGroupAsModified()`空関数、デバッグ`console.log`残存
+  - **デッドコード・不整合（6件）**: ダミーレスポンスの旧`purpose`プロパティ、存在しないTailwindクラス13件、`getUniqueDepartments()`未使用、`filterMembersTable()`の列インデックスずれ、削除済み設定値の参照、設定保存との不整合
+  - 分析結果は [refactoring_analysis.md](file:///C:/Users/hirok/.gemini/antigravity-ide/brain/95a7a75f-c4f8-40df-be56-a63b5b14ef2f/refactoring_analysis.md) に詳細レポートとして出力
+
 ## 2026-06-01 09:20
 
 - **対応内容**: 運用マニュアルへの「メンテナンスマニュアル（開発者・保守担当者向け）」の追記

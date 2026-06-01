@@ -988,8 +988,6 @@
         latestGroups.forEach((g) => {
           const namesList = g.memberNames
             .map((name, index) => {
-              // 所属部署を取得
-              const cleanName = (n) => (n ? n.replace(/\s+/g, "") : "");
               const memberInfo =
                 state.members.find(
                   (m) => cleanName(m.name) === cleanName(name),
@@ -1075,7 +1073,7 @@
                 </a>
               `
                   : `
-                <button disabled class="w-full py-2 bg-slate-100 dark:bg-zinc-850/50 text-slate-405 text-slate-400 dark:text-zinc-500 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed">
+                <button disabled class="w-full py-2 bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed">
                   <i data-lucide="lock" class="w-4 h-4"></i>
                   <span>メンバー専用チャット</span>
                 </button>
@@ -1178,7 +1176,7 @@
               </div>
               <div class="space-y-1">
                 <label class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">メールアドレス (Google アカウント)</label>
-                <input type="email" disabled value="${escapeHtml(state.currentUserEmail)}" class="w-full p-2.5 text-xs rounded-xl border border-slate-105 dark:border-zinc-850 bg-slate-50 dark:bg-zinc-950 text-slate-400 cursor-not-allowed focus:outline-none">
+                <input type="email" disabled value="${escapeHtml(state.currentUserEmail)}" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-400 cursor-not-allowed focus:outline-none">
                 <p class="text-[9px] text-slate-400 font-medium mt-1">※セキュリティのためメールアドレスは自動判別され、変更不可です。</p>
               </div>
             </div>
@@ -1373,7 +1371,6 @@
         if (matchingGroup) {
           membersBadge = matchingGroup.memberNames
             .map((name, index) => {
-              const cleanName = (n) => (n ? n.replace(/\s+/g, "") : "");
               const memberInfo =
                 state.members.find(
                   (m) => cleanName(m.name) === cleanName(name),
@@ -1397,7 +1394,7 @@
 
           if (matchingGroup.memo) {
             aiThemeHtml = `
-            <div class="p-4 rounded-xl border border-indigo-100/50 bg-indigo-50/15 dark:border-indigo-955/20 dark:bg-indigo-955/10 text-xs leading-relaxed">
+            <div class="p-4 rounded-xl border border-indigo-100/50 bg-indigo-50/15 dark:border-indigo-900/20 dark:bg-indigo-950/10 text-xs leading-relaxed">
               <p class="font-bold text-slate-700 dark:text-zinc-300 mb-1 flex items-center gap-1">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i>
                 <span>AI提案のおすすめ雑談テーマ</span>
@@ -1453,7 +1450,7 @@
           <div id="chat-messages-container" class="flex-1 overflow-y-auto p-5 space-y-4 min-h-[350px] max-h-[500px] border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/20 rounded-2xl flex flex-col">
             <!-- ローディング表示 -->
             <div class="flex-1 flex flex-col items-center justify-center gap-3 py-12">
-              <div class="w-8 h-8 border-3 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin"></div>
+              <div class="w-8 h-8 border-2 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin"></div>
               <p class="text-xs text-slate-400 dark:text-zinc-500 animate-pulse">メッセージ履歴を取得しています...</p>
             </div>
           </div>
@@ -1544,7 +1541,6 @@
                       senderMember.id,
                     );
                   } else {
-                    const cleanName = (n) => (n ? n.replace(/\s+/g, "") : "");
                     isGroupMember = matchingGroup.memberNames.some(
                       (name) => cleanName(name) === cleanName(msg.senderName),
                     );
@@ -1599,7 +1595,6 @@
               `;
                 } else {
                   // 左側：他のグループメンバーのメッセージ (白/ライトグレー、あるいはグループ外管理者の場合はゴールド調枠付き)
-                  const cleanName = (n) => (n ? n.replace(/\s+/g, "") : "");
                   const memberInfo =
                     state.members.find(
                       (m) =>
@@ -1932,7 +1927,7 @@
                       </div>
                       <p class="text-[11px] text-slate-500 dark:text-zinc-400 mt-2 leading-relaxed">趣味・部署の相性をGeminiが深く読み解き、盛り上がる最適なチームを編成。選出理由も提案します。</p>
                     </div>
-                    ${!state.hasApiKey ? '<span class="absolute right-2 top-2 text-[9px] px-1.5 py-0.5 rounded font-semibold bg-red-100 text-red-700 dark:bg-red-955/50 dark:text-red-400 border border-red-200/20">APIキー未設定</span>' : ""}
+                    ${!state.hasApiKey ? '<span class="absolute right-2 top-2 text-[9px] px-1.5 py-0.5 rounded font-semibold bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400 border border-red-200/20">APIキー未設定</span>' : ""}
                   </label>
                 </div>
 
@@ -2054,7 +2049,7 @@
           });
 
           groupSections += `
-          <div class="p-5 border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-900 rounded-xl space-y-4 shadow-sm flex flex-col justify-between">
+          <div class="p-5 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-xl space-y-4 shadow-sm flex flex-col justify-between">
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <h4 class="font-heading font-bold text-sm text-slate-800 dark:text-zinc-200">${escapeHtml(g.groupId)} <span class="text-xs font-normal text-slate-400 dark:text-zinc-500">(${g.members.length}名)</span></h4>
@@ -2101,7 +2096,7 @@
           ${
             state.tempUnmatched && state.tempUnmatched.length > 0
               ? `
-            <div class="p-5 border border-amber-200/60 bg-amber-500/5 dark:border-amber-955/40 dark:bg-amber-955/10 rounded-2xl space-y-3.5 shadow-inner">
+            <div class="p-5 border border-amber-200/60 bg-amber-500/5 dark:border-amber-900/40 dark:bg-amber-950/10 rounded-2xl space-y-3.5 shadow-inner">
               <h4 class="font-heading font-bold text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5 select-none">
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 animate-pulse"></i>
                 <span>今回選出枠からあふれたメンバー (${state.tempUnmatched.length} 名) ——— 次回マッチング時に最優先で選出されます</span>
@@ -2121,7 +2116,7 @@
                         : ""
                     }
                     <select class="ml-1.5 text-[9px] p-0.5 rounded border border-indigo-100/50 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 focus:outline-none cursor-pointer" onchange="addUnmatchedToGroup(${uIdx}, parseInt(this.value, 10))">
-                      <option value="" disabled selected hidden class="bg-white dark:bg-zinc-900 text-slate-405 dark:text-zinc-500">追加...</option>
+                      <option value="" disabled selected hidden class="bg-white dark:bg-zinc-900 text-slate-400 dark:text-zinc-500">追加...</option>
                       ${state.tempGroups.map((g, gIdx) => `<option value="${gIdx}" class="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200">${escapeHtml(g.groupId)}</option>`).join("")}
                     </select>
                   </span>
@@ -2152,7 +2147,7 @@
               "bg-sky-500 text-white border-sky-500 dark:bg-sky-400 dark:border-sky-400";
           } else if (num === 3) {
             colorClass =
-              "bg-slate-400 text-white border-slate-400 dark:bg-zinc-550 dark:border-zinc-550";
+              "bg-slate-400 text-white border-slate-400 dark:bg-zinc-500 dark:border-zinc-500";
           } else if (num === 2) {
             colorClass =
               "bg-amber-500 text-white border-amber-500 dark:bg-amber-400 dark:border-amber-400";
@@ -2199,7 +2194,7 @@
                 ${
                   m.considerations
                     ? `<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-955/20 px-2 py-0.5 rounded-lg border border-amber-200/40 dark:border-amber-900/30">⚠️ ${escapeHtml(m.considerations)}</span>`
-                    : '<span class="text-slate-405 text-slate-400 dark:text-zinc-600">-</span>'
+                    : '<span class="text-slate-400 dark:text-zinc-650">-</span>'
                 }
               </td>
               <td class="px-4 py-3.5 whitespace-nowrap">
@@ -2790,15 +2785,7 @@
         state.tempGroups[fromGroupIdx].members.splice(fromMemberIdx, 1);
         state.tempGroups[toGroupIdx].members.push(member);
 
-        markGroupAsModified(fromGroupIdx);
-        markGroupAsModified(toGroupIdx);
-
         renderView();
-      }
-
-      // グループ微調整に「修正あり」のメモを追加する補助関数
-      function markGroupAsModified(groupIdx) {
-        // ユーザー要望に基づき、手動微調整時のタグ付加処理は廃止されました。
       }
 
       // グループメンバーの操作ハンドラ（移動、削除、交代）
@@ -2815,7 +2802,6 @@
           if (!state.tempUnmatched) state.tempUnmatched = [];
           state.tempUnmatched.push(member);
 
-          markGroupAsModified(fromGroupIdx);
           showToast(
             "メンバーを控えに戻しました",
             `${member.name} さんを控えメンバーに移動しました。`,
@@ -2835,7 +2821,6 @@
               unmatchedMember;
             state.tempUnmatched[unmatchedIdx] = groupMember;
 
-            markGroupAsModified(fromGroupIdx);
             showToast(
               "メンバーを交代しました",
               `${groupMember.name} さんと ${unmatchedMember.name} さんを交代しました。`,
@@ -2855,7 +2840,6 @@
         state.tempUnmatched.splice(unmatchedIdx, 1);
         state.tempGroups[toGroupIdx].members.unshift(member); // 一番上（先頭）に追加
 
-        markGroupAsModified(toGroupIdx);
         showToast(
           "メンバーを追加しました",
           `${member.name} さんを ${state.tempGroups[toGroupIdx].groupId} に追加しました。`,
@@ -2899,16 +2883,7 @@
               "success",
             );
 
-            const loadRes = await callGas("getInitialData");
-            if (loadRes.success) {
-              state.members = loadRes.members;
-              state.settings = loadRes.settings;
-              state.history = loadRes.history;
-              state.totalCount = loadRes.totalCount;
-              state.activeCount = loadRes.activeCount;
-              state.hasApiKey = loadRes.hasApiKey;
-            }
-
+            await refreshStateFromServer();
             window.location.hash = "#user-matching";
           } else {
             showToast(
@@ -2948,17 +2923,7 @@
             );
 
             // データを再読み込みしてダッシュボードを更新
-            const loadRes = await callGas("getInitialData");
-            if (loadRes.success) {
-              state.members = loadRes.members;
-              state.settings = loadRes.settings;
-              state.history = loadRes.history;
-              state.totalCount = loadRes.totalCount;
-              state.activeCount = loadRes.activeCount;
-              state.hasApiKey = loadRes.hasApiKey;
-            }
-
-            renderView();
+            await refreshStateFromServer();
           } else {
             showToast(
               "削除エラー",
@@ -2994,7 +2959,7 @@
 
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
-          if (row.cells.length < 10) continue;
+          if (row.cells.length < 16) continue;
 
           const name = row.cells[0].textContent.toLowerCase();
           const email = row.cells[1].textContent.toLowerCase();
@@ -3003,7 +2968,7 @@
           const interests = row.cells[4].textContent.toLowerCase();
           const specialty = row.cells[5].textContent.toLowerCase();
           const weakness = row.cells[6].textContent.toLowerCase();
-          const considerations = row.cells[7].textContent.toLowerCase();
+          const considerations = row.cells[12].textContent.toLowerCase();
 
           const matchesSearch =
             !searchVal ||
@@ -3669,15 +3634,9 @@
       }
 
       async function handleSaveSettings() {
-        console.log("[DEBUG] handleSaveSettings() が実行されました！");
         try {
           const adminEmailsInput = document.getElementById("s-admin-emails");
           const apiKeyInput = document.getElementById("s-api-key");
-
-          console.log("[DEBUG] フォーム要素の取得状況:", {
-            adminEmailsInput: !!adminEmailsInput,
-            apiKeyInput: !!apiKeyInput,
-          });
 
           const settingsObj = {
             admin_emails: adminEmailsInput ? adminEmailsInput.value.trim() : "",
@@ -3723,7 +3682,7 @@
         ) {
           showToast("クリア中", "履歴データを削除中...", "warning");
           try {
-            var res = await callGas("clearMatchingHistory");
+            const res = await callGas("clearMatchingHistory");
             if (res.success) {
               showToast(
                 "クリア完了",
@@ -3756,7 +3715,7 @@
         ) {
           showToast("リセット中", "スプレッドシートを初期化中...", "warning");
           try {
-            await callGas("initDatabase");
+            await callGas("resetDatabase");
             showToast(
               "リセット成功",
               "データベースの初期化とデモデータの再インポートが完了しました。",
@@ -3908,6 +3867,10 @@
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#039;");
+      }
+
+      function cleanName(n) {
+        return n ? n.toString().replace(/\s+/g, "") : "";
       }
 
       // ==========================================

@@ -124,6 +124,15 @@ function showWebAppUrl() {
 }
 
 /**
+ * 管理者権限チェックを行った上で、スプレッドシートデータベースを初期化・リセットする。
+ * UI上のリセットボタンから呼び出される。
+ */
+function resetDatabase() {
+  checkAdminPermission();
+  return initDatabase();
+}
+
+/**
  * スプレッドシートデータベース（各シートおよびデモデータ）の自動初期化・マイグレーション。
  */
 function initDatabase() {
