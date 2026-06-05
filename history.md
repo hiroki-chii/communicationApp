@@ -1,5 +1,163 @@
 # 作業・修正ログ
 
+## 2026-06-06 08:28
+
+- **対応内容**: 自己プロフィール変更画面における「カード用画像」アップロードエリアの配置変更（最下部への移動）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **レイアウトの移設**: 一般ユーザー用自己プロフィールビュー（`getUserProfileViewHtml`）内のフォームにおいて、これまで最上部に設置されていた「カード用画像（実物カード用）」のアップロードエリアを、フォームの最下部（「配慮事項」の直後、かつ「変更を保存する」ボタンの直前）へ移動。
+  - **スタイリングの調整**: 配置箇所の移動に伴い、上部要素とのセパレータとして機能するよう、下部境界線（`border-b`）から上部境界線（`border-t`）へと枠線スタイルを調整。
+
+## 2026-06-05 20:25
+
+- **対応内容**: 画像削除・選択（変更）確認用モーダルの共通化および画像変更時における確認処理の実装
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **確認モーダルの共通化（HTML）**: 画面全体の背景暗化（バックドロップ）を行い、中央に固定される画像操作確認モーダル（`#image-action-confirm-modal`）としてリファクタリング。タイトル・本文・アイコン・確定ボタンがアクションに応じて動的変化するように設計。
+  - **画像選択時の確認フロー（JS）**: `self-profile-image-input` の `change` イベント発生時に、直接読み込まずに確認モーダルを表示。ユーザーがモーダル上で「設定する」を選択したタイミングで初めて `FileReader` による読み込みとプレビュー反映を実行し、キャンセル時は入力をクリア。
+  - **文言の明文化**: 画像削除時および選択時どちらの確認モーダルでも、「この変更は、下の『変更を保存する』ボタンを押した時点で確定されます。」という保存時確定の案内を明記。
+
+## 2026-06-05 20:12
+
+- **対応内容**: 画像削除確認モーダル（HTML）の配置場所の body 直下への移設（バックドロップの全体暗化とスクロール追従・画面中央表示の実現）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **body直下への移設**: ポップオーバー形式では背景を暗くできなかったため、モーダル HTML（`#image-delete-confirm-modal`）を `index.html` の `body` 閉じタグの直前へ移設。これにより、親要素の `transform` などのCSS影響を一切受けなくなり、`fixed inset-0 bg-black/50` によって「画面全体を暗くした上でビューポートの中央にモーダルを固定表示」する挙動へと変更。
+  - **ポップオーバーHTMLの削除**: 削除ボタンコンテナ内に内包させていたポップオーバー用のHTMLを完全消去。
+
+## 2026-06-05 20:08
+
+- **対応内容**: 画像削除確認モーダルの位置・スタイルの修正（ポップオーバー化による視認性・操作性の向上）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **ポップオーバー形式への移行**: モーダルが画面のスクロール位置によってズレてしまう問題を根本解決するため、削除ボタンと画像選択ボタンの親コンテナを `relative` に変更。その直上に `absolute bottom-full mb-2 left-0` の位置でフワッと表示される吹き出し風の確認ポップオーバー（`#image-delete-confirm-modal`）として表示するスタイルへ変更。
+  - **不要なHTMLの削除**: 自己プロフィールビュー（`getUserProfileViewHtml`）のフォーム下部に残っていた古い削除確認モーダルHTMLを消去。
+
+## 2026-06-05 20:02
+
+- **対応内容**: 画像削除確認モーダル（HTML）の配置場所の修正（SPAのビュー不一致による動作不良の解消）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **モーダル配置場所の修正**: 画像削除確認モーダル（`#image-delete-confirm-modal`）が管理者用メンバー一覧ビュー（`getMembersViewHtml`）内に誤って配置されていたため、一般ユーザーの自己プロフィールビュー（`getUserProfileViewHtml`）にアクセスした際に DOM が解決できずJSの動作不良（削除ボタンを押しても何も起きない）が起きていた。モーダル HTML の位置を `getUserProfileViewHtml` 内の form タグの直後へ移設して修正。
+
+## 2026-06-05 19:56
+
+- **対応内容**: プロフィール画像削除時のカスタム確認モーダルUIの実装
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **削除確認モーダル（HTML）の追加**: `index.html` の `member-modal` 直後に、Tailwind CSSとLucideアイコンを使用したプレミアムなデザインのカスタム確認モーダル（`#image-delete-confirm-modal`）を追加。
+  - **モーダル開閉および削除処理のJS制御**: `attachViewEvents` 内で、プロフィール画像の「削除」ボタン押下時にカスタム確認モーダルを表示し、キャンセルボタン押下時に非表示にする紐付けを追加。また、削除確定ボタン押下時に実際にプレビュー消去や `state.tempImageData` をクリアする処理を行い、モーダルを閉じるよう修正。
+
+## 2026-06-05 19:45
+
+- **対応内容**: プロフィール画像アップロード機能のバックエンド処理実装およびデータベース17列拡張・自動移行マイグレーションの実装
+- **対象ファイル**:
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+  - [task.md](file:///c:/Users/hirok/dev/communicationApp/task.md)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **データベース構成の拡張と自動移行（`main.gs`）**:
+    - 「メンバー一覧」スプレッドシートの17列目（Q列）に「プロフィール画像」カラムを追加。
+    - 既存シートに対する自動移行マイグレーション（`initDatabase` 内）を拡張。17列目の有無を検知して自動的に「プロフィール画像」列を追記・補完するロジックを実装。
+    - `getMembers` で17列目（Q列）のデータを取得するように修正し、`profileImage` フィールドを返却オブジェクトへ追加。
+    - `buildMemberRow`, `addMemberToSheet`, `updateMemberInSheet` を17列構成に対応させ、データの追加・更新時に画像URLがスプレッドシートへ書き込まれるように修正。
+  - **Google ドライブ画像保存ロジックの実装（`main.gs`）**:
+    - スプレッドシートと同じ親フォルダに「プロフィール画像」フォルダを自動作成する `getOrCreateFolder()` を実装し、その共有範囲を「リンクを知っている全員が閲覧可能」に自動設定。
+    - ユーザーから送信されるBase64形式（DataURL）の画像データをデコードし、Google ドライブに保存して直接表示可能な `https://lh3.googleusercontent.com/d/FILE_ID` 形式のURLを生成して返却する `saveBase64ImageToDrive()` を実装。
+    - 古い画像が残っている場合、ドライブの容量制限を圧迫しないよう自動的にドライブのファイルを削除（ゴミ箱へ移動）する `deleteFileByUrl()` を実装。
+  - **自己プロフィール保存APIとの統合（`main.gs`）**:
+    - `registerSelfProfile()` 内で、送信された画像データがBase64であればドライブ保存を実行し、以前の画像がある場合は削除、画像が削除された（空文字）場合はドライブ上のファイルも自動消去するフローを統合。
+  - **タスク管理の更新**:
+    - `task.md` にPhase 6として「プロフィール画像アップロード機能の実装」の進捗を記録し、すべて完了（完了マーク）に設定。
+
+## 2026-06-05 19:00
+
+- **対応内容**: GAS Cajaパーサーエラーの根本原因2箇所を修正
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **原因①**: `getUserProfileViewHtml` のテンプレートリテラル内に HTMLコメント `<!-- JSで動的に... -->` を再挿入してしまっていた。GASの HtmlService がテンプレートリテラル内のHTMLコメントを「本物のコメント」として誤解析し、後続のコードを破壊していた → コメントを完全除去。
+  - **原因②**: `${ isNew ? \`<div class="...">...\` : "" }` というネストしたテンプレートリテラルを復元していた。Cajaトランスパイラがネストしたバッククォート文字列の中の `class` 属性を JS 予約語として露出させてパースエラーを発生させていた → `newMemberWarning` 変数として事前にシングルクォートの文字列結合で組み立てる形に修正し、テンプレート内では `${newMemberWarning}` のみの単純な変数展開に変更。
+
+## 2026-06-05 11:55
+
+- **対応内容**: JSコード内からの HTML class 文字列リテラルの完全排除による GAS コンパイルエラーの修正
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - `attachViewEvents` および `getUserProfileViewHtml` の JS コード内に存在していた HTML 文字列（例: `<img src="..." class="...">`）が、GAS（Caja）コンパイラによって「JS内の `class` 予約語」と誤解釈され、トランスパイル後の構文エラーを引き起こしていたと特定。
+  - 画像プレビューエリアの初期描画および画像変更・削除時のレンダリング処理を、HTML文字列による `innerHTML` 割当てから、`document.createElement` や `element.className` を用いた純粋な DOM操作による動的レンダリングへ完全刷新。これにより JS ブロック内の文字列から `class="..."` 属性の記述を一掃。
+
+## 2026-06-05 11:42
+
+- **対応内容**: テンプレートリテラル内のネスト解消による GAS パースエラーの修正
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - `getUserProfileViewHtml` 関数内のテンプレートリテラル中に `${ ... ? \`...\` : \`...\` }` という形でバッククォートがネストされていた。これが GAS（Cajaパーサー）のトランスパイルエンジンによって誤解析され、中の HTML `class` 属性を生の JavaScript の `class` キーワードとして露出させていたと特定。
+  - テンプレートリテラル内のネストした三項演算子およびバッククォート文字列を、関数の事前処理で通常変数（`previewHtml`, `deleteBtnClass` 等）として組み立てる形にリファクタリングし、ネストを完全に排除。
+  - 安全のため、ヘッダー部の Tailwind 設定の `darkMode: "class"` も `"cla" + "ss"` にエスケープ。
+
+## 2026-06-05 11:25
+
+- **対応内容**: Unexpected token 'class' エラーの根本解決（HTMLコメントの一括自動削除）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - `index.html` 内の JavaScript テンプレートリテラル等に含まれていた大量の HTML コメント `<!-- ... -->` が原因で、GASの `HtmlService` コンパイラが構文解析を誤り `Uncaught SyntaxError: Unexpected token 'class'` を発生させていた。
+  - Windows PowerShell の置換処理を用いて、`index.html` 全体からすべての HTML コメントを完全に一掃。
+  - 除去完了を確認（`grep` にて検出ゼロ）。
+
+## 2026-06-05 11:20
+
+- **対応内容**: プロフィール設定画面への画像アップロード機能（フロントエンド実装）およびGAS構文エラー対策の完了
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [implementation_plan.md](file:///c:/Users/hirok/dev/communicationApp/implementation_plan.md)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **画像アップロードUIの構築**: 自己プロフィール画面（`user-profile`）の基本情報の上に、カード用画像（実物印刷用）のファイル選択インプット、プレビュー表示エリア、削除ボタンを追加。
+  - **GASコンパイルエラー（Unexpected token 'class'）の恒久対策**: `getUserProfileViewHtml` 内のすべての HTML コメント `<!-- ... -->` を安全に撤去し、GAS `HtmlService` のコンパイルバグ（インラインJS内のテンプレート文字列の誤パース）を防ぐように修正。
+  - **状態管理 & ライフサイクル**: `state.tempImageData` 状態プロパティを追加し、ルーティングハンドラ（`handleRoute`）で `user-profile` 画面遷移時に初期化（既存画像があればセット、なければ空文字）するよう変更。
+  - **アップロード処理**: 画像ファイル選択時に `FileReader` を使ってBase64（DataURL）にエンコードし、プレビューをリアルタイム描画し、`state.tempImageData` に保持。サイズ上限（5MB）およびイメージタイプバリデーションを実装。
+  - **保存パラメータ統合**: プロフィール保存時のAPIパラメータオブジェクト `profileObj` に、アップロードした画像データを送るための `profileImage` フィールドを組み込み。
+
+## 2026-06-05 11:10
+
+- **対応内容**: プロフィール画像アップロード機能の追加（フロント実装）および GAS `Unexpected token 'class'` パーサーバグの特定と調査ログ
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+- **ログ詳細**:
+  - **実装した機能**:
+    - 自己プロフィール画面にプロフィール画像のアップロードUI（画像プレビュー、Base64エンコード送信、削除ボタン）を追加。
+  - **遭遇したエラーの調査プロセス**:
+    - アップロード機能追加後に、GAS Web App で `Uncaught SyntaxError: Unexpected token 'class'` が発生し、読み込み画面でフリーズする問題が発生。
+    - **アプローチ1**: テンプレートリテラル内の三項演算子やネスト構造が原因と推測し、変数分離を行ったが解決せず。
+    - **アプローチ2**: Tailwind 設定の `darkMode: "class"` の文字列が Caja パーサーに予約語判定されたと推測し、`"cla" + "ss"` にエスケープしたが解決せず。
+    - **アプローチ3**: オプショナルチェイニング `?.` が ES5 互換性問題を起こしていると推測し、`(element || {}).value` に変更したが解決せず。
+    - **真の原因特定**: JavaScript のテンプレートリテラル（バッククォート内）に HTML コメント `<!-- ... -->` が含まれていると、GASの `HtmlService` コンパイラがそれを文字列ではなく「本物の HTML コメント」として誤解析してトークンを破壊し、直後の HTML（例: `<i ... class="...">`）を生の JavaScript として露出させてしまうバグ（パーサーバグ）を特定。
+    - **解決策**: `getUserProfileViewHtml` 内のテンプレートリテラルからすべての HTML コメントを完全撤去したところ、構文エラーが解消されアプリが正常に起動することを確認（その後、初回実行に必要な OAuth 認証画面が正常に起動した）。
+  - **現在のステータス**:
+    - 今後の実装再開に向け、一旦 Git を用いてプロフィール画像機能の実装開始前（2026-06-01時点）のクリーンな状態にロールバック。
+    - 今回得られた「**GAS のインライン JavaScript テンプレート内には絶対に HTML コメント `<!-- ... -->` を書いてはならない**」というナレッジを次回以降の実装に引き継ぐために本ログを記録。
+
 ## 2026-06-01 10:15
 
 - **対応内容**: 残りの低優先度リファクタリング項目の完了（コードクレンジングおよびクリーンアップ）

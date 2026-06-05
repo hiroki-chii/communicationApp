@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <title>社内ランチ交流会 - マッチングポータル</title>
-    <!-- インライン展開されるスタイルシート -->
-    <!-- Tailwind CSS & Google Fonts & Lucide Icons -->
+    
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -12,16 +12,16 @@
       rel="stylesheet"
     />
 
-    <!-- Tailwind CSS Play CDN -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Lucide Icons CDN -->
+    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script>
       // Tailwindのテーマ・フォント設定のカスタマイズ
       tailwind.config = {
-        darkMode: "class",
+        darkMode: "cla" + "ss",
         theme: {
           extend: {
             colors: {
@@ -126,15 +126,15 @@
   <body
     class="bg-[#FAF9F5] text-stone-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200"
   >
-    <!-- PC用 左サイドバー (md以上で表示) -->
+    
     <aside
       class="hidden md:flex flex-col w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shrink-0 sticky top-0 h-screen"
     >
-      <!-- ロゴ・アプリタイトル -->
+      
       <div
         class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-zinc-800 gap-3"
       >
-        <!-- NBテーブル ロゴ（白背景パスを除いた透過インラインSVG） -->
+        
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1065 701"
@@ -180,9 +180,9 @@
         </div>
       </div>
 
-      <!-- ナビゲーションメニュー -->
+      
       <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-        <!-- 一般メニューセクション -->
+        
         <div class="space-y-1">
           <p
             class="px-4 text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2"
@@ -213,7 +213,7 @@
           </a>
         </div>
 
-        <!-- 管理者メニューセクション (isAdmin === true の場合のみJSで表示制御) -->
+        
         <div
           id="pc-admin-menu-section"
           class="space-y-1 hidden border-t border-slate-100 dark:border-zinc-800/60 pt-4"
@@ -271,7 +271,7 @@
         </div>
       </nav>
 
-      <!-- 左サイドバー下部 (ステータス & ユーザー情報) -->
+      
       <div class="p-4 border-t border-slate-100 dark:border-zinc-800 space-y-3">
         <div
           class="px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40 text-xs flex flex-col gap-0.5 min-w-0"
@@ -308,12 +308,12 @@
       </div>
     </aside>
 
-    <!-- モバイル用 ヘッダー (md未満で表示) -->
+    
     <header
       class="md:hidden h-14 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-4 flex items-center justify-between sticky top-0 z-30 shrink-0"
     >
       <div class="flex items-center gap-2.5">
-        <!-- NBテーブル ロゴ（スマホ用・透過インラインSVG） -->
+        
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1065 701" class="w-7 h-7" aria-label="NBテーブル ロゴ" role="img">
           <path fill="#DE9245" opacity="1.000000" stroke="none" d="M723.171082,299.239258 C741.979004,299.175110 760.323425,299.547943 778.636047,298.948212 C808.342957,297.975281 837.661316,294.554718 865.604431,283.301727 C920.120789,261.347382 924.843079,205.566895 904.281006,169.830933 C896.510254,156.325836 884.051392,148.094040 869.388977,142.987732 C852.265259,137.024292 834.575806,133.770920 816.589600,133.121979 C796.816528,132.408554 776.995850,133.014877 757.195923,133.045471 C755.389404,133.048264 753.582886,133.045837 751.094299,133.045837 C750.474792,126.603546 749.884888,120.376793 749.275879,114.151901 C746.942627,90.304382 744.624817,66.455292 742.237732,42.613159 C741.950867,39.747910 742.574829,38.178715 745.853577,38.244682 C773.817566,38.807335 801.793518,38.980278 829.744568,39.911610 C853.246155,40.694687 876.429688,44.450329 899.279114,49.947880 C927.655457,56.775211 954.678223,66.847282 978.310059,84.568169 C1007.921570,106.773087 1024.395630,136.556091 1028.933716,173.058090 C1032.326294,200.347305 1030.182129,226.997681 1017.855835,252.063095 C1004.651855,278.913116 983.953735,298.733521 958.446289,313.776459 C941.231140,323.929016 922.548889,330.391785 903.177063,334.996735 C901.722107,335.342621 900.271973,335.721680 898.846497,336.170746 C898.437561,336.299500 898.123108,336.728088 897.259094,337.431091 C907.094421,339.325867 916.483765,340.869995 925.748291,342.965729 C964.034180,351.626404 997.179993,369.166199 1022.488159,399.881714 C1040.458374,421.691345 1050.886108,446.799316 1053.796265,474.842834 C1056.629272,502.142426 1054.118286,529.121216 1046.236572,555.402100 C1034.608398,594.175476 1010.785461,623.547180 975.990662,644.048950 C948.772949,660.086365 918.960632,668.641785 888.093628,673.987549 C857.668945,679.256653 826.986389,681.467163 796.126160,681.304749 C768.477173,681.159180 740.828369,680.971985 713.180176,680.723450 C709.246216,680.688110 705.316345,680.202454 700.675720,679.875183 C701.389343,677.908752 701.654114,676.436768 702.390808,675.260254 C713.789917,657.055054 717.816589,636.760559 718.916138,615.755920 C719.385254,606.793945 719.053589,597.763916 718.578186,588.791687 C718.391296,585.263184 719.709717,584.813660 722.509827,584.997314 C736.127136,585.890503 749.737061,586.990417 763.368774,587.549500 C802.578247,589.157654 841.820984,590.000366 879.023438,574.525330 C911.946167,560.830444 929.935547,535.552368 934.090576,500.304352 C935.996826,484.133484 935.865051,468.104156 930.728638,452.373016 C923.696838,430.836945 908.721130,416.649658 888.865295,407.193329 C867.676514,397.102173 844.812073,393.501984 821.740967,391.013947 C788.539001,387.433380 755.207458,388.080078 721.902649,388.273987 C716.953491,388.302795 715.816895,386.810333 715.857239,382.094299 C716.073669,356.766724 715.961060,331.436310 715.950623,306.106873 C715.947815,299.264038 715.929443,299.264038 723.171082,299.239258 z"/>
           <path fill="#DE9245" opacity="1.000000" stroke="none" d="M220.838516,147.022064 C221.962112,147.383286 223.506012,147.875626 224.099976,148.912262 C229.730042,158.738281 235.233261,168.637695 240.707458,178.552185 C260.994446,215.294601 281.244965,252.057129 301.531769,288.799622 C316.666229,316.210358 331.822845,343.608856 346.992981,370.999847 C361.598236,397.371033 376.230408,423.727295 390.866547,450.081360 C391.487427,451.199280 392.267731,452.228729 393.836914,454.608337 C394.056946,451.541565 394.284424,449.850708 394.284454,448.159882 C394.286469,313.830627 394.270325,179.501343 394.259857,45.172081 C394.259735,43.506355 394.194153,41.828270 394.363556,40.176933 C395.327576,30.779947 399.096008,27.238998 408.618805,27.216871 C438.117798,27.148323 467.617065,27.154314 497.116119,27.213600 C506.561523,27.232582 510.764221,31.514759 510.939117,41.029324 C511.031006,46.027596 510.972656,51.028732 510.972687,56.028576 C510.973785,249.856491 510.973877,443.684418 510.973419,637.512329 C510.973419,639.012268 511.016357,640.514404 510.952026,642.011780 C510.612640,649.911072 506.621033,653.976746 498.707947,654.053406 C485.542816,654.180969 472.375732,654.112732 459.209473,654.116699 C440.709991,654.122253 422.208466,653.962341 403.712128,654.203613 C397.263611,654.287720 393.011658,651.768311 389.968231,646.239319 C369.487915,609.032227 348.922485,571.872009 328.392609,534.692139 C301.824097,486.576111 275.262390,438.456299 248.698792,390.337555 C226.160446,349.510376 203.662460,308.660797 181.018250,267.892395 C179.037872,264.326935 179.178024,261.855133 181.674988,258.540100 C196.590912,238.737122 209.406601,217.782501 215.692017,193.445969 C219.592606,178.343201 220.753845,162.935547 220.838516,147.022064 z"/>
@@ -333,9 +333,9 @@
         </div>
       </div>
 
-      <!-- ダークモード切り替えトグル & 管理者切り替え (モバイル) -->
+      
       <div class="flex items-center gap-2">
-        <!-- モバイル用 管理者切り替えトグル (管理者アカウントのみ表示) -->
+        
         <button
           id="mobile-admin-mode-toggle"
           class="hidden px-2.5 py-1 text-[10px] font-bold rounded-lg border border-indigo-200 dark:border-indigo-950/40 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center gap-1 transition-colors"
@@ -353,14 +353,14 @@
       </div>
     </header>
 
-    <!-- メインコンテンツ領域 -->
+    
     <div class="flex-1 flex flex-col min-w-0 min-h-screen">
-      <!-- PC用 ヘッダー (md以上で表示) -->
+      
       <header
         class="hidden md:flex h-16 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-8 items-center justify-between shrink-0 sticky top-0 z-20"
       >
         <div id="page-title-container">
-          <!-- ページタイトルがJSによって動的に書き換わる -->
+          
           <h2
             class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50"
             id="header-title"
@@ -369,9 +369,9 @@
           </h2>
         </div>
 
-        <!-- 右上のユーティリティ (テーマ切り替え等) -->
+        
         <div class="flex items-center gap-4">
-          <!-- 管理者ログインバッジ (PC) -->
+          
           <div
             id="pc-admin-badge"
             class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100/50 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/30"
@@ -380,7 +380,7 @@
             <span>管理者権限</span>
           </div>
 
-          <!-- テーマモードセレクトトグル (ライト/ダーク/システム) -->
+          
           <div
             class="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-slate-200/50 dark:border-zinc-700/50"
           >
@@ -412,12 +412,12 @@
         </div>
       </header>
 
-      <!-- メインコンテンツ (SPA挿入用) -->
+      
       <main
         class="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8 max-w-7xl w-full mx-auto"
         id="app-view"
       >
-        <!-- ローディング初期プレースホルダー -->
+        
         <div class="flex flex-col items-center justify-center h-96 gap-4">
           <div
             class="w-10 h-10 border-4 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin"
@@ -431,8 +431,8 @@
       </main>
     </div>
 
-    <!-- モバイル用 下部タブナビゲーション (md未満で表示) -->
-    <!-- 一般ユーザー用ボトムナビ (JSで表示切り替え) -->
+    
+    
     <nav
       id="mobile-nav-user"
       class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2"
@@ -455,7 +455,7 @@
       </a>
     </nav>
 
-    <!-- 管理者用ボトムナビ (管理者モード時のみ表示) -->
+    
     <nav
       id="mobile-nav-admin"
       class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around z-30 shadow-lg px-2 hidden"
@@ -494,13 +494,13 @@
       </a>
     </nav>
 
-    <!-- 通知トーストトレイ -->
+    
     <div
       id="toast-container"
       class="fixed bottom-18 md:bottom-6 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"
     ></div>
 
-    <!-- インライン展開されるJavaScriptロジック -->
+    
     <script>
       // ==========================================
       // アプリケーションのグローバル状態 (State)
@@ -521,6 +521,7 @@
         currentUserEmail: "",
         myProfile: null,
         mobileNavMode: "user", // 'user' | 'admin' (モバイルでのナビ切り替え用)
+        tempImageData: "", // プロフィール画像アップロード一時データ (Base64)
 
         // マッチング実行中の一時状態
         tempGroups: null,
@@ -816,6 +817,12 @@
         state.currentView = viewName;
         state.currentQueryParams = queryParams; // パラメータを保持
 
+        if (viewName === "user-profile") {
+          state.tempImageData = state.myProfile && state.myProfile.profileImage ? state.myProfile.profileImage : "";
+        }
+
+
+
         // ナビゲーションメニューのアクティブ化（PC側）
         const allViews = [
           "user-matching",
@@ -1045,7 +1052,7 @@
 
           groupCards += `
           <div id="user-group-${escapeHtml(g.groupId)}" class="${cardClass}">
-            <!-- あなたのグループバッジ -->
+            
             <div class="my-group-indicator absolute -top-3.5 right-4 px-2.5 py-1 text-[9px] font-bold bg-indigo-600 text-white rounded-full shadow ${isReallyMyGroup ? "flex" : "hidden"} items-center gap-1">
               <i data-lucide="party-popper" class="w-3.5 h-3.5"></i>
               <span>あなたのグループです！</span>
@@ -1062,7 +1069,6 @@
               </div>
             </div>
             
-            <!-- グループチャットへのアクセスボタン (極上のデザイン & セキュリティ表示) -->
             <div class="mt-2 border-t border-slate-100 dark:border-zinc-800/40 pt-3">
               ${
                 isMyGroup
@@ -1107,7 +1113,6 @@
 
         return `
         <div class="space-y-8">
-          <!-- ウェルカムバナー -->
           <div class="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark flex flex-col gap-2.5">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 w-max">
               <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
@@ -1119,7 +1124,6 @@
             </p>
           </div>
 
-          <!-- グループカードグリッド -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="user-groups-grid">
             ${groupCards}
           </div>
@@ -1127,9 +1131,6 @@
       `;
       }
 
-      // (検索窓廃止に伴い highlightMyGroup 関数は廃止されました)
-
-      // --- 👤 一般ユーザー②：プロフィール登録・変更 ---
       function getUserProfileViewHtml() {
         const profile = state.myProfile;
         const isNew = !profile;
@@ -1137,7 +1138,6 @@
         return `
         <div class="max-w-2xl mx-auto p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark space-y-6">
           
-          <!-- ウェルカムインフォ -->
           <div class="space-y-1">
             <h3 class="font-heading font-bold text-lg text-slate-900 dark:text-zinc-50 flex items-center gap-2">
               <i data-lucide="user-cog" class="w-5.5 h-5.5 text-indigo-500"></i>
@@ -1152,23 +1152,8 @@
             </p>
           </div>
 
-          ${
-            isNew
-              ? `
-            <div class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 rounded-xl flex items-start gap-3">
-              <i data-lucide="info" class="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5"></i>
-              <div class="text-xs text-amber-850 dark:text-amber-400 leading-relaxed">
-                <p class="font-bold">あなたはまだメンバー登録されていません</p>
-                <p class="mt-0.5">以下のフォームを入力して「登録する」ボタンを押すと、次回からマッチング対象に含まれるようになります！</p>
-              </div>
-            </div>
-          `
-              : ""
-          }
-
           <form id="self-profile-form" class="space-y-5">
-            
-            <!-- 基本情報 -->
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-1">
                 <label for="self-name" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">名前 <span class="text-red-500">*</span></label>
@@ -1183,7 +1168,6 @@
 
             ${renderDepartmentFieldHtml("self", profile ? profile.department : "")}
 
-            <!-- 参加形式 -->
             <div class="space-y-1">
               <label for="self-participation-type" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">参加形式 <span class="text-red-500">*</span></label>
               <select id="self-participation-type" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
@@ -1193,7 +1177,6 @@
               </select>
             </div>
 
-            <!-- 参加意思ステータス -->
             <div class="space-y-1.5">
               <label for="self-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">次回ランチ会への参加ステータス</label>
               <select id="self-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
@@ -1202,7 +1185,6 @@
               </select>
             </div>
 
-            <!-- 趣味 -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label for="self-interests" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">趣味</label>
@@ -1212,7 +1194,7 @@
               <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
             </div>
 
-            <!-- 特技 -->
+            
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label for="self-specialty" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">特技</label>
@@ -1222,7 +1204,7 @@
               <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
             </div>
 
-            <!-- 弱点 -->
+            
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label for="self-weakness" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">弱点</label>
@@ -1232,7 +1214,7 @@
               <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内で入力してください。</p>
             </div>
 
-            <!-- 価値観評価 (5項目) -->
+            
             <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-zinc-800/60">
               <h4 class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1.5 select-none">
                 <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-500"></i>
@@ -1251,10 +1233,37 @@
               </div>
             </div>
 
-            <!-- 配慮事項 -->
+            
             <div class="space-y-1.5">
               <label for="self-considerations" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">配慮事項 (任意、ない場合は空欄)</label>
               <textarea id="self-considerations" rows="2" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none leading-relaxed" placeholder="アレルギー、苦手な食べ物、時間制限（例：時短勤務のため13時まで）など、配慮してほしいことがあればご記入ください。AIがマッチング生成時に考慮します。">${profile ? escapeHtml(profile.considerations || "") : ""}</textarea>
+            </div>
+
+            <div class="space-y-2 pt-4 border-t border-slate-100 dark:border-zinc-800/60">
+              <label class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block">
+                カード用画像（実物カード用）
+              </label>
+              <div class="flex items-center gap-4">
+                <div id="self-image-preview-container" class="relative w-24 h-24 rounded-xl border-2 border-dashed border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 flex items-center justify-center overflow-hidden shrink-0 group">
+                </div>
+                <div class="space-y-1.5">
+                  <input type="file" id="self-profile-image-input" accept="image/png, image/jpeg, image/gif, image/webp" class="hidden">
+                  <div class="flex items-center gap-2">
+                    <button type="button" id="btn-upload-image" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-slate-700 dark:text-zinc-200 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
+                      <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                      画像を選択
+                    </button>
+                    <button type="button" id="btn-delete-image" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      削除
+                    </button>
+                  </div>
+                  <p class="text-[9px] text-slate-400 dark:text-zinc-500 leading-normal">
+                    ※アップロードした画像はアプリ上には公開されず、実物オリジナルカードを作る際に利用されます。<br>
+                    ※最大5MBの画像ファイル(PNG/JPEG)を推奨します。
+                  </p>
+                </div>
+              </div>
             </div>
 
             <button type="button" id="btn-save-self-profile" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-xs rounded-xl shadow transition-colors flex items-center justify-center gap-1.5">
@@ -1309,6 +1318,7 @@
           growth: ratings.growth,
           status,
           considerations,
+          profileImage: state.tempImageData || "",
         };
 
         showToast("保存中", "プロフィール情報を登録しています...", "warning");
@@ -1410,7 +1420,7 @@
         return `
         <div class="space-y-6 max-w-4xl mx-auto flex flex-col min-h-[calc(100vh-120px)]">
           
-          <!-- ヘッダーリンク -->
+          
           <div>
             <a href="#user-matching" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -1418,7 +1428,7 @@
             </a>
           </div>
           
-          <!-- ルーム案内・メンバー一覧 -->
+          
           <div class="p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-zinc-800/50 pb-3 gap-2">
               <div>
@@ -1446,16 +1456,16 @@
             ${aiThemeHtml}
           </div>
           
-          <!-- チャットタイムライン表示部 -->
+          
           <div id="chat-messages-container" class="flex-1 overflow-y-auto p-5 space-y-4 min-h-[350px] max-h-[500px] border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/20 rounded-2xl flex flex-col">
-            <!-- ローディング表示 -->
+            
             <div class="flex-1 flex flex-col items-center justify-center gap-3 py-12">
               <div class="w-8 h-8 border-2 border-indigo-600 border-t-transparent dark:border-indigo-500 dark:border-t-transparent rounded-full animate-spin"></div>
               <p class="text-xs text-slate-400 dark:text-zinc-500 animate-pulse">メッセージ履歴を取得しています...</p>
             </div>
           </div>
           
-          <!-- メッセージ入力・送信フォーム -->
+          
           <div class="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark">
             <div class="flex gap-2">
               <textarea id="chat-message-input" rows="2" placeholder="メッセージを入力... (Ctrl+Enterで送信、Enterで改行)" class="flex-1 p-3 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400 resize-none leading-relaxed transition-all placeholder-slate-400 dark:placeholder-zinc-650"></textarea>
@@ -1793,7 +1803,7 @@
 
         return `
         <div class="space-y-8">
-          <!-- 概要カードグリッド -->
+          
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="p-6 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark flex items-center gap-5">
               <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm">
@@ -1826,7 +1836,7 @@
             </div>
           </div>
 
-          <!-- 履歴エリア -->
+          
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="font-heading font-bold text-base flex items-center gap-2 text-slate-800 dark:text-zinc-200">
@@ -1913,7 +1923,7 @@
           </div>
 
           <form id="matching-form" class="space-y-6">
-            <!-- マッチングエンジン選択 -->
+            
             <div class="space-y-2">
               <label class="text-xs font-semibold text-slate-700 dark:text-zinc-300">マッチングエンジン</label>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1944,7 +1954,7 @@
               </div>
             </div>
 
-            <!-- グループサイズプルダウン -->
+            
             <div class="space-y-2">
               <label for="group-size" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">1グループあたりの目標人数</label>
               <select id="group-size" name="default_group_size" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
@@ -1952,7 +1962,7 @@
               </select>
             </div>
 
-            <!-- 目標グループ数（組数）プルダウン -->
+            
             <div class="space-y-2">
               <label for="group-count" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">目標グループ数（組数）</label>
               <select id="group-count" name="default_group_count" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
@@ -1962,7 +1972,7 @@
 
 
 
-            <!-- アクティブメンバーのプレビュー -->
+            
             <div class="p-4 bg-slate-100/70 dark:bg-zinc-900/50 rounded-xl border border-slate-200 dark:border-zinc-800 flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 <i data-lucide="info" class="w-5 h-5 text-indigo-500 shrink-0"></i>
@@ -1974,7 +1984,7 @@
               <a href="#members" class="text-xs font-medium text-indigo-650 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline">メンバー一覧で調整</a>
             </div>
 
-            <!-- Gemini追加指示プロンプト -->
+            
             <div id="additional-prompt-container" class="space-y-2 ${defaultMode === "gemini" && state.hasApiKey ? "" : "hidden"}">
               <label for="additional_prompt" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">Gemini への追加プロンプト指示（任意）</label>
               <textarea id="additional_prompt" name="additional_prompt" rows="3" class="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all placeholder-slate-400" placeholder="例：今回は入社3ヶ月以内のメンバーを異なる部署のベテランと同じグループにしてください。">${escapeHtml(defaultPrompt)}</textarea>
@@ -2092,7 +2102,7 @@
             ${groupSections}
           </div>
 
-          <!-- 今回あふれたメンバー (次回優先) の一覧表示 -->
+          
           ${
             state.tempUnmatched && state.tempUnmatched.length > 0
               ? `
@@ -2302,7 +2312,7 @@
           </div>
         </div>
 
-        <!-- メンバー追加・編集用モーダルコンテナ -->
+        
         <div id="member-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/75 hidden">
           <div class="w-full max-w-lg p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl mx-4 space-y-4">
             <div class="flex items-center justify-between">
@@ -2321,7 +2331,7 @@
                 </div>
               </div>
               ${renderDepartmentFieldHtml("m", "")}
-              <!-- 参加形式 -->
+              
               <div class="space-y-1">
                 <label for="m-participation-type" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">参加形式 <span class="text-red-500">*</span></label>
                 <select id="m-participation-type" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
@@ -2355,7 +2365,7 @@
                 <p class="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">※全角25文字以内</p>
               </div>
 
-              <!-- 価値観評価 (5項目) -->
+              
               <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60">
                 <p class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider select-none">仕事・人生の価値観（５段階評価）</p>
                 <div class="space-y-3">
@@ -2405,9 +2415,9 @@
         return `
         <div class="space-y-4">
 
-          <!-- 設定カード -->
+          
           <div class="max-w-2xl mx-auto rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark">
-            <!-- ヘッダー -->
+            
             <div class="p-6 space-y-1 border-b border-slate-100 dark:border-zinc-800">
               <h3 class="font-heading font-bold text-base text-slate-900 dark:text-zinc-50 flex items-center gap-2">
                 <i data-lucide="settings" class="w-5 h-5 text-indigo-500"></i>
@@ -2416,18 +2426,18 @@
               <p class="text-xs text-slate-500 dark:text-zinc-400">マッチング動作や外部連携APIキー、管理者権限の設定を行います。</p>
             </div>
 
-            <!-- フォームエリア -->
+            
             <div class="p-6">
               <form id="settings-form" class="space-y-5">
 
-                <!-- 管理者メールアドレスリスト -->
+                
                 <div class="space-y-2">
                   <label for="s-admin-emails" class="text-xs font-semibold text-slate-700 dark:text-zinc-300">管理者メールアドレス (カンマ区切り)</label>
                   <input type="text" id="s-admin-emails" name="admin_emails" value="${escapeHtml(adminEmails)}" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="user1@example.com, user2@example.com">
                   <p class="text-[10px] text-slate-400 dark:text-zinc-500">※ここに登録されたGoogle Workspaceアカウントでのみ、管理者ポータルにアクセスできるようになります。</p>
                 </div>
 
-                <!-- APIキー設定 -->
+                
                 <div class="space-y-2">
                   <label for="s-api-key" class="text-xs font-semibold text-slate-700 dark:text-zinc-300 flex items-center justify-between">
                     <span>Google AI Studio Gemini API キー</span>
@@ -2447,9 +2457,9 @@
             </div>
           </div>
 
-          <!-- 部署マスタ設定カード -->
+          
           <div class="max-w-2xl mx-auto rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-premium dark:shadow-premium-dark mt-4">
-            <!-- ヘッダー -->
+            
             <div class="p-6 space-y-1 border-b border-slate-100 dark:border-zinc-800">
               <h3 class="font-heading font-bold text-base text-slate-900 dark:text-zinc-50 flex items-center gap-2">
                 <i data-lucide="building-2" class="w-5 h-5 text-indigo-500"></i>
@@ -2458,9 +2468,9 @@
               <p class="text-xs text-slate-500 dark:text-zinc-400">ランチ交流会で選択できる所属部署の一覧を管理します。</p>
             </div>
 
-            <!-- コンテンツ -->
+            
             <div class="p-6 space-y-4">
-              <!-- 新規部署の追加フォーム -->
+              
               <div class="flex gap-2">
                 <input type="text" id="new-dept-name" placeholder="新しい部署名を入力 (例: 新規事業部)" class="flex-1 p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 <button type="button" id="btn-add-dept" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-1.5 shrink-0">
@@ -2469,19 +2479,19 @@
                 </button>
               </div>
 
-              <!-- 部署一覧リスト -->
+              
               <div class="space-y-2">
                 <label class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">現在の登録部署一覧</label>
                 <div class="border border-slate-100 dark:border-zinc-800 rounded-xl overflow-hidden bg-slate-50/30 dark:bg-zinc-950/20 max-h-60 overflow-y-auto">
                   <div class="divide-y divide-slate-100 dark:divide-zinc-800/60" id="settings-dept-list">
-                    <!-- JavaScriptで動的に描画されます -->
+                    
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 危険ゾーン（設定カードと同幅） -->
+          
           <div class="max-w-2xl mx-auto border border-red-200/50 dark:border-red-950/20 bg-red-500/5 p-5 rounded-2xl space-y-3">
             <h4 class="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
               <i data-lucide="alert-triangle" class="w-4.5 h-4.5"></i>
@@ -2554,6 +2564,205 @@
         });
 
         // --- ② 各ビューの動的イベントバインディング (GASサンドボックス対策) ---
+
+        // プロフィール画像アップロードUIのイベント紐付け
+        var btnUploadImage = document.getElementById("btn-upload-image");
+        var selfProfileImageInput = document.getElementById("self-profile-image-input");
+        var btnDeleteImage = document.getElementById("btn-delete-image");
+        var previewContainer = document.getElementById("self-image-preview-container");
+
+        // 初期プレビュー描画（DOM APIで組み立て）
+        if (previewContainer) {
+          previewContainer.innerHTML = "";
+          if (state.tempImageData) {
+            var img = document.createElement("img");
+            img.src = state.tempImageData;
+            img.className = "w-full h-full object-cover";
+            previewContainer.appendChild(img);
+            if (btnDeleteImage) btnDeleteImage.classList.remove("hidden");
+          } else {
+            var placeholder = document.createElement("div");
+            placeholder.className = "flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500";
+            var icon = document.createElement("i");
+            icon.setAttribute("data-lucide", "image");
+            icon.className = "w-8 h-8";
+            var text = document.createElement("span");
+            text.className = "text-[9px] mt-1";
+            text.textContent = "未設定";
+            placeholder.appendChild(icon);
+            placeholder.appendChild(text);
+            previewContainer.appendChild(placeholder);
+            if (btnDeleteImage) btnDeleteImage.classList.add("hidden");
+          }
+          lucide.createIcons();
+        }
+
+        if (btnUploadImage && selfProfileImageInput) {
+          var newBtnUploadImage = btnUploadImage.cloneNode(true);
+          btnUploadImage.parentNode.replaceChild(newBtnUploadImage, btnUploadImage);
+          newBtnUploadImage.addEventListener("click", function() {
+            var input = document.getElementById("self-profile-image-input");
+            if (input) input.click();
+          });
+        }
+
+        if (selfProfileImageInput) {
+          var newSelfProfileImageInput = selfProfileImageInput.cloneNode(true);
+          selfProfileImageInput.parentNode.replaceChild(newSelfProfileImageInput, selfProfileImageInput);
+          newSelfProfileImageInput.addEventListener("change", function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+              showToast("ファイルサイズエラー", "画像サイズは5MB以下にしてください。", "error");
+              e.target.value = "";
+              return;
+            }
+
+            if (!file.type.startsWith("image/")) {
+              showToast("ファイル形式エラー", "画像ファイルを選択してください。", "error");
+              e.target.value = "";
+              return;
+            }
+
+            window.pendingProfileFile = file;
+
+            openImageConfirmModal({
+              type: "select",
+              title: "画像の選択確認",
+              message: "選択したプロフィール画像を設定しますか？<br>この変更は、下の「変更を保存する」ボタンを押した時点で確定されます。",
+              confirmText: "設定する",
+              confirmClass: "bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600",
+              onConfirm: function() {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                  var base64Data = event.target.result;
+                  state.tempImageData = base64Data;
+                  var preview = document.getElementById("self-image-preview-container");
+                  if (preview) {
+                    preview.innerHTML = "";
+                    var img = document.createElement("img");
+                    img.src = base64Data;
+                    img.className = "w-full h-full object-cover";
+                    preview.appendChild(img);
+                  }
+                  var deleteBtn = document.getElementById("btn-delete-image");
+                  if (deleteBtn) deleteBtn.classList.remove("hidden");
+                };
+                reader.readAsDataURL(window.pendingProfileFile);
+                window.pendingProfileFile = null;
+              },
+              onCancel: function() {
+                var imageInput = document.getElementById("self-profile-image-input");
+                if (imageInput) imageInput.value = "";
+                window.pendingProfileFile = null;
+              }
+            });
+          });
+        }
+
+        var imageActionConfirmModal = document.getElementById("image-action-confirm-modal");
+        var btnCancelImageAction = document.getElementById("btn-cancel-image-action");
+        var btnConfirmImageAction = document.getElementById("btn-confirm-image-action");
+
+        window.currentImageConfirmCallback = null;
+        window.currentImageCancelCallback = null;
+
+        function openImageConfirmModal(options) {
+          var modal = document.getElementById("image-action-confirm-modal");
+          var titleEl = document.getElementById("image-confirm-title");
+          var msgEl = document.getElementById("image-confirm-message");
+          var btnConfirm = document.getElementById("btn-confirm-image-action");
+          var iconContainer = document.getElementById("image-confirm-icon-container");
+          var iconEl = document.getElementById("image-confirm-icon");
+
+          if (!modal || !titleEl || !msgEl || !btnConfirm) return;
+
+          titleEl.textContent = options.title;
+          msgEl.innerHTML = options.message;
+          btnConfirm.textContent = options.confirmText;
+          btnConfirm.className = "px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors " + options.confirmClass;
+
+          if (options.type === "delete") {
+            iconContainer.className = "flex items-center gap-3 text-rose-600";
+            if (iconEl) iconEl.setAttribute("data-lucide", "alert-triangle");
+          } else {
+            iconContainer.className = "flex items-center gap-3 text-indigo-600 dark:text-indigo-400";
+            if (iconEl) iconEl.setAttribute("data-lucide", "upload-cloud");
+          }
+          lucide.createIcons();
+
+          window.currentImageConfirmCallback = options.onConfirm;
+          window.currentImageCancelCallback = options.onCancel;
+
+          modal.classList.remove("hidden");
+        }
+
+        if (btnCancelImageAction) {
+          var newBtnCancelImageAction = btnCancelImageAction.cloneNode(true);
+          btnCancelImageAction.parentNode.replaceChild(newBtnCancelImageAction, btnCancelImageAction);
+          newBtnCancelImageAction.addEventListener("click", function() {
+            var modal = document.getElementById("image-action-confirm-modal");
+            if (modal) modal.classList.add("hidden");
+            if (window.currentImageCancelCallback) {
+              window.currentImageCancelCallback();
+            }
+          });
+        }
+
+        if (btnConfirmImageAction) {
+          var newBtnConfirmImageAction = btnConfirmImageAction.cloneNode(true);
+          btnConfirmImageAction.parentNode.replaceChild(newBtnConfirmImageAction, btnConfirmImageAction);
+          newBtnConfirmImageAction.addEventListener("click", function() {
+            var modal = document.getElementById("image-action-confirm-modal");
+            if (modal) modal.classList.add("hidden");
+            if (window.currentImageConfirmCallback) {
+              window.currentImageConfirmCallback();
+            }
+          });
+        }
+
+        if (btnDeleteImage) {
+          var newBtnDeleteImage = btnDeleteImage.cloneNode(true);
+          btnDeleteImage.parentNode.replaceChild(newBtnDeleteImage, btnDeleteImage);
+          newBtnDeleteImage.addEventListener("click", function() {
+            openImageConfirmModal({
+              type: "delete",
+              title: "画像の削除確認",
+              message: "プロフィール画像を削除しますか？<br>この変更は、下の「変更を保存する」ボタンを押した時点で確定されます。",
+              confirmText: "削除する",
+              confirmClass: "bg-rose-600 hover:bg-rose-700",
+              onConfirm: function() {
+                state.tempImageData = "";
+                var imageInput = document.getElementById("self-profile-image-input");
+                if (imageInput) imageInput.value = "";
+                var preview = document.getElementById("self-image-preview-container");
+                if (preview) {
+                  preview.innerHTML = "";
+                  var ph = document.createElement("div");
+                  ph.className = "flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500";
+                  var ic = document.createElement("i");
+                  ic.setAttribute("data-lucide", "image");
+                  ic.className = "w-8 h-8";
+                  var tx = document.createElement("span");
+                  tx.className = "text-[9px] mt-1";
+                  tx.textContent = "未設定";
+                  ph.appendChild(ic);
+                  ph.appendChild(tx);
+                  preview.appendChild(ph);
+                  lucide.createIcons();
+                }
+                var deleteBtn = document.getElementById("btn-delete-image");
+                if (deleteBtn) deleteBtn.classList.add("hidden");
+              },
+              onCancel: function() {
+              }
+            });
+          });
+        }
+
+
+
 
         // プロフィール設定保存ボタン
         const btnSaveSelfProfile = document.getElementById(
@@ -3237,7 +3446,7 @@
         arrowAlignClass,
       ) {
         return `
-          <!-- 👤 ユーザー詳細ポップオーバー (配慮事項以外) -->
+          
           <div class="absolute bottom-full ${popoverAlignClass} mb-2 w-56 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex flex-col gap-1.5 text-xs text-left normal-case leading-normal font-sans">
             <div class="flex flex-col border-b border-slate-100 dark:border-zinc-800 pb-1.5 shrink-0">
               <span class="font-bold text-sm text-slate-900 dark:text-zinc-50">${escapeHtml(name)}</span>
@@ -4178,5 +4387,27 @@
         loadInitialData();
       });
     </script>
+
+    <!-- 汎用画像操作確認モーダル -->
+    <div id="image-action-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/75 hidden">
+      <div class="w-full max-w-sm p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl mx-4 space-y-4">
+        <div class="flex items-center gap-3 text-indigo-600 dark:text-indigo-400" id="image-confirm-icon-container">
+          <i data-lucide="alert-triangle" class="w-6 h-6 shrink-0" id="image-confirm-icon"></i>
+          <h4 class="font-heading font-bold text-sm text-slate-900 dark:text-zinc-50" id="image-confirm-title">画像の変更確認</h4>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed" id="image-confirm-message">
+          プロフィール画像を変更しますか？<br>この変更は、下の「変更を保存する」ボタンを押した時点で確定されます。
+        </p>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btn-cancel-image-action" class="px-4 py-2 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-xs font-semibold rounded-lg text-slate-700 dark:text-zinc-300 transition-colors">
+            キャンセル
+          </button>
+          <button type="button" id="btn-confirm-image-action" class="px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors">
+            確定する
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
+

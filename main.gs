@@ -211,13 +211,13 @@ function initDatabase() {
   let isNewMemberSheet = false;
   
   const targetHeaders = [
-    "メンバーID", "名前", "メールアドレス", "部署・チーム", "参加形式", "趣味", "特技", "弱点", "やりがい", "チームワーク", "プライベート", "評価", "成長", "配慮事項", "ステータス", "次回優先"
+    "メンバーID", "名前", "メールアドレス", "部署・チーム", "参加形式", "趣味", "特技", "弱点", "やりがい", "チームワーク", "プライベート", "評価", "成長", "配慮事項", "ステータス", "次回優先", "プロフィール画像"
   ];
 
   if (!memberSheet) {
     memberSheet = ss.insertSheet("メンバー一覧");
     memberSheet.appendRow(targetHeaders);
-    memberSheet.getRange("A1:P1").setBackground("#f1f5f9").setFontWeight("bold");
+    memberSheet.getRange("A1:Q1").setBackground("#f1f5f9").setFontWeight("bold");
     isNewMemberSheet = true;
   } else {
     // 既存シートのヘッダー取得と安全なリビルド・マイグレーション
@@ -225,7 +225,7 @@ function initDatabase() {
     const lastRow = memberSheet.getLastRow();
     let headers = lastCol > 0 ? memberSheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
 
-    // ヘッダーが完全に正しい順番かつ16列であるかチェックする
+    // ヘッダーが完全に正しい順番かつ17列であるかチェックする
     let needsMigration = false;
     if (headers.length !== targetHeaders.length) {
       needsMigration = true;
@@ -282,6 +282,7 @@ function initDatabase() {
             if (["やりがい", "チームワーク", "プライベート", "評価", "成長"].includes(h)) return 3;
             if (h === "ステータス") return true;
             if (h === "次回優先") return false;
+            if (h === "プロフィール画像") return "";
             return "";
           }
         });
@@ -289,18 +290,63 @@ function initDatabase() {
 
       // 既存のシートデータと「データ検証ルール（チェックボックス等）」を完全に初期化
       memberSheet.clearContents();
-      memberSheet.getRange(1, 1, Math.max(lastRow, 2), Math.max(lastCol, 16)).clearDataValidations();
+      memberSheet.getRange(1, 1, Math.max(lastRow, 2), Math.max(lastCol, 17)).clearDataValidations();
 
       // 正しいサイズに調整した範囲に上書き書き込み
-      memberSheet.getRange(1, 1, newValues.length, 16).setValues(newValues);
+      memberSheet.getRange(1, 1, newValues.length, 17).setValues(newValues);
       
-      // 不要な余剰列を削除してぴったり16列に整える
+      // 不要な余剰列を削除してぴったり17列に整える
       const currentCols = memberSheet.getLastColumn();
-      if (currentCols > 16) {
-        memberSheet.deleteColumns(17, currentCols - 16);
+      if (currentCols > 17) {
+        memberSheet.deleteColumns(18, currentCols - 17);
       }
     }
-    memberSheet.getRange("A1:P1").setBackground("#f1f5f9").setFontWeight("bold");
+    memberSheet.getRange("A1:Q1").setBackground("#f1f5f9").setFontWeight("bold");
+  }
+
+  // ブーリアン型データのチェックボックス挿入と古いゴミ検証ルールの再整備
+  if (memberSheet) {
+    const lastRow = memberSheet.getLastRow();
+    if (lastRow > 1) {
+      // 念のためK〜O列に誤ってチェックボックスが残らないよう、O・P列以外はクレンジング
+      memberSheet.getRange(2, 9, lastRow - 1, 5).clearDataValidations();
+      
+      // 正しい列（15列目: O列＝ステータス、16列目: P列＝次回優先）にのみチェックボックスをバインド
+      memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
+      memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
+    }
+  }
+
+  // デモデータの自動挿入（シートが新規作成されたか空の場合）
+  if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
+    const demoMembers = [
+      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "対面", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "DIY", "早起き", 4, 3, 3, 5, 4, "", true, false, ""],
+      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "リモート", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "ヨガ", "方向音痴", 3, 5, 4, 3, 3, "", true, false, ""],
+      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "どちらでも", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "コーヒー焙煎", "人混み", 4, 4, 3, 4, 5, "", true, false, ""],
+      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "対面", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "トレンド分析", "虫", 4, 3, 4, 4, 4, "", true, false, ""],
+      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "リモート", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "ゴルフ", "低血圧", 3, 4, 5, 4, 3, "", true, false, ""],
+      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "どちらでも", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "カレー作り", "ホラー映画", 5, 3, 4, 3, 3, "", true, false, ""],
+      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "対面", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "カメラ撮影", "片付け", 4, 4, 3, 3, 4, "", true, false, ""],
+      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "リモート", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "アロマテラピー", "絶叫マシン", 3, 3, 4, 5, 4, "", true, false, ""],
+      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "どちらでも", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "BBQ", "機械オンチ", 5, 4, 4, 3, 4, "", true, false, ""],
+      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "対面", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "筋トレ", "甘いもの", 3, 5, 3, 4, 4, "", true, false, ""],
+      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "リモート", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "謎解き", "球技", 4, 3, 3, 4, 5, "", true, false, ""],
+      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "どちらでも", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "スタートアップ研究", "計算", 5, 3, 4, 4, 5, "", true, false, ""],
+      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "対面", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "イラスト作成", "人前でのスピーチ", 4, 4, 4, 3, 4, "", true, false, ""],
+      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "リモート", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "キャンプ", "英語", 4, 5, 3, 3, 4, "", true, false, ""],
+      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "どちらでも", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "激辛グルメ", "寒さ", 3, 3, 5, 4, 3, "", true, false, ""],
+      ["M016", "斎藤翼", "saito.t@example.com", "開発部", "対面", "自動テスト、バグハント。趣味はランニングと麻雀です。", "麻雀", "朝に弱い", 4, 4, 3, 4, 4, "", true, false, ""],
+    ];
+
+    demoMembers.forEach(member => memberSheet.appendRow(member));
+
+    // チェックボックスの確実な挿入
+    const lastRow = memberSheet.getLastRow();
+    if (lastRow > 1) {
+      memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
+      memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
+    }
+    memberSheet.autoResizeColumns(1, 17);
   }
 
   // ブーリアン型データのチェックボックス挿入と古いゴミ検証ルールの再整備
@@ -608,7 +654,7 @@ function getMembers() {
   if (lastRow <= 1) return [];
 
   const lastCol = sheet.getLastColumn();
-  const colCount = Math.max(lastCol, 16); // 16列目（次回優先）まで安全に取得する
+  const colCount = Math.max(lastCol, 17); // 17列目（プロフィール画像）まで安全に取得する
   const data = sheet.getRange(2, 1, lastRow - 1, colCount).getValues();
  
   return data.map(row => ({
@@ -628,6 +674,7 @@ function getMembers() {
     considerations: row[13] || "",   // 配慮事項 (14列目)
     status: row[14] === true || row[14] === "アクティブ", // 15列目 (O列)
     priority: !!row[15], // 16列目 (P列)
+    profileImage: row[16] || "", // 17列目 (Q列) プロフィール画像
   }));
 }
 
@@ -803,6 +850,7 @@ function buildMemberRow(id, obj) {
     obj.considerations || "",
     obj.status !== false,
     !!obj.priority,
+    obj.profileImage || "", // 17列目：プロフィール画像
   ];
 }
 
@@ -829,7 +877,7 @@ function addMemberToSheet(memberObj) {
   sheet.getRange(targetRow, 15).insertCheckboxes().setValue(newRow[14]); // ステータス
   sheet.getRange(targetRow, 16).insertCheckboxes().setValue(newRow[15]); // 次回優先
 
-  sheet.autoResizeColumns(1, 16);
+  sheet.autoResizeColumns(1, 17);
 
   return {
     success: true,
@@ -872,7 +920,7 @@ function updateMemberInSheet(memberObj) {
   }
 
   const row = buildMemberRow(memberObj.id, memberObj);
-  sheet.getRange(rowNum, 1, 1, 16).setValues([row]);
+  sheet.getRange(rowNum, 1, 1, 17).setValues([row]);
 
   return { success: true, member: memberObj };
 }
@@ -1192,6 +1240,23 @@ function registerSelfProfile(profileObj) {
 
     const members = getMembers();
     const myProfile = members.find(m => m.email.toLowerCase() === userEmail.toLowerCase());
+
+    // 画像URLのハンドリング
+    var oldImageUrl = myProfile ? (myProfile.profileImage || "") : "";
+    var newImageUrl = oldImageUrl;
+
+    // 送られてきた画像がBase64画像データの場合
+    if (profileObj.profileImage && profileObj.profileImage.startsWith("data:image/")) {
+      const fileName = "profile_" + userEmail.replace(/[@.]/g, "_");
+      newImageUrl = saveBase64ImageToDrive(profileObj.profileImage, fileName, oldImageUrl);
+    } else if (profileObj.profileImage === "") {
+      // 画像が削除された場合、古いファイルをドライブから消去
+      if (oldImageUrl) {
+        deleteFileByUrl(oldImageUrl);
+        newImageUrl = "";
+      }
+    }
+
     let result;
 
     if (myProfile) {
@@ -1213,6 +1278,7 @@ function registerSelfProfile(profileObj) {
         status: profileObj.status !== false,
         priority: myProfile.priority || false,
         considerations: profileObj.considerations || "",
+        profileImage: newImageUrl,
       };
       result = updateMemberInSheet(updateObj);
     } else {
@@ -1233,6 +1299,7 @@ function registerSelfProfile(profileObj) {
         status: profileObj.status !== false,
         priority: false,
         considerations: profileObj.considerations || "",
+        profileImage: newImageUrl,
       };
       result = addMemberToSheet(addObj);
     }
@@ -1947,4 +2014,93 @@ function getNextId(sheet, prefix, regexPattern) {
   });
   
   return `${prefix}${("000" + (maxNum + 1)).slice(-3)}`;
+}
+
+/**
+ * スプレッドシートと同じフォルダに「プロフィール画像」フォルダを作成または取得する。
+ * 
+ * @param {string} folderName フォルダ名
+ * @return {Folder} Googleドライブのフォルダオブジェクト
+ */
+function getOrCreateFolder(folderName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const file = DriveApp.getFileById(ss.getId());
+  const parents = file.getParents();
+  let parentFolder;
+  if (parents.hasNext()) {
+    parentFolder = parents.next();
+  } else {
+    parentFolder = DriveApp.getRootFolder();
+  }
+  
+  const folders = parentFolder.getFoldersByName(folderName);
+  if (folders.hasNext()) {
+    return folders.next();
+  } else {
+    const folder = parentFolder.createFolder(folderName);
+    // リンクを知っている全員が閲覧可能にする
+    folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return folder;
+  }
+}
+
+/**
+ * Base64データをデコードしてGoogleドライブの「プロフィール画像」フォルダに保存する。
+ * 古いファイルがある場合は削除する。
+ * 
+ * @param {string} base64Data Base64エンコードされた画像データ(DataURL)
+ * @param {string} fileName 保存するファイル名
+ * @param {string} oldFileUrl 既存の画像URL
+ * @return {string} 保存された画像の直接表示用URL
+ */
+function saveBase64ImageToDrive(base64Data, fileName, oldFileUrl) {
+  // 既存の古いファイルがあれば削除
+  if (oldFileUrl) {
+    deleteFileByUrl(oldFileUrl);
+  }
+  
+  if (!base64Data || !base64Data.startsWith("data:image/")) {
+    return "";
+  }
+  
+  const folder = getOrCreateFolder("プロフィール画像");
+  
+  // Base64データのパース
+  const matches = base64Data.match(/^data:(image\/[a-z0-9-+.]+);base64,(.+)$/i);
+  if (!matches) {
+    throw new Error("無効な画像データ形式です。");
+  }
+  
+  const contentType = matches[1];
+  const base64Content = matches[2];
+  
+  // デコード
+  const decoded = Utilities.base64Decode(base64Content);
+  const blob = Utilities.newBlob(decoded, contentType, fileName);
+  
+  // ファイル作成
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  
+  // 直接表示可能なURLを生成して返す
+  return "https://lh3.googleusercontent.com/d/" + file.getId();
+}
+
+/**
+ * 直接表示用URLからファイルIDを抽出し、Googleドライブからファイルを削除（ゴミ箱へ移動）する。
+ * 
+ * @param {string} url 削除対象ファイルのURL
+ */
+function deleteFileByUrl(url) {
+  if (!url) return;
+  const matches = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (matches && matches[1]) {
+    const fileId = matches[1];
+    try {
+      const file = DriveApp.getFileById(fileId);
+      file.setTrashed(true);
+    } catch (e) {
+      Logger.log(`ファイルの削除に失敗しました (ID: ${fileId}): ${e.toString()}`);
+    }
+  }
 }

@@ -92,3 +92,12 @@ graph TD
   - `scripts.html` に「次回マッチング確認ビュー（検索ハイライト付き）」および「プロフィール自己登録・変更フォーム」を実装。
 - [ ] **Phase 4: 管理者UIの認証連携**
   - `isAdmin` 状態に基づき、管理者向け機能の有効化/無効化処理をフロントエンドに実装。
+- [ ] **Phase 5: プロフィール画像アップロード機能の実装**
+  - **フロントエンド（index.html）**:
+    - 自己プロフィール画面（`user-profile`）にカード用画像（実物印刷用）のアップロードUI（ファイルインプット、プレビュー領域、削除ボタン）を構築する。
+    - **GASコンパイルエラー対策**: `getUserProfileViewHtml` 内のすべての HTML コメント `<!-- ... -->` を安全に撤去し、JSコード露出バグ（Unexpected token 'class'）の発生を根本防止する。
+    - 状態管理 `state` に `tempImageData` を追加し、画面遷移時に初期化する。
+    - ファイル選択時に `FileReader` を使ってBase64（DataURL）へ変換し、プレビュー表示および `state` に保持する。
+    - `handleSaveSelfProfile` で保存用パラメータ `profileObj` に画像Base64データ `profileImage` を追加する。
+  - **バックエンド（main.gs）**:
+    - 画像データを保存・取得するためのバックエンド連携処理の実装（※次フェーズ）。
