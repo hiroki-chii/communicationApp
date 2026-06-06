@@ -2581,7 +2581,11 @@
           if (state.tempImageData) {
             var img = document.createElement("img");
             img.src = state.tempImageData;
-            img.className = "w-full h-full object-cover";
+            img.className = "w-full h-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-105";
+            img.title = "クリックして拡大プレビュー";
+            img.addEventListener("click", function () {
+              openImagePreview(state.tempImageData);
+            });
             previewContainer.appendChild(img);
             if (btnDeleteImage) btnDeleteImage.classList.remove("hidden");
           } else {
@@ -2666,7 +2670,11 @@
                     preview.innerHTML = "";
                     var img = document.createElement("img");
                     img.src = base64Data;
-                    img.className = "w-full h-full object-cover";
+                    img.className = "w-full h-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-105";
+                    img.title = "クリックして拡大プレビュー";
+                    img.addEventListener("click", function () {
+                      openImagePreview(base64Data);
+                    });
                     preview.appendChild(img);
                   }
                   var deleteBtn = document.getElementById("btn-delete-image");
@@ -2698,6 +2706,39 @@
 
         window.currentImageConfirmCallback = null;
         window.currentImageCancelCallback = null;
+
+        // 画像プレビューモーダル開閉関数
+        function openImagePreview(src) {
+          var modal = document.getElementById("image-preview-modal");
+          var img = document.getElementById("image-preview-content");
+          if (!modal || !img) return;
+          img.src = src;
+          modal.classList.remove("hidden");
+        }
+
+        function closeImagePreview() {
+          var modal = document.getElementById("image-preview-modal");
+          if (modal) {
+            modal.classList.add("hidden");
+          }
+        }
+
+        // 画像プレビューモーダルのイベント登録
+        var previewModal = document.getElementById("image-preview-modal");
+        var btnClosePreview = document.getElementById("btn-close-preview");
+        if (previewModal) {
+          previewModal.addEventListener("click", function (e) {
+            if (e.target !== document.getElementById("image-preview-content")) {
+              closeImagePreview();
+            }
+          });
+        }
+        if (btnClosePreview) {
+          btnClosePreview.addEventListener("click", function (e) {
+            e.stopPropagation();
+            closeImagePreview();
+          });
+        }
 
         function openImageConfirmModal(options) {
           var modal = document.getElementById("image-action-confirm-modal");
@@ -2845,6 +2886,16 @@
         const btnSubmitMember = document.getElementById("btn-submit-member");
         if (btnSubmitMember) {
           btnSubmitMember.addEventListener("click", handleSubmitMember);
+        }
+
+        // メンバー編集モーダルの枠外（背景）クリックでキャンセル
+        const memberModal = document.getElementById("member-modal");
+        if (memberModal) {
+          memberModal.addEventListener("click", function (e) {
+            if (e.target === memberModal) {
+              closeMemberModal();
+            }
+          });
         }
 
         // システム設定保存ボタン
@@ -4481,6 +4532,28 @@
             確定する
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- 画像プレビュー用モーダル -->
+    <div
+      id="image-preview-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 dark:bg-black/90 hidden cursor-zoom-out"
+    >
+      <button
+        type="button"
+        id="btn-close-preview"
+        class="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 rounded-full transition-colors z-50 cursor-pointer"
+      >
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <div class="max-w-[90%] max-h-[90%] flex items-center justify-center relative">
+        <img
+          id="image-preview-content"
+          src=""
+          alt="プレビュー画像"
+          class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain border border-white/10"
+        />
       </div>
     </div>
   </body>
