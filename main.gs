@@ -5,7 +5,7 @@
 /**
  * Web Appへのアクセス時にHTMLを出力する。
  * 起動時に自動でスプレッドシートの初期化を行う（シートが存在しない場合のみ作成）。
- * 
+ *
  * @param {Object} e イベントオブジェクト
  * @return {HtmlOutput} HTML出力オブジェクト
  */
@@ -13,7 +13,7 @@ function doGet(e) {
   initDatabase();
 
   return HtmlService.createHtmlOutputFromFile("index")
-    .setTitle("社内ランチ交流会 - マッチングポータル")
+    .setTitle("NBテーブル - 社内ランチ交流会ポータル")
     .addMetaTag("viewport", "width=device-width, initial-scale=1")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -23,7 +23,7 @@ function doGet(e) {
  */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu("ランチ交流会")
+  ui.createMenu("社内ランチ交流会")
     .addItem("管理者画面の初期化/デモデータ挿入", "initDatabase")
     .addItem("ポータル画面のURLを表示", "showWebAppUrl")
     .addToUi();
@@ -31,28 +31,32 @@ function onOpen() {
 
 /**
  * ログイン中または有効なユーザーのメールアドレスを取得する。
- * 
+ *
  * @return {string} ユーザーのメールアドレス
  */
 function getCurrentUserEmail() {
-  return Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail() || "";
+  return (
+    Session.getActiveUser().getEmail() ||
+    Session.getEffectiveUser().getEmail() ||
+    ""
+  );
 }
 
 /**
  * 管理者のメールアドレス一覧を設定から取得する。
- * 
+ *
  * @param {Object} [settings] 事前に取得した設定オブジェクト（省略時は自動取得）
  * @return {string[]} 管理者メールアドレスの配列（小文字統一）
  */
 function getAdminEmails(settings) {
   const currentSettings = settings || getSettings();
   const adminEmailsStr = currentSettings.admin_emails || "";
-  return adminEmailsStr.split(",").map(e => e.trim().toLowerCase());
+  return adminEmailsStr.split(",").map((e) => e.trim().toLowerCase());
 }
 
 /**
  * 指定されたメールアドレスが管理者権限を持っているか判定する。
- * 
+ *
  * @param {string} email 判定対象のメールアドレス
  * @param {Object} [settings] 事前に取得した設定オブジェクト
  * @return {boolean} 管理者である場合はtrue
@@ -64,13 +68,15 @@ function isAdminUser(email, settings) {
 
 /**
  * 管理者権限の有無をチェックし、権限がない場合はエラーをスローする。
- * 
+ *
  * @return {boolean} 管理者権限がある場合はtrue
  */
 function checkAdminPermission() {
   const userEmail = getCurrentUserEmail();
   if (!userEmail) {
-    throw new Error("Googleアカウントにログインしていないか、メールアドレスの取得権限がありません。ポータルのデプロイ設定をご確認ください。");
+    throw new Error(
+      "Googleアカウントにログインしていないか、メールアドレスの取得権限がありません。ポータルのデプロイ設定をご確認ください。",
+    );
   }
 
   if (!isAdminUser(userEmail)) {
@@ -82,7 +88,7 @@ function checkAdminPermission() {
 /**
  * Webポータル画面のURLを取得する。
  * 設定シートに `webapp_url` があればそれを優先し、無ければ自動取得する。
- * 
+ *
  * @return {string} Web AppのURL
  */
 function getPortalUrl() {
@@ -109,17 +115,19 @@ function getPortalUrl() {
 function showWebAppUrl() {
   const url = getPortalUrl();
   const ui = SpreadsheetApp.getUi();
-  
+
   if (url) {
     const htmlOutput = HtmlService.createHtmlOutput(
-      `<p>以下のURLからマッチングポータル（ユーザー/管理者画面）にアクセスできます：</p>
-       <p><a href="${url}" target="_blank" style="color:#4f46e5;font-weight:bold;text-decoration:underline;">ポータルを開く</a></p>`
+      `<p>以下のURLから社内ランチ交流会ポータル（ユーザー/管理者画面）にアクセスできます：</p>
+       <p><a href="${url}" target="_blank" style="color:#4f46e5;font-weight:bold;text-decoration:underline;">ポータルを開く</a></p>`,
     )
       .setWidth(400)
       .setHeight(150);
     ui.showModalDialog(htmlOutput, "ポータル画面のURL");
   } else {
-    ui.alert("Webアプリケーションとしてデプロイされていないか、URLが設定されていません。「設定」シートに webapp_url を手動で設定するか、デプロイを行ってください。");
+    ui.alert(
+      "Webアプリケーションとしてデプロイされていないか、URLが設定されていません。「設定」シートに webapp_url を手動で設定するか、デプロイを行ってください。",
+    );
   }
 }
 
@@ -150,11 +158,23 @@ function initDatabase() {
     setupSheet = ss.insertSheet("設定");
     setupSheet.appendRow(["設定キー", "設定値", "説明"]);
     const defaultSettings = [
-      ["admin_emails", activeEmail, "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）"],
-      ["gemini_api_key", "", "Google AI Studioから取得したGemini APIキー。空の場合は独自ロジックで動作します。"],
-      ["webapp_url", "", "Webポータル画面の公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）"]
+      [
+        "admin_emails",
+        activeEmail,
+        "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）",
+      ],
+      [
+        "gemini_api_key",
+        "",
+        "Google AI Studioから取得したGemini APIキー。空の場合は独自ロジックで動作します。",
+      ],
+      [
+        "webapp_url",
+        "",
+        "Webポータル画面の公開URL（未入力の場合は自動取得のURLを使用します。/dev を指定したい場合は手動で入力してください）",
+      ],
     ];
-    defaultSettings.forEach(row => setupSheet.appendRow(row));
+    defaultSettings.forEach((row) => setupSheet.appendRow(row));
 
     // スタイル調整
     setupSheet.getRange("A1:C1").setBackground("#f1f5f9").setFontWeight("bold");
@@ -162,7 +182,13 @@ function initDatabase() {
   } else {
     // 既存の設定シートに対して、不足しているキーがあれば補完する
     const lastRow = setupSheet.getLastRow();
-    const keys = lastRow > 1 ? setupSheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]) : [];
+    const keys =
+      lastRow > 1
+        ? setupSheet
+            .getRange(2, 1, lastRow - 1, 1)
+            .getValues()
+            .map((r) => r[0])
+        : [];
 
     const appendMissingKey = (key, defaultValue, description) => {
       if (!keys.includes(key)) {
@@ -170,11 +196,24 @@ function initDatabase() {
       }
     };
 
-    appendMissingKey("admin_emails", activeEmail, "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）");
-    appendMissingKey("webapp_url", "", "Webポータル画面 of 公開URL（未入力の場合は自動取得 of URLを使用します。/dev を指定したい場合は手動で入力してください）");
+    appendMissingKey(
+      "admin_emails",
+      activeEmail,
+      "管理者権限を持つGoogle Workspaceアカウントのメールアドレス（カンマ区切りで複数登録可能）",
+    );
+    appendMissingKey(
+      "webapp_url",
+      "",
+      "Webポータル画面 of 公開URL（未入力の場合は自動取得 of URLを使用します。/dev を指定したい場合は手動で入力してください）",
+    );
 
     // 【最適化】ループ内でのgetValue()を廃止し、getValues()の一括取得から判定して不要キーを逆順に削除
-    const obsoleteKeys = ["matching_mode", "default_group_size", "default_group_count", "additional_prompt"];
+    const obsoleteKeys = [
+      "matching_mode",
+      "default_group_size",
+      "default_group_count",
+      "additional_prompt",
+    ];
     if (lastRow > 1) {
       const keyValues = setupSheet.getRange(2, 1, lastRow - 1, 1).getValues();
       for (let i = lastRow; i >= 2; i--) {
@@ -197,9 +236,9 @@ function initDatabase() {
       ["D003", "東京統括部"],
       ["D004", "ST開発部"],
       ["D005", "営業統括部"],
-      ["D006", "印刷統括部"]
+      ["D006", "印刷統括部"],
     ];
-    initialDepts.forEach(row => deptSheet.appendRow(row));
+    initialDepts.forEach((row) => deptSheet.appendRow(row));
 
     // スタイル調整
     deptSheet.getRange("A1:B1").setBackground("#f1f5f9").setFontWeight("bold");
@@ -209,21 +248,41 @@ function initDatabase() {
   // 3. 「メンバー一覧」シートの初期化とマイグレーション
   let memberSheet = ss.getSheetByName("メンバー一覧");
   let isNewMemberSheet = false;
-  
+
   const targetHeaders = [
-    "メンバーID", "名前", "メールアドレス", "部署・チーム", "参加形式", "趣味", "特技", "弱点", "やりがい", "チームワーク", "プライベート", "評価", "成長", "配慮事項", "ステータス", "次回優先", "プロフィール画像"
+    "メンバーID",
+    "名前",
+    "メールアドレス",
+    "部署・チーム",
+    "参加形式",
+    "趣味",
+    "特技",
+    "弱点",
+    "やりがい",
+    "チームワーク",
+    "プライベート",
+    "評価",
+    "成長",
+    "配慮事項",
+    "ステータス",
+    "次回優先",
+    "プロフィール画像",
   ];
 
   if (!memberSheet) {
     memberSheet = ss.insertSheet("メンバー一覧");
     memberSheet.appendRow(targetHeaders);
-    memberSheet.getRange("A1:Q1").setBackground("#f1f5f9").setFontWeight("bold");
+    memberSheet
+      .getRange("A1:Q1")
+      .setBackground("#f1f5f9")
+      .setFontWeight("bold");
     isNewMemberSheet = true;
   } else {
     // 既存シートのヘッダー取得と安全なリビルド・マイグレーション
     const lastCol = memberSheet.getLastColumn();
     const lastRow = memberSheet.getLastRow();
-    let headers = lastCol > 0 ? memberSheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+    let headers =
+      lastCol > 0 ? memberSheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
 
     // ヘッダーが完全に正しい順番かつ17列であるかチェックする
     let needsMigration = false;
@@ -244,7 +303,9 @@ function initDatabase() {
     }
 
     if (needsMigration && lastRow >= 1) {
-      Logger.log("メンバー一覧シートの列ズレ・未移行ヘッダーを検出しました。安全なリビルドマイグレーションを実行します。");
+      Logger.log(
+        "メンバー一覧シートの列ズレ・未移行ヘッダーを検出しました。安全なリビルドマイグレーションを実行します。",
+      );
       const fullData = memberSheet.getDataRange().getValues();
       const currentHeaders = fullData[0];
       const headerMap = {};
@@ -255,21 +316,34 @@ function initDatabase() {
       // 新しい正しい並びの二次元配列を構築
       const newValues = fullData.map((row, rIdx) => {
         if (rIdx === 0) return targetHeaders; // 1行目は正しいヘッダー
-        
-        return targetHeaders.map(h => {
+
+        return targetHeaders.map((h) => {
           const oldIdx = headerMap[h];
           if (oldIdx !== undefined) {
             let val = row[oldIdx];
-            
+
             // ５つの価値観評価項目は数値型(1〜5)へ変換し、チェックボックスなどの誤った型を排除
-            if (["やりがい", "チームワーク", "プライベート", "評価", "成長"].includes(h)) {
+            if (
+              [
+                "やりがい",
+                "チームワーク",
+                "プライベート",
+                "評価",
+                "成長",
+              ].includes(h)
+            ) {
               if (typeof val === "boolean") return 3; // ブーリアン型（誤ったチェックボックス）はデフォルト3
               const num = Number(val);
               return isNaN(num) || val === "" ? 3 : num;
             }
             // ステータスはブーリアン型へ
             if (h === "ステータス") {
-              return val === true || val === "true" || val === "アクティブ" || val === "TRUE";
+              return (
+                val === true ||
+                val === "true" ||
+                val === "アクティブ" ||
+                val === "TRUE"
+              );
             }
             // 次回優先はブーリアン型へ
             if (h === "次回優先") {
@@ -279,7 +353,16 @@ function initDatabase() {
           } else {
             // 存在しなかった列はデフォルト値
             if (h === "参加形式") return "どちらでも";
-            if (["やりがい", "チームワーク", "プライベート", "評価", "成長"].includes(h)) return 3;
+            if (
+              [
+                "やりがい",
+                "チームワーク",
+                "プライベート",
+                "評価",
+                "成長",
+              ].includes(h)
+            )
+              return 3;
             if (h === "ステータス") return true;
             if (h === "次回優先") return false;
             if (h === "プロフィール画像") return "";
@@ -290,18 +373,23 @@ function initDatabase() {
 
       // 既存のシートデータと「データ検証ルール（チェックボックス等）」を完全に初期化
       memberSheet.clearContents();
-      memberSheet.getRange(1, 1, Math.max(lastRow, 2), Math.max(lastCol, 17)).clearDataValidations();
+      memberSheet
+        .getRange(1, 1, Math.max(lastRow, 2), Math.max(lastCol, 17))
+        .clearDataValidations();
 
       // 正しいサイズに調整した範囲に上書き書き込み
       memberSheet.getRange(1, 1, newValues.length, 17).setValues(newValues);
-      
+
       // 不要な余剰列を削除してぴったり17列に整える
       const currentCols = memberSheet.getLastColumn();
       if (currentCols > 17) {
         memberSheet.deleteColumns(18, currentCols - 17);
       }
     }
-    memberSheet.getRange("A1:Q1").setBackground("#f1f5f9").setFontWeight("bold");
+    memberSheet
+      .getRange("A1:Q1")
+      .setBackground("#f1f5f9")
+      .setFontWeight("bold");
   }
 
   // ブーリアン型データのチェックボックス挿入と古いゴミ検証ルールの再整備
@@ -310,7 +398,7 @@ function initDatabase() {
     if (lastRow > 1) {
       // 念のためK〜O列に誤ってチェックボックスが残らないよう、O・P列以外はクレンジング
       memberSheet.getRange(2, 9, lastRow - 1, 5).clearDataValidations();
-      
+
       // 正しい列（15列目: O列＝ステータス、16列目: P列＝次回優先）にのみチェックボックスをバインド
       memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
       memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
@@ -320,25 +408,313 @@ function initDatabase() {
   // デモデータの自動挿入（シートが新規作成されたか空の場合）
   if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
     const demoMembers = [
-      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "対面", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "DIY", "早起き", 4, 3, 3, 5, 4, "", true, false, ""],
-      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "リモート", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "ヨガ", "方向音痴", 3, 5, 4, 3, 3, "", true, false, ""],
-      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "どちらでも", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "コーヒー焙煎", "人混み", 4, 4, 3, 4, 5, "", true, false, ""],
-      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "対面", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "トレンド分析", "虫", 4, 3, 4, 4, 4, "", true, false, ""],
-      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "リモート", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "ゴルフ", "低血圧", 3, 4, 5, 4, 3, "", true, false, ""],
-      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "どちらでも", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "カレー作り", "ホラー映画", 5, 3, 4, 3, 3, "", true, false, ""],
-      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "対面", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "カメラ撮影", "片付け", 4, 4, 3, 3, 4, "", true, false, ""],
-      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "リモート", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "アロマテラピー", "絶叫マシン", 3, 3, 4, 5, 4, "", true, false, ""],
-      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "どちらでも", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "BBQ", "機械オンチ", 5, 4, 4, 3, 4, "", true, false, ""],
-      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "対面", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "筋トレ", "甘いもの", 3, 5, 3, 4, 4, "", true, false, ""],
-      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "リモート", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "謎解き", "球技", 4, 3, 3, 4, 5, "", true, false, ""],
-      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "どちらでも", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "スタートアップ研究", "計算", 5, 3, 4, 4, 5, "", true, false, ""],
-      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "対面", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "イラスト作成", "人前でのスピーチ", 4, 4, 4, 3, 4, "", true, false, ""],
-      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "リモート", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "キャンプ", "英語", 4, 5, 3, 3, 4, "", true, false, ""],
-      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "どちらでも", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "激辛グルメ", "寒さ", 3, 3, 5, 4, 3, "", true, false, ""],
-      ["M016", "斎藤翼", "saito.t@example.com", "開発部", "対面", "自動テスト、バグハント。趣味はランニングと麻雀です。", "麻雀", "朝に弱い", 4, 4, 3, 4, 4, "", true, false, ""],
+      [
+        "M001",
+        "山田 太郎",
+        "yamada.t@example.com",
+        "開発部",
+        "対面",
+        "趣味はサウナとTypeScript。最近はDIYにハマっています。",
+        "DIY",
+        "早起き",
+        4,
+        3,
+        3,
+        5,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M002",
+        "佐藤 美咲",
+        "sato.m@example.com",
+        "人事部",
+        "リモート",
+        "休日はカフェ巡りやヨガをしています。旅行が大好きです。",
+        "ヨガ",
+        "方向音痴",
+        3,
+        5,
+        4,
+        3,
+        3,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M003",
+        "鈴木 健一",
+        "suzuki.k@example.com",
+        "開発部",
+        "どちらでも",
+        "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。",
+        "コーヒー焙煎",
+        "人混み",
+        4,
+        4,
+        3,
+        4,
+        5,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M004",
+        "高橋 玲子",
+        "takahashi.r@example.com",
+        "マーケティング部",
+        "対面",
+        "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。",
+        "トレンド分析",
+        "虫",
+        4,
+        3,
+        4,
+        4,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M005",
+        "田中 達也",
+        "tanaka.t@example.com",
+        "営業部",
+        "リモート",
+        "学生時代からゴルフをしています。週末はだいたいグリーンにいます。",
+        "ゴルフ",
+        "低血圧",
+        3,
+        4,
+        5,
+        4,
+        3,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M006",
+        "渡辺 奈々",
+        "watanabe.n@example.com",
+        "総務部",
+        "どちらでも",
+        "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。",
+        "カレー作り",
+        "ホラー映画",
+        5,
+        3,
+        4,
+        3,
+        3,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M007",
+        "伊藤 淳",
+        "ito.j@example.com",
+        "開発部",
+        "対面",
+        "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。",
+        "カメラ撮影",
+        "片付け",
+        4,
+        4,
+        3,
+        3,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M008",
+        "山本 結衣",
+        "yamamoto.y@example.com",
+        "営業部",
+        "リモート",
+        "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。",
+        "アロマテラピー",
+        "絶叫マシン",
+        3,
+        3,
+        4,
+        5,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M009",
+        "中村 翔",
+        "nakamura.s@example.com",
+        "マーケティング部",
+        "どちらでも",
+        "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。",
+        "BBQ",
+        "機械オンチ",
+        5,
+        4,
+        4,
+        3,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M010",
+        "小林 直樹",
+        "kobayashi.n@example.com",
+        "人事部",
+        "対面",
+        "テニスと筋トレ。最近は健康食作りにも取り組んでいます。",
+        "筋トレ",
+        "甘いもの",
+        3,
+        5,
+        3,
+        4,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M011",
+        "加藤 沙織",
+        "kato.s@example.com",
+        "開発部",
+        "リモート",
+        "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。",
+        "謎解き",
+        "球技",
+        4,
+        3,
+        3,
+        4,
+        5,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M012",
+        "吉田 拓海",
+        "yoshida.t@example.com",
+        "新規事業部",
+        "どちらでも",
+        "サウナ、ポッドキャストを聴くこと、スタートアップ研究。",
+        "スタートアップ研究",
+        "計算",
+        5,
+        3,
+        4,
+        4,
+        5,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M013",
+        "佐々木 萌",
+        "sasaki.m@example.com",
+        "広報部",
+        "対面",
+        "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。",
+        "イラスト作成",
+        "人前でのスピーチ",
+        4,
+        4,
+        4,
+        3,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M014",
+        "山口 健太",
+        "yamaguchi.k@example.com",
+        "開発部",
+        "リモート",
+        "Kubernetes、Terraform。趣味はボードゲームとキャンプです。",
+        "キャンプ",
+        "英語",
+        4,
+        5,
+        3,
+        3,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M015",
+        "松本 恵",
+        "matsumoto.m@example.com",
+        "営業部",
+        "どちらでも",
+        "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。",
+        "激辛グルメ",
+        "寒さ",
+        3,
+        3,
+        5,
+        4,
+        3,
+        "",
+        true,
+        false,
+        "",
+      ],
+      [
+        "M016",
+        "斎藤翼",
+        "saito.t@example.com",
+        "開発部",
+        "対面",
+        "自動テスト、バグハント。趣味はランニングと麻雀です。",
+        "麻雀",
+        "朝に弱い",
+        4,
+        4,
+        3,
+        4,
+        4,
+        "",
+        true,
+        false,
+        "",
+      ],
     ];
 
-    demoMembers.forEach(member => memberSheet.appendRow(member));
+    demoMembers.forEach((member) => memberSheet.appendRow(member));
 
     // チェックボックスの確実な挿入
     const lastRow = memberSheet.getLastRow();
@@ -355,7 +731,7 @@ function initDatabase() {
     if (lastRow > 1) {
       // 念のためK〜O列に誤ってチェックボックスが残らないよう、O・P列以外はクレンジング
       memberSheet.getRange(2, 9, lastRow - 1, 5).clearDataValidations();
-      
+
       // 正しい列（15列目: O列＝ステータス、16列目: P列＝次回優先）にのみチェックボックスをバインド
       memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
       memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
@@ -365,25 +741,297 @@ function initDatabase() {
   // デモデータの自動挿入（シートが新規作成されたか空の場合）
   if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
     const demoMembers = [
-      ["M001", "山田 太郎", "yamada.t@example.com", "開発部", "対面", "趣味はサウナとTypeScript。最近はDIYにハマっています。", "DIY", "早起き", 4, 3, 3, 5, 4, "", true, false],
-      ["M002", "佐藤 美咲", "sato.m@example.com", "人事部", "リモート", "休日はカフェ巡りやヨガをしています。旅行が大好きです。", "ヨガ", "方向音痴", 3, 5, 4, 3, 3, "", true, false],
-      ["M003", "鈴木 健一", "suzuki.k@example.com", "開発部", "どちらでも", "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。", "コーヒー焙煎", "人混み", 4, 4, 3, 4, 5, "", true, false],
-      ["M004", "高橋 玲子", "takahashi.r@example.com", "マーケティング部", "対面", "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。", "トレンド分析", "虫", 4, 3, 4, 4, 4, "", true, false],
-      ["M005", "田中 達也", "tanaka.t@example.com", "営業部", "リモート", "学生時代からゴルフをしています。週末はだいたいグリーンにいます。", "ゴルフ", "低血圧", 3, 4, 5, 4, 3, "", true, false],
-      ["M006", "渡辺 奈々", "watanabe.n@example.com", "総務部", "どちらでも", "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。", "カレー作り", "ホラー映画", 5, 3, 4, 3, 3, "", true, false],
-      ["M007", "伊藤 淳", "ito.j@example.com", "開発部", "対面", "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。", "カメラ撮影", "片付け", 4, 4, 3, 3, 4, "", true, false],
-      ["M008", "山本 結衣", "yamamoto.y@example.com", "営業部", "リモート", "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。", "アロマテラピー", "絶叫マシン", 3, 3, 4, 5, 4, "", true, false],
-      ["M009", "中村 翔", "nakamura.s@example.com", "マーケティング部", "どちらでも", "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。", "BBQ", "機械オンチ", 5, 4, 4, 3, 4, "", true, false],
-      ["M010", "小林 直樹", "kobayashi.n@example.com", "人事部", "対面", "テニスと筋トレ。最近は健康食作りにも取り組んでいます。", "筋トレ", "甘いもの", 3, 5, 3, 4, 4, "", true, false],
-      ["M011", "加藤 沙織", "kato.s@example.com", "開発部", "リモート", "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。", "謎解き", "球技", 4, 3, 3, 4, 5, "", true, false],
-      ["M012", "吉田 拓海", "yoshida.t@example.com", "新規事業部", "どちらでも", "サウナ、ポッドキャストを聴くこと、スタートアップ研究。", "スタートアップ研究", "計算", 5, 3, 4, 4, 5, "", true, false],
-      ["M013", "佐々木 萌", "sasaki.m@example.com", "広報部", "対面", "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。", "イラスト作成", "人前でのスピーチ", 4, 4, 4, 3, 4, "", true, false],
-      ["M014", "山口 健太", "yamaguchi.k@example.com", "開発部", "リモート", "Kubernetes、Terraform。趣味はボードゲームとキャンプです。", "キャンプ", "英語", 4, 5, 3, 3, 4, "", true, false],
-      ["M015", "松本 恵", "matsumoto.m@example.com", "営業部", "どちらでも", "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。", "激辛グルメ", "寒さ", 3, 3, 5, 4, 3, "", true, false],
-      ["M016", "斎藤翼", "saito.t@example.com", "開発部", "対面", "自動テスト、バグハント。趣味はランニングと麻雀です。", "麻雀", "朝に弱い", 4, 4, 3, 4, 4, "", true, false],
+      [
+        "M001",
+        "山田 太郎",
+        "yamada.t@example.com",
+        "開発部",
+        "対面",
+        "趣味はサウナとTypeScript。最近はDIYにハマっています。",
+        "DIY",
+        "早起き",
+        4,
+        3,
+        3,
+        5,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M002",
+        "佐藤 美咲",
+        "sato.m@example.com",
+        "人事部",
+        "リモート",
+        "休日はカフェ巡りやヨガをしています。旅行が大好きです。",
+        "ヨガ",
+        "方向音痴",
+        3,
+        5,
+        4,
+        3,
+        3,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M003",
+        "鈴木 健一",
+        "suzuki.k@example.com",
+        "開発部",
+        "どちらでも",
+        "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。",
+        "コーヒー焙煎",
+        "人混み",
+        4,
+        4,
+        3,
+        4,
+        5,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M004",
+        "高橋 玲子",
+        "takahashi.r@example.com",
+        "マーケティング部",
+        "対面",
+        "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。",
+        "トレンド分析",
+        "虫",
+        4,
+        3,
+        4,
+        4,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M005",
+        "田中 達也",
+        "tanaka.t@example.com",
+        "営業部",
+        "リモート",
+        "学生時代からゴルフをしています。週末はだいたいグリーンにいます。",
+        "ゴルフ",
+        "低血圧",
+        3,
+        4,
+        5,
+        4,
+        3,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M006",
+        "渡辺 奈々",
+        "watanabe.n@example.com",
+        "総務部",
+        "どちらでも",
+        "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。",
+        "カレー作り",
+        "ホラー映画",
+        5,
+        3,
+        4,
+        3,
+        3,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M007",
+        "伊藤 淳",
+        "ito.j@example.com",
+        "開発部",
+        "対面",
+        "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。",
+        "カメラ撮影",
+        "片付け",
+        4,
+        4,
+        3,
+        3,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M008",
+        "山本 結衣",
+        "yamamoto.y@example.com",
+        "営業部",
+        "リモート",
+        "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。",
+        "アロマテラピー",
+        "絶叫マシン",
+        3,
+        3,
+        4,
+        5,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M009",
+        "中村 翔",
+        "nakamura.s@example.com",
+        "マーケティング部",
+        "どちらでも",
+        "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。",
+        "BBQ",
+        "機械オンチ",
+        5,
+        4,
+        4,
+        3,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M010",
+        "小林 直樹",
+        "kobayashi.n@example.com",
+        "人事部",
+        "対面",
+        "テニスと筋トレ。最近は健康食作りにも取り組んでいます。",
+        "筋トレ",
+        "甘いもの",
+        3,
+        5,
+        3,
+        4,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M011",
+        "加藤 沙織",
+        "kato.s@example.com",
+        "開発部",
+        "リモート",
+        "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。",
+        "謎解き",
+        "球技",
+        4,
+        3,
+        3,
+        4,
+        5,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M012",
+        "吉田 拓海",
+        "yoshida.t@example.com",
+        "新規事業部",
+        "どちらでも",
+        "サウナ、ポッドキャストを聴くこと、スタートアップ研究。",
+        "スタートアップ研究",
+        "計算",
+        5,
+        3,
+        4,
+        4,
+        5,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M013",
+        "佐々木 萌",
+        "sasaki.m@example.com",
+        "広報部",
+        "対面",
+        "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。",
+        "イラスト作成",
+        "人前でのスピーチ",
+        4,
+        4,
+        4,
+        3,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M014",
+        "山口 健太",
+        "yamaguchi.k@example.com",
+        "開発部",
+        "リモート",
+        "Kubernetes、Terraform。趣味はボードゲームとキャンプです。",
+        "キャンプ",
+        "英語",
+        4,
+        5,
+        3,
+        3,
+        4,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M015",
+        "松本 恵",
+        "matsumoto.m@example.com",
+        "営業部",
+        "どちらでも",
+        "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。",
+        "激辛グルメ",
+        "寒さ",
+        3,
+        3,
+        5,
+        4,
+        3,
+        "",
+        true,
+        false,
+      ],
+      [
+        "M016",
+        "斎藤翼",
+        "saito.t@example.com",
+        "開発部",
+        "対面",
+        "自動テスト、バグハント。趣味はランニングと麻雀です。",
+        "麻雀",
+        "朝に弱い",
+        4,
+        4,
+        3,
+        4,
+        4,
+        "",
+        true,
+        false,
+      ],
     ];
 
-    demoMembers.forEach(member => memberSheet.appendRow(member));
+    demoMembers.forEach((member) => memberSheet.appendRow(member));
 
     // チェックボックスの確実な挿入
     const lastRow = memberSheet.getLastRow();
@@ -406,9 +1054,16 @@ function initDatabase() {
       "マッチング方法",
       "選出理由 / メモ",
     ]);
-    historySheet.getRange("A1:F1").setBackground("#f1f5f9").setFontWeight("bold");
+    historySheet
+      .getRange("A1:F1")
+      .setBackground("#f1f5f9")
+      .setFontWeight("bold");
 
-    const todayStr = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    const todayStr = Utilities.formatDate(
+      new Date(),
+      "Asia/Tokyo",
+      "yyyy-MM-dd",
+    );
     historySheet.appendRow([
       todayStr,
       "G-1",
@@ -445,7 +1100,11 @@ function initDatabase() {
     ]);
     chatSheet.getRange("A1:H1").setBackground("#f1f5f9").setFontWeight("bold");
 
-    const todayStr = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    const todayStr = Utilities.formatDate(
+      new Date(),
+      "Asia/Tokyo",
+      "yyyy-MM-dd",
+    );
     const demoRoomId = `${todayStr}_G-1`;
     const now = new Date();
 
@@ -487,7 +1146,7 @@ function initDatabase() {
 /**
  * ポータルの起動に必要な初期データをまとめて取得する。
  * セキュリティ保護のため、非管理者に対してはAPIキーの文字をマスクする。
- * 
+ *
  * @return {Object} 初期データオブジェクト
  */
 function getInitialData() {
@@ -506,8 +1165,12 @@ function getInitialData() {
       settings.gemini_api_key = settings.gemini_api_key ? "●●●●●●●●" : "";
     }
 
-    const activeCount = members.filter(m => m.status === true).length;
-    const myProfile = userEmail ? members.find(m => m.email.toLowerCase() === userEmail.toLowerCase()) || null : null;
+    const activeCount = members.filter((m) => m.status === true).length;
+    const myProfile = userEmail
+      ? members.find(
+          (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
+        ) || null
+      : null;
 
     return {
       success: true,
@@ -517,7 +1180,8 @@ function getInitialData() {
       departments,
       totalCount: members.length,
       activeCount,
-      hasApiKey: !!settings.gemini_api_key && settings.gemini_api_key !== "●●●●●●●●",
+      hasApiKey:
+        !!settings.gemini_api_key && settings.gemini_api_key !== "●●●●●●●●",
       isAdmin,
       currentUserEmail: userEmail,
       myProfile,
@@ -530,7 +1194,7 @@ function getInitialData() {
 
 /**
  * 部署一覧を「部署マスタ」シートから取得する。
- * 
+ *
  * @return {Object[]} 部署オブジェクトの配列（id, name）
  */
 function getDepartments() {
@@ -542,7 +1206,7 @@ function getDepartments() {
   if (lastRow <= 1) return [];
 
   const data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
-  return data.map(row => ({
+  return data.map((row) => ({
     id: row[0],
     name: row[1],
   }));
@@ -551,7 +1215,7 @@ function getDepartments() {
 /**
  * 新しい部署を追加する (管理者専用)。
  * 重複チェックと自動ID採番を行う。
- * 
+ *
  * @param {string} deptName 追加する部署名
  * @return {Object} 処理結果オブジェクト
  */
@@ -560,7 +1224,10 @@ function addDepartment(deptName) {
     checkAdminPermission();
 
     if (!deptName || deptName.trim() === "") {
-      return { success: false, error: "部署名が入力されていません。部署名を入力してください。" };
+      return {
+        success: false,
+        error: "部署名が入力されていません。部署名を入力してください。",
+      };
     }
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -572,9 +1239,12 @@ function addDepartment(deptName) {
 
     // 重複チェック
     const departments = getDepartments();
-    const isDuplicate = departments.some(d => d.name === deptName.trim());
+    const isDuplicate = departments.some((d) => d.name === deptName.trim());
     if (isDuplicate) {
-      return { success: false, error: "その部署名は既に登録されています。別の名前を入力してください。" };
+      return {
+        success: false,
+        error: "その部署名は既に登録されています。別の名前を入力してください。",
+      };
     }
 
     // 次のID採番（D001, D002...）
@@ -585,17 +1255,20 @@ function addDepartment(deptName) {
     return {
       success: true,
       department: { id: newId, name: deptName.trim() },
-      departments: getDepartments()
+      departments: getDepartments(),
     };
   } catch (e) {
     Logger.log(`addDepartment エラー: ${e.toString()}`);
-    return { success: false, error: "部署の追加処理中にエラーが発生しました。" };
+    return {
+      success: false,
+      error: "部署の追加処理中にエラーが発生しました。",
+    };
   }
 }
 
 /**
  * 部署を削除する (管理者専用)。
- * 
+ *
  * @param {string} deptId 削除対象の部署ID
  * @return {Object} 処理結果オブジェクト
  */
@@ -618,11 +1291,17 @@ function deleteDepartment(deptId) {
       return { success: false, error: "削除できる部署データが存在しません。" };
     }
 
-    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+    const ids = sheet
+      .getRange(2, 1, lastRow - 1, 1)
+      .getValues()
+      .map((r) => r[0]);
     const rowIndex = ids.indexOf(deptId);
 
     if (rowIndex === -1) {
-      return { success: false, error: "指定された部署IDが見つかりませんでした。" };
+      return {
+        success: false,
+        error: "指定された部署IDが見つかりませんでした。",
+      };
     }
 
     sheet.deleteRow(rowIndex + 2);
@@ -631,18 +1310,21 @@ function deleteDepartment(deptId) {
     return {
       success: true,
       deletedId: deptId,
-      departments: getDepartments()
+      departments: getDepartments(),
     };
   } catch (e) {
     Logger.log(`deleteDepartment エラー: ${e.toString()}`);
-    return { success: false, error: "部署の削除処理中にエラーが発生しました。" };
+    return {
+      success: false,
+      error: "部署の削除処理中にエラーが発生しました。",
+    };
   }
 }
 
 /**
  * メンバー一覧を「メンバー一覧」シートから取得する。
  * カラムインデックス: G列(15列目)=ステータス, H列(16列目)=次回優先。
- * 
+ *
  * @return {Object[]} メンバーオブジェクトの配列
  */
 function getMembers() {
@@ -656,8 +1338,8 @@ function getMembers() {
   const lastCol = sheet.getLastColumn();
   const colCount = Math.max(lastCol, 17); // 17列目（プロフィール画像）まで安全に取得する
   const data = sheet.getRange(2, 1, lastRow - 1, colCount).getValues();
- 
-  return data.map(row => ({
+
+  return data.map((row) => ({
     id: row[0],
     name: row[1],
     email: row[2],
@@ -667,11 +1349,11 @@ function getMembers() {
     specialty: row[6] || "",
     weakness: row[7] || "",
     motivation: Number(row[8]) || 3, // やりがい (デフォルト3)
-    teamwork: Number(row[9]) || 3,   // チームワーク
-    private: Number(row[10]) || 3,    // プライベート
-    evaluation: Number(row[11]) || 3,// 評価
-    growth: Number(row[12]) || 3,    // 成長
-    considerations: row[13] || "",   // 配慮事項 (14列目)
+    teamwork: Number(row[9]) || 3, // チームワーク
+    private: Number(row[10]) || 3, // プライベート
+    evaluation: Number(row[11]) || 3, // 評価
+    growth: Number(row[12]) || 3, // 成長
+    considerations: row[13] || "", // 配慮事項 (14列目)
     status: row[14] === true || row[14] === "アクティブ", // 15列目 (O列)
     priority: !!row[15], // 16列目 (P列)
     profileImage: row[16] || "", // 17列目 (Q列) プロフィール画像
@@ -680,7 +1362,7 @@ function getMembers() {
 
 /**
  * 設定情報を「設定」シートからキー・値のマップ形式で取得する。
- * 
+ *
  * @return {Object} 設定キーと値のマップ
  */
 function getSettings() {
@@ -694,7 +1376,7 @@ function getSettings() {
   const data = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
   const settings = {};
 
-  data.forEach(row => {
+  data.forEach((row) => {
     if (row[0]) {
       settings[row[0]] = row[1];
     }
@@ -706,7 +1388,7 @@ function getSettings() {
 /**
  * 設定情報を「設定」シートに一括保存する (管理者専用)。
  * マスクされたAPIキーが渡された場合は、既存キーを上書きしない。
- * 
+ *
  * @param {Object} settingsObj 保存対象の設定マップ
  * @return {Object} 処理結果オブジェクト
  */
@@ -722,7 +1404,13 @@ function saveSettings(settingsObj) {
     }
 
     const lastRow = sheet.getLastRow();
-    const keys = lastRow > 1 ? sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]) : [];
+    const keys =
+      lastRow > 1
+        ? sheet
+            .getRange(2, 1, lastRow - 1, 1)
+            .getValues()
+            .map((r) => r[0])
+        : [];
 
     for (const key in settingsObj) {
       const val = settingsObj[key];
@@ -747,7 +1435,9 @@ function saveSettings(settingsObj) {
     return {
       success: true,
       settings: updatedSettings,
-      hasApiKey: !!updatedSettings.gemini_api_key && updatedSettings.gemini_api_key !== "●●●●●●●●",
+      hasApiKey:
+        !!updatedSettings.gemini_api_key &&
+        updatedSettings.gemini_api_key !== "●●●●●●●●",
       isAdmin,
     };
   } catch (e) {
@@ -759,7 +1449,7 @@ function saveSettings(settingsObj) {
 /**
  * マッチング履歴を「マッチング履歴」シートから取得し、降順（新しい日付順）で返す。
  * メモ欄からシステム表示タグを除去する。
- * 
+ *
  * @return {Object[]} マッチング履歴オブジェクトの配列
  */
 function getMatchingHistory() {
@@ -773,17 +1463,24 @@ function getMatchingHistory() {
   const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
 
   return data
-    .map(row => {
+    .map((row) => {
       const cleanMemo = cleanMatchingMemo(row[5]);
-      const dateFormatted = row[0] instanceof Date
-        ? Utilities.formatDate(row[0], "Asia/Tokyo", "yyyy-MM-dd")
-        : row[0].toString();
+      const dateFormatted =
+        row[0] instanceof Date
+          ? Utilities.formatDate(row[0], "Asia/Tokyo", "yyyy-MM-dd")
+          : row[0].toString();
 
       return {
         date: dateFormatted,
         groupId: row[1],
-        memberIds: row[2].toString().split(",").map(s => s.trim()),
-        memberNames: row[3].toString().split(",").map(s => s.trim()),
+        memberIds: row[2]
+          .toString()
+          .split(",")
+          .map((s) => s.trim()),
+        memberNames: row[3]
+          .toString()
+          .split(",")
+          .map((s) => s.trim()),
         method: row[4],
         memo: cleanMemo,
       };
@@ -793,7 +1490,7 @@ function getMatchingHistory() {
 
 /**
  * 代理で新規メンバーを追加する (管理者専用)。
- * 
+ *
  * @param {Object} memberObj 追加するメンバー情報
  * @return {Object} 処理結果オブジェクト
  */
@@ -810,7 +1507,7 @@ function addMember(memberObj) {
 /**
  * メンバー一覧シートから指定IDのデータ行番号（2始まり）を検索する共通ヘルパー。
  * 全てのメンバー操作関数（更新・削除・トグル）で共通利用し、行検索の重複コードを排除する。
- * 
+ *
  * @param {Sheet} sheet メンバー一覧シートオブジェクト
  * @param {string} memberId 検索対象のメンバーID
  * @return {number} データ行番号（2始まり）。見つからない場合は -1
@@ -819,7 +1516,10 @@ function findMemberRowIndex(sheet, memberId) {
   const lastRow = sheet.getLastRow();
   if (lastRow <= 1) return -1;
 
-  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+  const ids = sheet
+    .getRange(2, 1, lastRow - 1, 1)
+    .getValues()
+    .map((r) => r[0]);
   const index = ids.indexOf(memberId);
   return index === -1 ? -1 : index + 2;
 }
@@ -827,7 +1527,7 @@ function findMemberRowIndex(sheet, memberId) {
 /**
  * メンバーオブジェクトからスプレッドシートの1行分の値配列（16列）を構築する共通ヘルパー。
  * 追加（addMemberToSheet）と更新（updateMemberInSheet）で行データ構築ロジックの重複を排除する。
- * 
+ *
  * @param {string} id メンバーID
  * @param {Object} obj メンバー情報オブジェクト
  * @return {Array} スプレッドシートの1行分の値配列（16列）
@@ -856,7 +1556,7 @@ function buildMemberRow(id, obj) {
 
 /**
  * メンバー一覧シートにメンバー行を実際に追加する。
- * 
+ *
  * @param {Object} memberObj 追加するメンバー情報
  * @return {Object} 処理結果オブジェクト
  */
@@ -881,13 +1581,13 @@ function addMemberToSheet(memberObj) {
 
   return {
     success: true,
-    member: getMembers().find(m => m.id === newId),
+    member: getMembers().find((m) => m.id === newId),
   };
 }
 
 /**
  * メンバー情報を更新する (管理者専用)。
- * 
+ *
  * @param {Object} memberObj 更新するメンバー情報
  * @return {Object} 処理結果オブジェクト
  */
@@ -903,7 +1603,7 @@ function updateMember(memberObj) {
 
 /**
  * メンバー一覧シートの特定メンバー情報を上書き更新する。
- * 
+ *
  * @param {Object} memberObj 更新するメンバー情報
  * @return {Object} 処理結果オブジェクト
  */
@@ -916,7 +1616,10 @@ function updateMemberInSheet(memberObj) {
 
   const rowNum = findMemberRowIndex(sheet, memberObj.id);
   if (rowNum === -1) {
-    return { success: false, error: `メンバーIDが見つかりません。ID: ${memberObj.id}` };
+    return {
+      success: false,
+      error: `メンバーIDが見つかりません。ID: ${memberObj.id}`,
+    };
   }
 
   const row = buildMemberRow(memberObj.id, memberObj);
@@ -927,7 +1630,7 @@ function updateMemberInSheet(memberObj) {
 
 /**
  * メンバーを削除する (管理者専用)。
- * 
+ *
  * @param {string} memberId 削除するメンバーID
  * @return {Object} 処理結果オブジェクト
  */
@@ -943,7 +1646,10 @@ function deleteMember(memberId) {
 
     const rowNum = findMemberRowIndex(sheet, memberId);
     if (rowNum === -1) {
-      return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
+      return {
+        success: false,
+        error: `メンバーIDが見つかりません。ID: ${memberId}`,
+      };
     }
 
     sheet.deleteRow(rowNum);
@@ -956,7 +1662,7 @@ function deleteMember(memberId) {
 
 /**
  * メンバーの参加ステータス（O列/15列目）を反転トグルする (管理者専用)。
- * 
+ *
  * @param {string} memberId メンバーID
  * @return {Object} 処理結果オブジェクト
  */
@@ -972,7 +1678,10 @@ function toggleMemberStatus(memberId) {
 
     const rowNum = findMemberRowIndex(sheet, memberId);
     if (rowNum === -1) {
-      return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
+      return {
+        success: false,
+        error: `メンバーIDが見つかりません。ID: ${memberId}`,
+      };
     }
 
     const cell = sheet.getRange(rowNum, 15); // O列（15列目: ステータス）
@@ -988,7 +1697,7 @@ function toggleMemberStatus(memberId) {
 
 /**
  * メンバーの次回優先ステータス（P列/16列目）を反転トグルする (管理者専用)。
- * 
+ *
  * @param {string} memberId メンバーID
  * @return {Object} 処理結果オブジェクト
  */
@@ -1004,7 +1713,10 @@ function toggleMemberPriority(memberId) {
 
     const rowNum = findMemberRowIndex(sheet, memberId);
     if (rowNum === -1) {
-      return { success: false, error: `メンバーIDが見つかりません。ID: ${memberId}` };
+      return {
+        success: false,
+        error: `メンバーIDが見つかりません。ID: ${memberId}`,
+      };
     }
 
     const cell = sheet.getRange(rowNum, 16); // P列（16列目: 次回優先）
@@ -1021,7 +1733,7 @@ function toggleMemberPriority(memberId) {
 /**
  * マッチング結果履歴の確定保存と次回優先フラグの自動同期 (管理者専用)。
  * マッチングに選ばれたメンバーは次回優先フラグを解除し、漏れたアクティブなメンバーは次回優先に設定する。
- * 
+ *
  * @param {Object[]} groups マッチンググループの配列
  * @param {string} matchingMethod マッチング方式の文字列
  * @return {Object} 処理結果オブジェクト
@@ -1037,15 +1749,19 @@ function saveMatchingHistory(groups, matchingMethod) {
       sheet = ss.getSheetByName("マッチング履歴");
     }
 
-    const todayStr = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    const todayStr = Utilities.formatDate(
+      new Date(),
+      "Asia/Tokyo",
+      "yyyy-MM-dd",
+    );
     const matchedMemberIds = [];
 
     // 各グループの履歴レコードを挿入
-    groups.forEach(group => {
+    groups.forEach((group) => {
       if (!group.members || group.members.length === 0) return;
 
-      const memberIds = group.members.map(m => m.id).join(",");
-      const memberNames = group.members.map(m => m.name).join(", ");
+      const memberIds = group.members.map((m) => m.id).join(",");
+      const memberNames = group.members.map((m) => m.name).join(", ");
       const cleanMemo = cleanMatchingMemo(group.memo);
 
       sheet.appendRow([
@@ -1057,7 +1773,7 @@ function saveMatchingHistory(groups, matchingMethod) {
         cleanMemo,
       ]);
 
-      group.members.forEach(m => matchedMemberIds.push(m.id));
+      group.members.forEach((m) => matchedMemberIds.push(m.id));
     });
 
     SpreadsheetApp.flush();
@@ -1065,12 +1781,15 @@ function saveMatchingHistory(groups, matchingMethod) {
 
     // --- 次回優先フラグ（16列目: P列）の自動更新マイグレーション ---
     const allMembers = getMembers();
-    const activeMembers = allMembers.filter(m => m.status === true);
+    const activeMembers = allMembers.filter((m) => m.status === true);
     const memberSheet = ss.getSheetByName("メンバー一覧");
 
     if (memberSheet && memberSheet.getLastRow() > 1) {
       const lastRow = memberSheet.getLastRow();
-      const memberIdsInSheet = memberSheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+      const memberIdsInSheet = memberSheet
+        .getRange(2, 1, lastRow - 1, 1)
+        .getValues()
+        .map((r) => r[0]);
       const priorityRange = memberSheet.getRange(2, 16, lastRow - 1, 1); // 16列目 (P列) が「次回優先」列
       const priorities = priorityRange.getValues();
 
@@ -1079,13 +1798,13 @@ function saveMatchingHistory(groups, matchingMethod) {
         if (matchedMemberIds.includes(mId)) {
           priorities[i][0] = false; // 今回選出されたメンバーは優先を解除
         } else {
-          const isActive = activeMembers.some(m => m.id === mId);
+          const isActive = activeMembers.some((m) => m.id === mId);
           if (isActive) {
             priorities[i][0] = true; // 今回漏れたアクティブメンバーは自動で次回優先へ
           }
         }
       }
-      
+
       priorityRange.setValues(priorities);
       SpreadsheetApp.flush();
     }
@@ -1106,7 +1825,7 @@ function saveMatchingHistory(groups, matchingMethod) {
 
 /**
  * 確定したマッチング結果を各グループのメンバーに個別メール通知する。
- * 
+ *
  * @param {Object[]} groups マッチンググループの配列
  * @param {string} dateStr 開催予定日の日付文字列
  * @param {string} matchingMethod マッチング方式の文字列
@@ -1114,26 +1833,26 @@ function saveMatchingHistory(groups, matchingMethod) {
 function sendMatchingEmails(groups, dateStr, matchingMethod) {
   const webAppUrl = getPortalUrl();
 
-  groups.forEach(group => {
+  groups.forEach((group) => {
     const { members, groupId } = group;
     if (!members || members.length === 0) return;
 
-    members.forEach(recipient => {
+    members.forEach((recipient) => {
       if (!recipient.email) {
         Logger.log(`メールアドレス未登録のため通知スキップ: ${recipient.name}`);
         return;
       }
 
       const otherMembersText = members
-        .filter(m => m.id !== recipient.id)
-        .map(m => `・${m.name} さん (${m.department || "部署未設定"})`)
+        .filter((m) => m.id !== recipient.id)
+        .map((m) => `・${m.name} さん (${m.department || "部署未設定"})`)
         .join("\n");
 
-      const subject = `【ランチ交流会】マッチング確定のお知らせ（${dateStr}）`;
+      const subject = `【社内ランチ交流会】参加者確定のお知らせ（${dateStr}）`;
       let body = `${recipient.name} さん
 
-お疲れ様です。ランチ交流会事務局です。
-次回ランチ交流会のマッチングが確定しましたのでお知らせいたします。
+お疲れ様です。Kレボ委員会です。
+次回ランチ交流会の参加者が確定しましたのでお知らせいたします。
 
 ■ 開催予定日
 ${dateStr}
@@ -1142,8 +1861,8 @@ ${dateStr}
 ・${recipient.name} さん (${recipient.department || "部署未設定"} ・あなた)
 ${otherMembersText}
 
-■ ランチ交流会について
-部署の重なりなどを考慮して選出されたグループです。メンバーの皆様で調整の上、ぜひランチ交流会をお楽しみください！
+■ 社内ランチ交流会について
+メンバーの組み合わせを考慮して選出されたグループです。メンバーの皆様で調整の上、ぜひランチ交流会をお楽しみください！
 
 `;
 
@@ -1151,16 +1870,18 @@ ${otherMembersText}
         body += `■ ポータル画面（チャット・プロフィール確認など）\n${webAppUrl}\n\n`;
       }
 
-      body += `※ 本メールはシステムより自動送信されています。\n何かご不明な点や不都合がございましたら、ランチ交流会事務局までご連絡ください。\n`;
+      body += `※ 本メールはシステムより自動送信されています。\n何かご不明な点や不都合がございましたら、Kレボ委員会までご連絡ください。\n`;
 
       try {
         GmailApp.sendEmail(recipient.email, subject, body, {
-          name: "ランチ交流会事務局",
+          name: "Kレボ委員会",
           noReply: true,
         });
         Logger.log(`メール送信成功: ${recipient.email}`);
       } catch (err) {
-        Logger.log(`メール送信失敗: ${recipient.email} エラー: ${err.toString()}`);
+        Logger.log(
+          `メール送信失敗: ${recipient.email} エラー: ${err.toString()}`,
+        );
       }
     });
   });
@@ -1168,7 +1889,7 @@ ${otherMembersText}
 
 /**
  * Gemini API接続の疎通確認テストを行う (管理者専用)。
- * 
+ *
  * @param {string} apiKey テストするGemini APIキー
  * @return {Object} 接続可否のステータス結果
  */
@@ -1182,9 +1903,15 @@ function testGeminiConnection(apiKey) {
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     const payload = {
-      contents: [{
-        parts: [{ text: 'Hello, this is a test. Reply with one word "OK" if you hear me.' }],
-      }],
+      contents: [
+        {
+          parts: [
+            {
+              text: 'Hello, this is a test. Reply with one word "OK" if you hear me.',
+            },
+          ],
+        },
+      ],
     };
 
     const options = {
@@ -1207,7 +1934,10 @@ function testGeminiConnection(apiKey) {
       try {
         errorJson = JSON.parse(responseBody);
       } catch (ex) {}
-      const errorMsg = errorJson && errorJson.error && errorJson.error.message ? errorJson.error.message : `ステータスコード ${responseCode}`;
+      const errorMsg =
+        errorJson && errorJson.error && errorJson.error.message
+          ? errorJson.error.message
+          : `ステータスコード ${responseCode}`;
       return { success: false, error: `APIエラー: ${errorMsg}` };
     }
   } catch (e) {
@@ -1217,7 +1947,7 @@ function testGeminiConnection(apiKey) {
 
 /**
  * ログインユーザー自身のプロフィールを自己登録または更新する。
- * 
+ *
  * @param {Object} profileObj プロフィール入力データ
  * @return {Object} 処理結果オブジェクト
  */
@@ -1227,7 +1957,8 @@ function registerSelfProfile(profileObj) {
     if (!userEmail) {
       return {
         success: false,
-        error: "Googleアカウントにログインしていないか、メールアドレスが取得できません。ポータルのデプロイ設定をご確認ください。",
+        error:
+          "Googleアカウントにログインしていないか、メールアドレスが取得できません。ポータルのデプロイ設定をご確認ください。",
       };
     }
 
@@ -1239,16 +1970,25 @@ function registerSelfProfile(profileObj) {
     }
 
     const members = getMembers();
-    const myProfile = members.find(m => m.email.toLowerCase() === userEmail.toLowerCase());
+    const myProfile = members.find(
+      (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
+    );
 
     // 画像URLのハンドリング
-    var oldImageUrl = myProfile ? (myProfile.profileImage || "") : "";
+    var oldImageUrl = myProfile ? myProfile.profileImage || "" : "";
     var newImageUrl = oldImageUrl;
 
     // 送られてきた画像がBase64画像データの場合
-    if (profileObj.profileImage && profileObj.profileImage.startsWith("data:image/")) {
+    if (
+      profileObj.profileImage &&
+      profileObj.profileImage.startsWith("data:image/")
+    ) {
       const fileName = "profile_" + userEmail.replace(/[@.]/g, "_");
-      newImageUrl = saveBase64ImageToDrive(profileObj.profileImage, fileName, oldImageUrl);
+      newImageUrl = saveBase64ImageToDrive(
+        profileObj.profileImage,
+        fileName,
+        oldImageUrl,
+      );
     } else if (profileObj.profileImage === "") {
       // 画像が削除された場合、古いファイルをドライブから消去
       if (oldImageUrl) {
@@ -1304,7 +2044,9 @@ function registerSelfProfile(profileObj) {
       result = addMemberToSheet(addObj);
     }
 
-    return result.success ? { success: true, myProfile: result.member } : { success: false, error: result.error };
+    return result.success
+      ? { success: true, myProfile: result.member }
+      : { success: false, error: result.error };
   } catch (e) {
     Logger.log(`registerSelfProfile エラー: ${e.toString()}`);
     return { success: false, error: e.toString() };
@@ -1314,7 +2056,7 @@ function registerSelfProfile(profileObj) {
 /**
  * 指定のチャットルーム（グループ）に対するユーザーのアクセス権限を検証する。
  * 管理者は常時アクセス可能。一般ユーザーは該当グループ所属メンバーのみアクセス可能。
- * 
+ *
  * @param {string} userEmail 検証するユーザーのメールアドレス
  * @param {string} roomId ルームID（フォーマット: 日付_グループID）
  * @return {boolean} アクセス権がある場合はtrue
@@ -1347,7 +2089,10 @@ function checkRoomAccess(userEmail, roomId) {
 
   for (let i = 0; i < data.length; i++) {
     const val = data[i][0];
-    const rowDate = val instanceof Date ? Utilities.formatDate(val, "Asia/Tokyo", "yyyy-MM-dd") : val.toString();
+    const rowDate =
+      val instanceof Date
+        ? Utilities.formatDate(val, "Asia/Tokyo", "yyyy-MM-dd")
+        : val.toString();
     const rowGroupId = data[i][1];
     if (rowDate === dateStr && rowGroupId === groupId) {
       targetRow = data[i];
@@ -1358,16 +2103,18 @@ function checkRoomAccess(userEmail, roomId) {
   if (!targetRow) return false;
 
   const memberIdsStr = targetRow[2] || "";
-  const memberIds = memberIdsStr.split(",").map(id => id.trim());
+  const memberIds = memberIdsStr.split(",").map((id) => id.trim());
   const members = getMembers();
-  const currentUser = members.find(m => m.email.toLowerCase() === userEmail.toLowerCase());
+  const currentUser = members.find(
+    (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
+  );
 
   return currentUser ? memberIds.includes(currentUser.id) : false;
 }
 
 /**
  * 特定のチャットルームに属するメッセージ履歴を全件取得する。
- * 
+ *
  * @param {string} roomId ルームID
  * @return {Object} メッセージ配列を含む結果オブジェクト
  */
@@ -1375,11 +2122,17 @@ function getChatMessages(roomId) {
   try {
     const userEmail = getCurrentUserEmail();
     if (!userEmail) {
-      return { success: false, error: "Googleアカウントにログインしていません。" };
+      return {
+        success: false,
+        error: "Googleアカウントにログインしていません。",
+      };
     }
 
     if (!checkRoomAccess(userEmail, roomId)) {
-      return { success: false, error: "このチャットルームへのアクセス権限がありません。" };
+      return {
+        success: false,
+        error: "このチャットルームへのアクセス権限がありません。",
+      };
     }
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1396,7 +2149,7 @@ function getChatMessages(roomId) {
     const data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
     const messages = [];
 
-    data.forEach(row => {
+    data.forEach((row) => {
       if (row[1] === roomId) {
         messages.push({
           id: row[0],
@@ -1421,7 +2174,7 @@ function getChatMessages(roomId) {
 
 /**
  * 特定のチャットルームに新着メッセージを送信・保存する。
- * 
+ *
  * @param {string} roomId ルームID
  * @param {string} messageText メッセージ本文
  * @return {Object} 更新後のメッセージ一覧オブジェクト
@@ -1430,7 +2183,10 @@ function sendChatMessage(roomId, messageText) {
   try {
     const userEmail = getCurrentUserEmail();
     if (!userEmail) {
-      return { success: false, error: "Googleアカウントにログインしていません。" };
+      return {
+        success: false,
+        error: "Googleアカウントにログインしていません。",
+      };
     }
 
     if (!messageText || messageText.trim() === "") {
@@ -1438,13 +2194,22 @@ function sendChatMessage(roomId, messageText) {
     }
 
     if (!checkRoomAccess(userEmail, roomId)) {
-      return { success: false, error: "このチャットルームへのアクセス権限がありません。" };
+      return {
+        success: false,
+        error: "このチャットルームへのアクセス権限がありません。",
+      };
     }
 
     const members = getMembers();
-    const currentUser = members.find(m => m.email.toLowerCase() === userEmail.toLowerCase());
+    const currentUser = members.find(
+      (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
+    );
     if (!currentUser) {
-      return { success: false, error: "メンバーとして登録されていません。プロフィールを設定してください。" };
+      return {
+        success: false,
+        error:
+          "メンバーとして登録されていません。プロフィールを設定してください。",
+      };
     }
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1480,7 +2245,7 @@ function sendChatMessage(roomId, messageText) {
 /**
  * 過去のマッチング履歴およびチャットメッセージを全件物理削除クリアする (管理者専用)。
  * 同時に全メンバーの「次回優先」フラグ（16列目: P列）をすべてクリア（false）する。
- * 
+ *
  * @return {Object} 処理結果オブジェクト
  */
 function clearMatchingHistory() {
@@ -1522,7 +2287,7 @@ function clearMatchingHistory() {
 /**
  * 指定された日付およびIDに該当するマッチンググループのみ履歴から物理削除する (管理者専用)。
  * 同時に、チャットメッセージシートから該当ルームに関連するログデータも削除する。
- * 
+ *
  * @param {string} dateStr 開催日付
  * @param {string} groupId グループID
  * @return {Object} 処理結果オブジェクト
@@ -1534,7 +2299,10 @@ function deleteMatchingGroup(dateStr, groupId) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("マッチング履歴");
     if (!sheet) {
-      return { success: false, error: "マッチング履歴シートが見つかりません。" };
+      return {
+        success: false,
+        error: "マッチング履歴シートが見つかりません。",
+      };
     }
 
     const lastRow = sheet.getLastRow();
@@ -1544,7 +2312,10 @@ function deleteMatchingGroup(dateStr, groupId) {
     let rowIndexToDelete = -1;
 
     for (let i = 0; i < data.length; i++) {
-      const rowDate = data[i][0] instanceof Date ? Utilities.formatDate(data[i][0], "Asia/Tokyo", "yyyy-MM-dd") : data[i][0].toString();
+      const rowDate =
+        data[i][0] instanceof Date
+          ? Utilities.formatDate(data[i][0], "Asia/Tokyo", "yyyy-MM-dd")
+          : data[i][0].toString();
       const rowGroupId = data[i][1];
 
       if (rowDate === dateStr && rowGroupId === groupId) {
@@ -1554,7 +2325,10 @@ function deleteMatchingGroup(dateStr, groupId) {
     }
 
     if (rowIndexToDelete === -1) {
-      return { success: false, error: `指定されたグループが見つかりません。日付: ${dateStr}, グループID: ${groupId}` };
+      return {
+        success: false,
+        error: `指定されたグループが見つかりません。日付: ${dateStr}, グループID: ${groupId}`,
+      };
     }
 
     sheet.deleteRow(rowIndexToDelete);
@@ -1565,7 +2339,9 @@ function deleteMatchingGroup(dateStr, groupId) {
       const chatLastRow = chatSheet.getLastRow();
       if (chatLastRow > 1) {
         const roomId = `${dateStr}_${groupId}`;
-        const chatData = chatSheet.getRange(2, 2, chatLastRow - 1, 1).getValues();
+        const chatData = chatSheet
+          .getRange(2, 2, chatLastRow - 1, 1)
+          .getValues();
         for (let j = chatData.length - 1; j >= 0; j--) {
           if (chatData[j][0] === roomId) {
             chatSheet.deleteRow(j + 2);
@@ -1585,7 +2361,7 @@ function deleteMatchingGroup(dateStr, groupId) {
 /**
  * フロントエンドからの実行要求に基づいて、マッチングロジックを展開するエントリーポイント (管理者専用)。
  * 優先枠の考慮、メンバー選出、API有無に応じたロジックフォールバック等を自動制御する。
- * 
+ *
  * @param {Object} params 各種パラメータ（groupSize, groupCount, mode, additionalPrompt）
  * @return {Object} 処理結果オブジェクト
  */
@@ -1600,10 +2376,13 @@ function runMatching(params) {
     const additionalPrompt = params.additionalPrompt || "";
 
     const allMembers = getMembers();
-    const activeMembers = allMembers.filter(m => m.status === true);
+    const activeMembers = allMembers.filter((m) => m.status === true);
 
     if (activeMembers.length < 2) {
-      return { success: false, error: "アクティブなメンバーが少なすぎます（最低2名必要です）。" };
+      return {
+        success: false,
+        error: "アクティブなメンバーが少なすぎます（最低2名必要です）。",
+      };
     }
 
     const maxParticipants = groupSize * groupCount;
@@ -1611,8 +2390,8 @@ function runMatching(params) {
     let unmatchedMembers = [];
 
     // 優先枠（次回優先メンバー）と通常枠の選出シャッフル
-    let priorityMembers = activeMembers.filter(m => !!m.priority);
-    let regularMembers = activeMembers.filter(m => !m.priority);
+    let priorityMembers = activeMembers.filter((m) => !!m.priority);
+    let regularMembers = activeMembers.filter((m) => !m.priority);
 
     priorityMembers = arrayShuffle(priorityMembers);
     regularMembers = arrayShuffle(regularMembers);
@@ -1643,26 +2422,52 @@ function runMatching(params) {
     // マッチング実行（APIキーの有無によって適宜フォールバック）
     if (mode === "gemini") {
       if (!apiKey) {
-        Logger.log("APIキー未設定のため、独自プログラムロジックにフォールバックします。");
-        result = runLogicMatching(selectedMembers, history, groupSize, groupCount);
+        Logger.log(
+          "APIキー未設定のため、独自プログラムロジックにフォールバックします。",
+        );
+        result = runLogicMatching(
+          selectedMembers,
+          history,
+          groupSize,
+          groupCount,
+        );
         finalMethod = "logic_fallback";
       } else {
-        result = runGeminiMatching(selectedMembers, history, groupSize, groupCount, apiKey, additionalPrompt);
+        result = runGeminiMatching(
+          selectedMembers,
+          history,
+          groupSize,
+          groupCount,
+          apiKey,
+          additionalPrompt,
+        );
         if (!result.success) {
-          Logger.log(`Gemini APIエラーのため、独自プログラムロジックにフォールバックします。エラー: ${result.error}`);
-          result = runLogicMatching(selectedMembers, history, groupSize, groupCount);
+          Logger.log(
+            `Gemini APIエラーのため、独自プログラムロジックにフォールバックします。エラー: ${result.error}`,
+          );
+          result = runLogicMatching(
+            selectedMembers,
+            history,
+            groupSize,
+            groupCount,
+          );
           finalMethod = "logic_fallback";
         }
       }
     } else {
-      result = runLogicMatching(selectedMembers, history, groupSize, groupCount);
+      result = runLogicMatching(
+        selectedMembers,
+        history,
+        groupSize,
+        groupCount,
+      );
       finalMethod = "logic";
     }
 
     // グループIDの採番（過去の最大連番を考慮して重複防止）
     if (result && result.success && result.groups) {
       let maxGroupIdNum = 0;
-      history.forEach(h => {
+      history.forEach((h) => {
         const match = h.groupId.match(/^G-(\d+)$/);
         if (match) {
           const num = parseInt(match[1], 10);
@@ -1690,7 +2495,7 @@ function runMatching(params) {
 /**
  * Engine A: Gemini API 連携によるインテリジェントマッチング。
  * 配慮事項を可能な限り尊重しつつ、AIメモ自体には配慮詳細を含めないように設計。
- * 
+ *
  * @param {Object[]} members 選出されたメンバーの配列
  * @param {Object[]} history 過去のマッチング履歴の配列
  * @param {number} groupSize 1グループあたりの目標人数
@@ -1699,11 +2504,18 @@ function runMatching(params) {
  * @param {string} additionalPrompt 管理者による追加指示
  * @return {Object} 処理結果オブジェクト
  */
-function runGeminiMatching(members, history, groupSize, groupCount, apiKey, additionalPrompt) {
+function runGeminiMatching(
+  members,
+  history,
+  groupSize,
+  groupCount,
+  apiKey,
+  additionalPrompt,
+) {
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
 
-    const membersData = members.map(m => ({
+    const membersData = members.map((m) => ({
       id: m.id,
       name: m.name,
       dept: m.department,
@@ -1720,7 +2532,7 @@ function runGeminiMatching(members, history, groupSize, groupCount, apiKey, addi
       considerations: m.considerations || "",
     }));
 
-    const compactHistory = history.slice(0, 8).map(h => ({
+    const compactHistory = history.slice(0, 8).map((h) => ({
       date: h.date,
       groups: h.memberIds,
     }));
@@ -1760,7 +2572,10 @@ ${additionalPrompt ? additionalPrompt : "特になし"}
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
       systemInstruction: { parts: [{ text: systemInstruction }] },
-      generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      },
     };
 
     const options = {
@@ -1775,7 +2590,10 @@ ${additionalPrompt ? additionalPrompt : "特になし"}
     const responseBody = response.getContentText();
 
     if (responseCode !== 200) {
-      return { success: false, error: `Gemini APIエラー (ステータス: ${responseCode})` };
+      return {
+        success: false,
+        error: `Gemini APIエラー (ステータス: ${responseCode})`,
+      };
     }
 
     const jsonResult = JSON.parse(responseBody);
@@ -1783,12 +2601,15 @@ ${additionalPrompt ? additionalPrompt : "特になし"}
     const parsedData = JSON.parse(generatedText.trim());
 
     if (!parsedData.groups || !Array.isArray(parsedData.groups)) {
-      return { success: false, error: "Geminiの返却データ構造が正しくありません。" };
+      return {
+        success: false,
+        error: "Geminiの返却データ構造が正しくありません。",
+      };
     }
 
     const finalGroups = parsedData.groups.map((g, idx) => {
       const matchedMembers = g.members
-        .map(id => members.find(m => m.id === id))
+        .map((id) => members.find((m) => m.id === id))
         .filter(Boolean);
 
       return {
@@ -1808,7 +2629,7 @@ ${additionalPrompt ? additionalPrompt : "特になし"}
 /**
  * Engine B: 山登り法（ローカルサーチ）による独自ロジックマッチング。
  * 過去の重複ペナルティや部署重複ペナルティをスコアリングして反復改善を行う。
- * 
+ *
  * @param {Object[]} members 選出されたメンバーの配列
  * @param {Object[]} history 過去のマッチング履歴の配列
  * @param {number} targetSize 1グループあたりの目標人数
@@ -1817,11 +2638,12 @@ ${additionalPrompt ? additionalPrompt : "特になし"}
  */
 function runLogicMatching(members, history, targetSize, targetCount) {
   const totalMembers = members.length;
-  const numGroups = targetCount || Math.max(1, Math.round(totalMembers / targetSize));
+  const numGroups =
+    targetCount || Math.max(1, Math.round(totalMembers / targetSize));
   const actualTargetSize = Math.ceil(totalMembers / numGroups);
 
   const penaltyMap = {};
-  history.forEach(h => {
+  history.forEach((h) => {
     const ids = h.memberIds;
     for (let i = 0; i < ids.length; i++) {
       for (let j = i + 1; j < ids.length; j++) {
@@ -1833,7 +2655,7 @@ function runLogicMatching(members, history, targetSize, targetCount) {
     }
   });
 
-  let shuffledIds = members.map(m => m.id);
+  let shuffledIds = members.map((m) => m.id);
   shuffledIds = arrayShuffle(shuffledIds);
 
   const groups = Array.from({ length: numGroups }, () => []);
@@ -1842,13 +2664,13 @@ function runLogicMatching(members, history, targetSize, targetCount) {
   }
 
   // 【最適化】配列メンバーを Map に一括変換して、ループ内探索を O(1) に高速化する
-  const memberMap = new Map(members.map(m => [m.id, m]));
+  const memberMap = new Map(members.map((m) => [m.id, m]));
 
   // スコア計算クロージャ
   const calculateTotalPenalty = (currentGroups) => {
     let totalPenalty = 0;
 
-    currentGroups.forEach(group => {
+    currentGroups.forEach((group) => {
       for (let i = 0; i < group.length; i++) {
         const m1 = memberMap.get(group[i]);
         if (!m1) continue;
@@ -1867,7 +2689,10 @@ function runLogicMatching(members, history, targetSize, targetCount) {
           }
 
           // 共通趣味ボーナス
-          const commonWord = findCommonWord(m1.interests || "", m2.interests || "");
+          const commonWord = findCommonWord(
+            m1.interests || "",
+            m2.interests || "",
+          );
           if (commonWord) {
             totalPenalty -= 10;
           }
@@ -1887,7 +2712,11 @@ function runLogicMatching(members, history, targetSize, targetCount) {
     const g1Idx = Math.floor(Math.random() * numGroups);
     const g2Idx = Math.floor(Math.random() * numGroups);
 
-    if (g1Idx === g2Idx || groups[g1Idx].length === 0 || groups[g2Idx].length === 0) {
+    if (
+      g1Idx === g2Idx ||
+      groups[g1Idx].length === 0 ||
+      groups[g2Idx].length === 0
+    ) {
       continue;
     }
 
@@ -1911,8 +2740,10 @@ function runLogicMatching(members, history, targetSize, targetCount) {
   }
 
   const finalGroups = groups.map((grpIds, idx) => {
-    const matchedMembers = grpIds.map(id => memberMap.get(id)).filter(Boolean);
-    const depts = matchedMembers.map(m => m.department);
+    const matchedMembers = grpIds
+      .map((id) => memberMap.get(id))
+      .filter(Boolean);
+    const depts = matchedMembers.map((m) => m.department);
     const uniqueDepts = [...new Set(depts)];
 
     let memo = "過去の履歴を考慮し、重複を極力回避して最適化しました。";
@@ -1934,7 +2765,7 @@ function runLogicMatching(members, history, targetSize, targetCount) {
 
 /**
  * フィッシャー–イェーツのアルゴリズムに基づき、配列をインプレースでランダムシャッフルする。
- * 
+ *
  * @param {Array} array シャッフル対象の配列
  * @return {Array} シャッフル後の配列
  */
@@ -1943,27 +2774,44 @@ function arrayShuffle(array) {
   while (currentIndex !== 0) {
     const randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex -= 1;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
   }
   return array;
 }
 
 /**
  * 二つの紹介文字列から、共通する趣味・関心キーワードを検出する。
- * 
+ *
  * @param {string} str1 メンバー1の趣味・紹介文
  * @param {string} str2 メンバー2の趣味・紹介文
  * @return {string|null} 共通キーワード（無ければnull）
  */
 function findCommonWord(str1, str2) {
   if (!str1 || !str2) return null;
-  
+
   const keywords = [
-    "サウナ", "カフェ", "ゴルフ", "テニス", "旅行", "キャンプ",
-    "料理", "カレー", "読書", "映画", "ゲーム", "デザイン",
-    "カメラ", "コーヒー", "ピラティス", "ヨガ", "筋トレ"
+    "サウナ",
+    "カフェ",
+    "ゴルフ",
+    "テニス",
+    "旅行",
+    "キャンプ",
+    "料理",
+    "カレー",
+    "読書",
+    "映画",
+    "ゲーム",
+    "デザイン",
+    "カメラ",
+    "コーヒー",
+    "ピラティス",
+    "ヨガ",
+    "筋トレ",
   ];
-  
+
   for (const kw of keywords) {
     if (str1.includes(kw) && str2.includes(kw)) {
       return kw;
@@ -1974,13 +2822,14 @@ function findCommonWord(str1, str2) {
 
 /**
  * 履歴用のメモ文字列から、システム判定用の表示用タグ（括弧を含む）をクリーンアップする。
- * 
+ *
  * @param {string} memo 加工前のメモ文字列
  * @return {string} クリーンアップ後のメモ文字列
  */
 function cleanMatchingMemo(memo) {
   if (!memo) return "";
-  return memo.toString()
+  return memo
+    .toString()
     .replace(/【手動微調整あり】/g, "")
     .replace(/【独自ロジック選出】/g, "")
     .replace(/\[手動微調整あり\]/g, "")
@@ -1990,7 +2839,7 @@ function cleanMatchingMemo(memo) {
 
 /**
  * スプレッドシート内の特定の列から、次の採番IDを重複なくインクリメンタル生成する。
- * 
+ *
  * @param {Sheet} sheet 対象のシートオブジェクト
  * @param {string} prefix 接頭辞（例: 'M', 'D', 'MSG'）
  * @param {RegExp} regexPattern 数値部分を取り出すための正規表現パターン（例: /^M(\d+)$/）
@@ -2001,24 +2850,27 @@ function getNextId(sheet, prefix, regexPattern) {
   if (lastRow <= 1) {
     return `${prefix}001`;
   }
-  
-  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().map(r => r[0]);
+
+  const ids = sheet
+    .getRange(2, 1, lastRow - 1, 1)
+    .getValues()
+    .map((r) => r[0]);
   let maxNum = 0;
-  
-  ids.forEach(id => {
+
+  ids.forEach((id) => {
     const match = id.toString().match(regexPattern);
     if (match) {
       const num = parseInt(match[1], 10);
       if (num > maxNum) maxNum = num;
     }
   });
-  
+
   return `${prefix}${("000" + (maxNum + 1)).slice(-3)}`;
 }
 
 /**
  * スプレッドシートと同じフォルダに「プロフィール画像」フォルダを作成または取得する。
- * 
+ *
  * @param {string} folderName フォルダ名
  * @return {Folder} Googleドライブのフォルダオブジェクト
  */
@@ -2032,14 +2884,17 @@ function getOrCreateFolder(folderName) {
   } else {
     parentFolder = DriveApp.getRootFolder();
   }
-  
+
   const folders = parentFolder.getFoldersByName(folderName);
   if (folders.hasNext()) {
     return folders.next();
   } else {
     const folder = parentFolder.createFolder(folderName);
     // リンクを知っている全員が閲覧可能にする
-    folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    folder.setSharing(
+      DriveApp.Access.ANYONE_WITH_LINK,
+      DriveApp.Permission.VIEW,
+    );
     return folder;
   }
 }
@@ -2047,7 +2902,7 @@ function getOrCreateFolder(folderName) {
 /**
  * Base64データをデコードしてGoogleドライブの「プロフィール画像」フォルダに保存する。
  * 古いファイルがある場合は削除する。
- * 
+ *
  * @param {string} base64Data Base64エンコードされた画像データ(DataURL)
  * @param {string} fileName 保存するファイル名
  * @param {string} oldFileUrl 既存の画像URL
@@ -2058,37 +2913,37 @@ function saveBase64ImageToDrive(base64Data, fileName, oldFileUrl) {
   if (oldFileUrl) {
     deleteFileByUrl(oldFileUrl);
   }
-  
+
   if (!base64Data || !base64Data.startsWith("data:image/")) {
     return "";
   }
-  
+
   const folder = getOrCreateFolder("プロフィール画像");
-  
+
   // Base64データのパース
   const matches = base64Data.match(/^data:(image\/[a-z0-9-+.]+);base64,(.+)$/i);
   if (!matches) {
     throw new Error("無効な画像データ形式です。");
   }
-  
+
   const contentType = matches[1];
   const base64Content = matches[2];
-  
+
   // デコード
   const decoded = Utilities.base64Decode(base64Content);
   const blob = Utilities.newBlob(decoded, contentType, fileName);
-  
+
   // ファイル作成
   const file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  
+
   // 直接表示可能なURLを生成して返す
   return "https://lh3.googleusercontent.com/d/" + file.getId();
 }
 
 /**
  * 直接表示用URLからファイルIDを抽出し、Googleドライブからファイルを削除（ゴミ箱へ移動）する。
- * 
+ *
  * @param {string} url 削除対象ファイルのURL
  */
 function deleteFileByUrl(url) {
@@ -2100,7 +2955,9 @@ function deleteFileByUrl(url) {
       const file = DriveApp.getFileById(fileId);
       file.setTrashed(true);
     } catch (e) {
-      Logger.log(`ファイルの削除に失敗しました (ID: ${fileId}): ${e.toString()}`);
+      Logger.log(
+        `ファイルの削除に失敗しました (ID: ${fileId}): ${e.toString()}`,
+      );
     }
   }
 }
