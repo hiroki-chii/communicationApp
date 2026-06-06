@@ -1,5 +1,100 @@
 # 作業・修正ログ
 
+## 2026-06-06 17:02
+
+- **対応内容**: ステータス・次回優先のトグル操作時における処理中トーストの追加
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+- **修正内容の詳細**:
+  - **index.html 非同期通信ラッパー（asyncGasAction）の適用**:
+    - メンバー一覧画面での「ステータス（アクティブ/非アクティブ）」および「次回優先（優先/通常）」を反転トグルする操作（`handleToggleStatus`, `handleTogglePriority`）について、共通の非同期処理ラッパー `asyncGasAction` を使用した構成に変更。これにより、GAS通信中の「更新中（処理中）」のローディング用トースト通知が画面上に自動で表示されるよう制御を統一しました。
+
+## 2026-06-06 16:58
+
+- **対応内容**: メンバーポップオーバーの表示項目の修正（特技・弱点の非表示化）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+- **修正内容の詳細**:
+  - **index.html ポップオーバー表示の差し戻し**:
+    - メンバーカードホバー時のポップオーバー（`renderMemberPopoverHtml`）において、追加表示するようにしていた「特技」と「弱点」の表示ブロックを削除し、従来の「趣味」のみを表示するシンプルなレイアウトに差し戻しました。
+
+## 2026-06-06 16:55
+
+- **対応内容**: 重要度：低のリファクタリングの実施
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+- **修正内容の詳細**:
+  - **index.html 未使用変数の削除**:
+    - `getMatchingViewHtml()` および `getSettingsViewHtml()` 内部で、過去のリファクタリングにより参照されなくなっていた変数 `defaultMode`, `defaultGroupSize`, `defaultGroupCount`, `defaultPrompt` の定義を完全に削除。
+  - **index.html 設定取得アクセサの共通化**:
+    - 設定値（`state.settings`）をデフォルト値付きで安全に取得するための共通ヘルパー関数 `getSettingValue(key, defaultValue)` を導入。
+  - **index.html ダミーデータと本番デモデータの不整合解消**:
+    - `getDummyResponse()` 内のローカル開発用ダミーメンバーのスキーマ構造を本番（`main.gs`）と一致するように更新（`specialty`, `weakness`, `motivation` 等の新しいフィールドを補完し、代表的な6名分を格納）。
+  - **index.html 重複メモクレンジングの削除**:
+    - バックエンド側（`main.gs`）で既にクレンジングされた状態で取得されるため、フロントエンド（`index.html`）の `user-group-card` 描画部で行っていた重複した正規表現によるメモクリーニング処理を廃止し、`g.memo.trim()` に最適化。
+  - **index.html `lucide.createIcons()` 呼び出しの最適化**:
+    - `renderView()` 内で `attachViewEvents()` が完了した後に `lucide.createIcons()` を実行する順序に変更し、初期表示時の不要な個別の `lucide.createIcons()` 呼び出しを削減。
+
+## 2026-06-06 16:50
+
+- **対応内容**: 重要度：中のリファクタリングの実施
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+- **修正内容の詳細**:
+  - **index.html プレビュープレースホルダーの共通化**:
+    - 画像未設定時のプレースホルダーDOM（アイコン、テキスト等）の組み立てを共通ヘルパー関数 `createImagePlaceholder()` にカプセル化。初期プレビュー表示および画像削除確定時のプレースホルダー生成処理をこのヘルパーに置き換え。
+  - **index.html `var` の `const`/`let` 化**:
+    - `attachViewEvents()` 内部などで使われていた `var` 宣言をすべて `const` または `let` に置換し、JavaScriptコード内の一貫性を向上。
+  - **index.html `window` グローバルエクスポートの集約**:
+    - ファイル各所に散在していた `window.xxx = xxx;` 形式の関数公開（部署削除、部署入力トグルなど）を、ファイル末尾の「GAS サンドボックス保護スコープ対策」ブロックに一括で集約し、コードの見通しを改善。
+  - **index.html ポップオーバー表示の拡張**:
+    - メンバーカードのポップオーバー（`renderMemberPopoverHtml`）において、従来「趣味」のみを表示していた仕様を拡張し、データの関連フィールドである「特技」と「弱点」もレイアウト内に追加で表示するように実装。
+  - **index.html マジックナンバーの定数 `CONFIG` 集約**:
+    - コード内でハードコードされていた各種数値（自己紹介などの文字数上限 `25`、チャット自動更新ポーリング間隔 `5000`、ファイルサイズ上限 `5MB`、スクロール判定閾値 `150`）を、定数オブジェクト `CONFIG` に集約・管理化。
+  - **main.gs `SpreadsheetApp.getActiveSpreadsheet()` 取得の効率化**:
+    - GASのロード制限・権限エラーに影響を与えないようグローバルキャッシュは避け、主要なCRUD系関数（`getSettings`, `getMembers`, `getMatchingHistory`, `getDepartments`）が引数 `ss` を任意で受け取れるようにリファクタリング。`getInitialData` や `saveMatchingHistory` などの一括データ同期時にスプレッドシートインスタンスを使い回すことで、不要な I/O アクセス回数を大幅に削減。
+
+## 2026-06-06 16:15
+
+- **対応内容**: 重要度：高 のリファクタリングの実施
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+- **修正内容の詳細**:
+  - **main.gs 重複コードとロジックの整理**:
+    - `initDatabase()` から、完全に二重に記述されていた約330行のコピペブロック（デモデータ再定義・シート初期化）を削除。
+    - `toggleMemberStatus()` と `toggleMemberPriority()` で重複していた管理者権限チェック、シート取得、行取得などの処理を、共通ヘルパー関数 `toggleMemberBoolColumn_()` に抽出して統合。
+  - **index.html SVGロゴの共通化**:
+    - PC用サイドバーとモバイル用ヘッダーの両方にインラインで直接コピペされていた長大なSVGロゴのパスデータを、`<body>` 直下に非表示の `<svg>` シンボル（`#logo-nb-table`）として定義。PC/モバイル双方で `<use href="#logo-nb-table">` タグを用いて参照する構成に変更し、HTMLサイズを大幅に軽量化。
+  - **index.html ナビゲーション記述の整理**:
+    - PC/モバイルで個別に定義されていた画面名配列（`allViews`, `mobViewIds`）を、定数 `ALL_VIEWS` に統一。
+    - PC/モバイルのアクティブ状態のTailwindクラス文字列を定数 `NAV_CLASSES` に抽出し、`navigateToView` 内で一元管理するように変更。
+  - **index.html イベント紐付け（cloneNode）パターンのヘルパー化**:
+    - 多重イベント登録防止のための「クローン取得→差し替え→イベントリスナー登録」の冗長な記述を、共通ヘルパー関数 `rebindEvent(targetIdOrElement, eventType, handler)` にカプセル化。モバイル管理者トグル、モバイルテーマトグル、PC用テーマ変更ボタン、画像アップロードUI関連、画像キャンセル/確定/削除イベント紐付けをこれを用いて簡潔に書き換え。
+  - **index.html エラーハンドリング（try/catch）のラッパー化**:
+    - 非同期GAS通信における try/catch + showToast パターンの共通ラッパー関数 `asyncGasAction(gasFunctionName, args, options)` を実装。主要な3コントローラー関数（`handleGenerateMatching`, `confirmTempMatching`, `handleDeleteMatchingGroup`）をこのラッパー経由で呼び出すように変更し、冗長なエラーハンドリングを排除。
+
+## 2026-06-06 16:10
+
+- **対応内容**: リファクタリング対象箇所の洗い出し分析（実装未着手・調査レポートのみ）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html) (分析対象)
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs) (分析対象)
+- **修正内容の詳細**:
+  - 全コード（index.html: 4561行、main.gs: 2964行）を精読し、以下の3カテゴリ・18項目の修正すべき点を洗い出しました。
+  - **🔴 高重要度（7件）**:
+    - `main.gs` の `initDatabase()` 内でデモデータ配列 `demoMembers` とチェックボックス挿入ブロックが完全にコピペで2重定義（約330行の無駄な重複）
+    - `index.html` のSVGロゴ（約30行×3パス）がPC/モバイルで完全重複
+    - ナビゲーションアクティブ/非アクティブ切替のTailwindクラス文字列が4箇所にハードコード
+    - `allViews` / `mobViewIds` 配列の同一内容が2箇所で定義
+    - `attachViewEvents()` 内のcloneNode→replaceChild→addEventListenerパターンが8回以上繰り返し
+    - エラーハンドリング try/catch + showToast パターンが15関数で重複
+    - `main.gs` の `toggleMemberStatus` / `toggleMemberPriority` が列番号以外ほぼ同一
+  - **🟡 中重要度（6件）**: 画像プレースホルダーDOM構築重複、var/const混在、windowグローバルエクスポート散在、ポップオーバーでspecialty/weakness未表示、マジックナンバー散在、SpreadsheetApp.getActiveSpreadsheet()の頻繁な重複取得
+  - **🟢 低重要度（5件）**: 未使用変数、設定値取得の重複、ダミーデータとmain.gsデモデータの不整合、cleanMatchingMemoのフロント/バック二重処理、lucide.createIcons()の過剰呼び出し
+  - 分析結果は [refactoring_analysis.md](file:///C:/Users/hirok/.gemini/antigravity-ide/brain/6d33471c-1906-4746-9139-27e2eefca00c/refactoring_analysis.md) に詳細レポートとして出力
+
 ## 2026-06-06 12:05
 
 - **対応内容**: メンバーマスタ管理の追加・編集モーダルにおける画面外（背景）クリックによるキャンセル機能の実装

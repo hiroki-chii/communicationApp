@@ -725,323 +725,6 @@ function initDatabase() {
     memberSheet.autoResizeColumns(1, 17);
   }
 
-  // ブーリアン型データのチェックボックス挿入と古いゴミ検証ルールの再整備
-  if (memberSheet) {
-    const lastRow = memberSheet.getLastRow();
-    if (lastRow > 1) {
-      // 念のためK〜O列に誤ってチェックボックスが残らないよう、O・P列以外はクレンジング
-      memberSheet.getRange(2, 9, lastRow - 1, 5).clearDataValidations();
-
-      // 正しい列（15列目: O列＝ステータス、16列目: P列＝次回優先）にのみチェックボックスをバインド
-      memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
-      memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
-    }
-  }
-
-  // デモデータの自動挿入（シートが新規作成されたか空の場合）
-  if (isNewMemberSheet || memberSheet.getLastRow() <= 1) {
-    const demoMembers = [
-      [
-        "M001",
-        "山田 太郎",
-        "yamada.t@example.com",
-        "開発部",
-        "対面",
-        "趣味はサウナとTypeScript。最近はDIYにハマっています。",
-        "DIY",
-        "早起き",
-        4,
-        3,
-        3,
-        5,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M002",
-        "佐藤 美咲",
-        "sato.m@example.com",
-        "人事部",
-        "リモート",
-        "休日はカフェ巡りやヨガをしています。旅行が大好きです。",
-        "ヨガ",
-        "方向音痴",
-        3,
-        5,
-        4,
-        3,
-        3,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M003",
-        "鈴木 健一",
-        "suzuki.k@example.com",
-        "開発部",
-        "どちらでも",
-        "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。",
-        "コーヒー焙煎",
-        "人混み",
-        4,
-        4,
-        3,
-        4,
-        5,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M004",
-        "高橋 玲子",
-        "takahashi.r@example.com",
-        "マーケティング部",
-        "対面",
-        "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。",
-        "トレンド分析",
-        "虫",
-        4,
-        3,
-        4,
-        4,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M005",
-        "田中 達也",
-        "tanaka.t@example.com",
-        "営業部",
-        "リモート",
-        "学生時代からゴルフをしています。週末はだいたいグリーンにいます。",
-        "ゴルフ",
-        "低血圧",
-        3,
-        4,
-        5,
-        4,
-        3,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M006",
-        "渡辺 奈々",
-        "watanabe.n@example.com",
-        "総務部",
-        "どちらでも",
-        "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。",
-        "カレー作り",
-        "ホラー映画",
-        5,
-        3,
-        4,
-        3,
-        3,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M007",
-        "伊藤 淳",
-        "ito.j@example.com",
-        "開発部",
-        "対面",
-        "Figmaでのデザイン、カメラ（スナップ写真）、ガジェット集め。",
-        "カメラ撮影",
-        "片付け",
-        4,
-        4,
-        3,
-        3,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M008",
-        "山本 結衣",
-        "yamamoto.y@example.com",
-        "営業部",
-        "リモート",
-        "読書（ビジネス書から小説まで）とアロマテラピー。美味しいパン屋探し。",
-        "アロマテラピー",
-        "絶叫マシン",
-        3,
-        3,
-        4,
-        5,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M009",
-        "中村 翔",
-        "nakamura.s@example.com",
-        "マーケティング部",
-        "どちらでも",
-        "キャンプ、BBQ、ロードバイク。分析ツールを触るのが好き。",
-        "BBQ",
-        "機械オンチ",
-        5,
-        4,
-        4,
-        3,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M010",
-        "小林 直樹",
-        "kobayashi.n@example.com",
-        "人事部",
-        "対面",
-        "テニスと筋トレ。最近は健康食作りにも取り組んでいます。",
-        "筋トレ",
-        "甘いもの",
-        3,
-        5,
-        3,
-        4,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M011",
-        "加藤 沙織",
-        "kato.s@example.com",
-        "開発部",
-        "リモート",
-        "Flutter、Swift。趣味はゲーム（RPG、インディーゲーム）と謎解き。",
-        "謎解き",
-        "球技",
-        4,
-        3,
-        3,
-        4,
-        5,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M012",
-        "吉田 拓海",
-        "yoshida.t@example.com",
-        "新規事業部",
-        "どちらでも",
-        "サウナ、ポッドキャストを聴くこと、スタートアップ研究。",
-        "スタートアップ研究",
-        "計算",
-        5,
-        3,
-        4,
-        4,
-        5,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M013",
-        "佐々木 萌",
-        "sasaki.m@example.com",
-        "広報部",
-        "対面",
-        "美術館巡り、イラストを描くこと、SNS運用。美味しいワインが好き。",
-        "イラスト作成",
-        "人前でのスピーチ",
-        4,
-        4,
-        4,
-        3,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M014",
-        "山口 健太",
-        "yamaguchi.k@example.com",
-        "開発部",
-        "リモート",
-        "Kubernetes、Terraform。趣味はボードゲームとキャンプです。",
-        "キャンプ",
-        "英語",
-        4,
-        5,
-        3,
-        3,
-        4,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M015",
-        "松本 恵",
-        "matsumoto.m@example.com",
-        "営業部",
-        "どちらでも",
-        "ピラティス、韓国ドラマ鑑賞、激辛グルメの開拓。",
-        "激辛グルメ",
-        "寒さ",
-        3,
-        3,
-        5,
-        4,
-        3,
-        "",
-        true,
-        false,
-      ],
-      [
-        "M016",
-        "斎藤翼",
-        "saito.t@example.com",
-        "開発部",
-        "対面",
-        "自動テスト、バグハント。趣味はランニングと麻雀です。",
-        "麻雀",
-        "朝に弱い",
-        4,
-        4,
-        3,
-        4,
-        4,
-        "",
-        true,
-        false,
-      ],
-    ];
-
-    demoMembers.forEach((member) => memberSheet.appendRow(member));
-
-    // チェックボックスの確実な挿入
-    const lastRow = memberSheet.getLastRow();
-    if (lastRow > 1) {
-      memberSheet.getRange(2, 15, lastRow - 1, 1).insertCheckboxes();
-      memberSheet.getRange(2, 16, lastRow - 1, 1).insertCheckboxes();
-    }
-    memberSheet.autoResizeColumns(1, 16);
-  }
-
   // 4. 「マッチング履歴」シートの初期化
   let historySheet = ss.getSheetByName("マッチング履歴");
   if (!historySheet) {
@@ -1151,11 +834,12 @@ function initDatabase() {
  */
 function getInitialData() {
   try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const userEmail = getCurrentUserEmail();
-    const settings = getSettings();
-    const members = getMembers();
-    const history = getMatchingHistory();
-    const departments = getDepartments();
+    const settings = getSettings(ss);
+    const members = getMembers(ss);
+    const history = getMatchingHistory(ss);
+    const departments = getDepartments(ss);
 
     // 管理者判定
     const isAdmin = isAdminUser(userEmail, settings);
@@ -1197,9 +881,9 @@ function getInitialData() {
  *
  * @return {Object[]} 部署オブジェクトの配列（id, name）
  */
-function getDepartments() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName("部署マスタ");
+function getDepartments(ss) {
+  const activeSs = ss || SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = activeSs.getSheetByName("部署マスタ");
   if (!sheet) return [];
 
   const lastRow = sheet.getLastRow();
@@ -1238,7 +922,7 @@ function addDepartment(deptName) {
     }
 
     // 重複チェック
-    const departments = getDepartments();
+    const departments = getDepartments(ss);
     const isDuplicate = departments.some((d) => d.name === deptName.trim());
     if (isDuplicate) {
       return {
@@ -1255,7 +939,7 @@ function addDepartment(deptName) {
     return {
       success: true,
       department: { id: newId, name: deptName.trim() },
-      departments: getDepartments(),
+      departments: getDepartments(ss),
     };
   } catch (e) {
     Logger.log(`addDepartment エラー: ${e.toString()}`);
@@ -1310,7 +994,7 @@ function deleteDepartment(deptId) {
     return {
       success: true,
       deletedId: deptId,
-      departments: getDepartments(),
+      departments: getDepartments(ss),
     };
   } catch (e) {
     Logger.log(`deleteDepartment エラー: ${e.toString()}`);
@@ -1327,9 +1011,9 @@ function deleteDepartment(deptId) {
  *
  * @return {Object[]} メンバーオブジェクトの配列
  */
-function getMembers() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName("メンバー一覧");
+function getMembers(ss) {
+  const activeSs = ss || SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = activeSs.getSheetByName("メンバー一覧");
   if (!sheet) return [];
 
   const lastRow = sheet.getLastRow();
@@ -1365,9 +1049,9 @@ function getMembers() {
  *
  * @return {Object} 設定キーと値のマップ
  */
-function getSettings() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName("設定");
+function getSettings(ss) {
+  const activeSs = ss || SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = activeSs.getSheetByName("設定");
   if (!sheet) return {};
 
   const lastRow = sheet.getLastRow();
@@ -1452,9 +1136,9 @@ function saveSettings(settingsObj) {
  *
  * @return {Object[]} マッチング履歴オブジェクトの配列
  */
-function getMatchingHistory() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName("マッチング履歴");
+function getMatchingHistory(ss) {
+  const activeSs = ss || SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = activeSs.getSheetByName("マッチング履歴");
   if (!sheet) return [];
 
   const lastRow = sheet.getLastRow();
@@ -1581,7 +1265,7 @@ function addMemberToSheet(memberObj) {
 
   return {
     success: true,
-    member: getMembers().find((m) => m.id === newId),
+    member: getMembers(ss).find((m) => m.id === newId),
   };
 }
 
@@ -1661,12 +1345,14 @@ function deleteMember(memberId) {
 }
 
 /**
- * メンバーの参加ステータス（O列/15列目）を反転トグルする (管理者専用)。
+ * メンバーの指定した列のブーリアン値（チェックボックス）を反転トグルする共通ヘルパー (管理者専用・内部用)。
  *
  * @param {string} memberId メンバーID
+ * @param {number} colNum 列番号
+ * @param {string} columnName ログ用列名
  * @return {Object} 処理結果オブジェクト
  */
-function toggleMemberStatus(memberId) {
+function toggleMemberBoolColumn_(memberId, colNum, columnName) {
   try {
     checkAdminPermission();
 
@@ -1684,15 +1370,29 @@ function toggleMemberStatus(memberId) {
       };
     }
 
-    const cell = sheet.getRange(rowNum, 15); // O列（15列目: ステータス）
-    const nextStatus = !(cell.getValue() === true);
-    cell.setValue(nextStatus);
+    const cell = sheet.getRange(rowNum, colNum);
+    const nextVal = !(cell.getValue() === true);
+    cell.setValue(nextVal);
 
-    return { success: true, memberId, nextStatus };
+    return { success: true, nextVal };
   } catch (e) {
-    Logger.log(`toggleMemberStatus エラー: ${e.toString()}`);
+    Logger.log(`toggleMemberBoolColumn_ (${columnName}) エラー: ${e.toString()}`);
     return { success: false, error: e.toString() };
   }
+}
+
+/**
+ * メンバーの参加ステータス（O列/15列目）を反転トグルする (管理者専用)。
+ *
+ * @param {string} memberId メンバーID
+ * @return {Object} 処理結果オブジェクト
+ */
+function toggleMemberStatus(memberId) {
+  const res = toggleMemberBoolColumn_(memberId, 15, "Status");
+  if (res.success) {
+    return { success: true, memberId, nextStatus: res.nextVal };
+  }
+  return res;
 }
 
 /**
@@ -1702,32 +1402,11 @@ function toggleMemberStatus(memberId) {
  * @return {Object} 処理結果オブジェクト
  */
 function toggleMemberPriority(memberId) {
-  try {
-    checkAdminPermission();
-
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("メンバー一覧");
-    if (!sheet) {
-      return { success: false, error: "メンバー一覧シートが見つかりません。" };
-    }
-
-    const rowNum = findMemberRowIndex(sheet, memberId);
-    if (rowNum === -1) {
-      return {
-        success: false,
-        error: `メンバーIDが見つかりません。ID: ${memberId}`,
-      };
-    }
-
-    const cell = sheet.getRange(rowNum, 16); // P列（16列目: 次回優先）
-    const nextPriority = !(cell.getValue() === true);
-    cell.setValue(nextPriority);
-
-    return { success: true, memberId, nextPriority };
-  } catch (e) {
-    Logger.log(`toggleMemberPriority エラー: ${e.toString()}`);
-    return { success: false, error: e.toString() };
+  const res = toggleMemberBoolColumn_(memberId, 16, "Priority");
+  if (res.success) {
+    return { success: true, memberId, nextPriority: res.nextVal };
   }
+  return res;
 }
 
 /**
@@ -1780,7 +1459,7 @@ function saveMatchingHistory(groups, matchingMethod) {
     sheet.autoResizeColumns(1, 6);
 
     // --- 次回優先フラグ（16列目: P列）の自動更新マイグレーション ---
-    const allMembers = getMembers();
+    const allMembers = getMembers(ss);
     const activeMembers = allMembers.filter((m) => m.status === true);
     const memberSheet = ss.getSheetByName("メンバー一覧");
 
@@ -1969,7 +1648,7 @@ function registerSelfProfile(profileObj) {
       sheet = ss.getSheetByName("メンバー一覧");
     }
 
-    const members = getMembers();
+    const members = getMembers(ss);
     const myProfile = members.find(
       (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
     );
