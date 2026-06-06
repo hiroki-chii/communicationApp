@@ -117,6 +117,33 @@
       .transition-all-200 {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       }
+
+      /* ブラウザ自動入力（Autofill）時の背景色および文字色の上書き */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      textarea:-webkit-autofill,
+      textarea:-webkit-autofill:hover,
+      textarea:-webkit-autofill:focus,
+      select:-webkit-autofill,
+      select:-webkit-autofill:hover,
+      select:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        -webkit-text-fill-color: #1c1917 !important; /* stone-900 */
+      }
+
+      .dark input:-webkit-autofill,
+      .dark input:-webkit-autofill:hover,
+      .dark input:-webkit-autofill:focus,
+      .dark textarea:-webkit-autofill,
+      .dark textarea:-webkit-autofill:hover,
+      .dark textarea:-webkit-autofill:focus,
+      .dark select:-webkit-autofill,
+      .dark select:-webkit-autofill:hover,
+      .dark select:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 30px #18181b inset !important; /* zinc-900 */
+        -webkit-text-fill-color: #f4f4f5 !important; /* zinc-100 */
+      }
     </style>
   </head>
 
@@ -124,7 +151,7 @@
     class="bg-[#FAF9F5] text-stone-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col md:flex-row transition-colors duration-200"
   >
     <!-- SVG Symbols -->
-    <svg style="display: none;">
+    <svg style="display: none">
       <symbol id="logo-nb-table" viewBox="0 0 1065 701">
         <path
           fill="#DE9245"
@@ -522,10 +549,14 @@
       };
 
       const NAV_CLASSES = {
-        PC_ACTIVE: "nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 group",
-        PC_INACTIVE: "nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/50 group",
-        MOB_ACTIVE: "nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-semibold py-1.5 flex-1 select-none text-indigo-600 dark:text-indigo-400",
-        MOB_INACTIVE: "nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none text-slate-400 dark:text-zinc-500"
+        PC_ACTIVE:
+          "nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 group",
+        PC_INACTIVE:
+          "nav-item flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-zinc-800/50 group",
+        MOB_ACTIVE:
+          "nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-semibold py-1.5 flex-1 select-none text-indigo-600 dark:text-indigo-400",
+        MOB_INACTIVE:
+          "nav-item-mobile flex flex-col items-center justify-center gap-1 text-[10px] font-medium py-1.5 flex-1 select-none text-slate-400 dark:text-zinc-500",
       };
 
       const ALL_VIEWS = [
@@ -589,7 +620,7 @@
           errorMsg,
           silent = false,
           onSuccess,
-          onFailure
+          onFailure,
         } = options;
 
         if (loadingTitle) {
@@ -600,14 +631,20 @@
           const res = await callGas(gasFunctionName, ...args);
           if (res && res.success) {
             if (!silent) {
-              showToast(successTitle, successMsg || "正常に完了しました。", "success");
+              showToast(
+                successTitle,
+                successMsg || "正常に完了しました。",
+                "success",
+              );
             }
             if (onSuccess) {
               await onSuccess(res);
             }
             return res;
           } else {
-            const errMsg = res ? (res.error || errorMsg || "不明なエラーが発生しました。") : (errorMsg || "応答が空でした。");
+            const errMsg = res
+              ? res.error || errorMsg || "不明なエラーが発生しました。"
+              : errorMsg || "応答が空でした。";
             showToast(errorTitle, errMsg, "error");
             if (onFailure) {
               await onFailure(res);
@@ -615,7 +652,9 @@
             return res;
           }
         } catch (e) {
-          const errMsg = e ? (e.message || e.toString()) : "例外エラーが発生しました。";
+          const errMsg = e
+            ? e.message || e.toString()
+            : "例外エラーが発生しました。";
           showToast(errorTitle, errMsg, "error");
           if (onFailure) {
             await onFailure(e);
@@ -691,9 +730,10 @@
        * @returns {HTMLElement|null} 新しい（差し替え後の）DOM要素
        */
       function rebindEvent(targetIdOrElement, eventType, handler) {
-        const el = typeof targetIdOrElement === "string" 
-          ? document.getElementById(targetIdOrElement) 
-          : targetIdOrElement;
+        const el =
+          typeof targetIdOrElement === "string"
+            ? document.getElementById(targetIdOrElement)
+            : targetIdOrElement;
         if (!el) return null;
 
         const newEl = el.cloneNode(true);
@@ -707,7 +747,8 @@
       // 画像未設定時のプレースホルダーDOM要素を生成するヘルパー関数
       function createImagePlaceholder() {
         const placeholder = document.createElement("div");
-        placeholder.className = "flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500";
+        placeholder.className =
+          "flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500";
         const icon = document.createElement("i");
         icon.setAttribute("data-lucide", "image");
         icon.className = "w-8 h-8";
@@ -948,9 +989,7 @@
           const pcNav = document.getElementById(`nav-${id}`);
           if (pcNav) {
             pcNav.className =
-              id === viewName
-                ? NAV_CLASSES.PC_ACTIVE
-                : NAV_CLASSES.PC_INACTIVE;
+              id === viewName ? NAV_CLASSES.PC_ACTIVE : NAV_CLASSES.PC_INACTIVE;
           }
         });
 
@@ -1091,18 +1130,16 @@
 
         let groupCards = "";
         latestGroups.forEach((g) => {
-          const namesList = g.memberNames
-            .map((name, index) => {
-              const memberInfo =
-                state.members.find(
-                  (m) => cleanName(m.name) === cleanName(name),
-                ) || {};
+          const ids = g.memberIds || [];
+          const namesList = ids
+            .map((id, index) => {
+              const memberInfo = state.members.find((m) => m.id === id) || {};
               const dept = memberInfo.department || "不明";
+              const displayName =
+                memberInfo.name || g.memberNames[index] || "不明";
 
-              // ログインユーザー自身かどうか判定 (大文字小文字を区別せず比較)
-              const isMe =
-                state.myProfile &&
-                name.toLowerCase() === state.myProfile.name.toLowerCase();
+              // ログインユーザー自身かどうか判定
+              const isMe = state.myProfile && id === state.myProfile.id;
 
               const boxClass = isMe
                 ? "flex flex-col p-2.5 rounded-lg border-2 border-indigo-500 bg-indigo-50/15 dark:bg-indigo-950/40 text-xs relative group cursor-help"
@@ -1119,9 +1156,9 @@
 
               return `
             <div class="${boxClass}">
-              <span class="font-bold ${isMe ? "text-indigo-600 dark:text-indigo-400" : "text-slate-800 dark:text-zinc-100"}">${escapeHtml(name)}</span>
+              <span class="font-bold ${isMe ? "text-indigo-600 dark:text-indigo-400" : "text-slate-800 dark:text-zinc-100"}">${escapeHtml(displayName)}</span>
               <span class="text-[9px] ${isMe ? "text-indigo-500/80 dark:text-indigo-350" : "text-slate-400 dark:text-zinc-500"} font-medium mt-0.5">${escapeHtml(dept)}</span>
-              ${renderMemberPopoverHtml(name, dept, memberInfo, popoverAlignClass, arrowAlignClass)}
+              ${renderMemberPopoverHtml(displayName, dept, memberInfo, popoverAlignClass, arrowAlignClass)}
             </div>
           `;
             })
@@ -1130,17 +1167,11 @@
           // 自分がこのグループのメンバーに含まれているか判定 (管理者の場合はすべてのルームを開けるようにする)
           const isMyGroup =
             state.isAdmin ||
-            (state.myProfile &&
-              g.memberNames
-                .map((n) => n.toLowerCase())
-                .includes(state.myProfile.name.toLowerCase()));
+            (state.myProfile && ids.includes(state.myProfile.id));
 
           // マークを付ける「自分のグループ」かどうか
           const isReallyMyGroup =
-            state.myProfile &&
-            g.memberNames
-              .map((n) => n.toLowerCase())
-              .includes(state.myProfile.name.toLowerCase());
+            state.myProfile && ids.includes(state.myProfile.id);
 
           const roomId = `${latestMatchingDate}_${g.groupId}`;
 
@@ -1249,7 +1280,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-1">
-                <label for="self-name" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">名前 <span class="text-red-500">*</span></label>
+                <label for="self-name" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">名前（ニックネーム可能） <span class="text-red-500">*</span></label>
                 <input type="text" id="self-name" required value="${profile ? escapeHtml(profile.name) : ""}" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
               </div>
               <div class="space-y-1">
@@ -1264,15 +1295,17 @@
             <div class="space-y-1">
               <label for="self-participation-type" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">参加形式 <span class="text-red-500">*</span></label>
               <select id="self-participation-type" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                <option value="" disabled ${!profile || !profile.participationType ? "selected" : ""}>参加形式を選択してください</option>
                 <option value="対面" ${profile && profile.participationType === "対面" ? "selected" : ""}>対面</option>
                 <option value="リモート" ${profile && profile.participationType === "リモート" ? "selected" : ""}>リモート</option>
-                <option value="どちらでも" ${!profile || profile.participationType === "どちらでも" || !profile.participationType ? "selected" : ""}>どちらでも</option>
+                <option value="どちらでも" ${profile && profile.participationType === "どちらでも" ? "selected" : ""}>どちらでも</option>
               </select>
             </div>
 
             <div class="space-y-1.5">
-              <label for="self-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">次回交流会への参加ステータス</label>
-              <select id="self-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+              <label for="self-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">次回交流会への参加ステータス <span class="text-red-500">*</span></label>
+              <select id="self-status" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <option value="" disabled ${!profile || profile.status === undefined || profile.status === "" ? "selected" : ""}>参加ステータスを選択してください</option>
                 <option value="true" ${profile && (profile.status === true || profile.status === "アクティブ") ? "selected" : ""}>参加する (交流会の参加対象になります)</option>
                 <option value="false" ${profile && (profile.status === false || profile.status === "非アクティブ") ? "selected" : ""}>参加しない (出張、休暇、多忙などにより一時的に除外します)</option>
               </select>
@@ -1314,7 +1347,7 @@
                 <span>仕事・人生の価値観（５段階評価）</span>
               </h4>
               <p class="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed">
-                あなたの仕事や生活における重視度を1（低い）〜5（高い）で教えてください。AIが共通点や多様性を分析してメンバー選定に活用します。
+                あなたの仕事や生活における重視度を1（低い）〜5（高い）で教えてください。
               </p>
 
               <div class="space-y-4">
@@ -1386,14 +1419,20 @@
         const considerations = document
           .getElementById("self-considerations")
           .value.trim();
-        const status = document.getElementById("self-status").value === "true";
+        const statusVal = document.getElementById("self-status").value;
 
         const ratings = getValueRatings("self");
 
-        if (!name || !department) {
-          showToast("入力エラー", "名前と部署は入力必須です。", "error");
+        if (!name || !participationType || statusVal === "") {
+          showToast(
+            "入力エラー",
+            "必須マーク (*) のある項目は入力必須です。",
+            "error",
+          );
           return;
         }
+
+        const status = statusVal === "true";
 
         if (!validateBioLengths(interests, specialty, weakness)) return;
 
@@ -1472,13 +1511,13 @@
         let aiThemeHtml = "";
 
         if (matchingGroup) {
-          membersBadge = matchingGroup.memberNames
-            .map((name, index) => {
-              const memberInfo =
-                state.members.find(
-                  (m) => cleanName(m.name) === cleanName(name),
-                ) || {};
+          const ids = matchingGroup.memberIds || [];
+          membersBadge = ids
+            .map((id, index) => {
+              const memberInfo = state.members.find((m) => m.id === id) || {};
               const dept = memberInfo.department || "他部署";
+              const displayName =
+                memberInfo.name || matchingGroup.memberNames[index] || "不明";
 
               // チャット画面は横幅が広く右側に十分なスペースがあるため、左側へのはみ出しを防ぐため常に左揃え（右へ展開）にする
               const popoverAlignClass =
@@ -1487,9 +1526,9 @@
 
               return `
             <span class="inline-flex flex-col px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800/50 text-xs relative group cursor-help">
-              <span class="font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(name)}</span>
+              <span class="font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(displayName)}</span>
               <span class="text-[9px] text-slate-400 dark:text-zinc-500 mt-0.5">${escapeHtml(dept)}</span>
-              ${renderMemberPopoverHtml(name, dept, memberInfo, popoverAlignClass, arrowAlignClass)}
+              ${renderMemberPopoverHtml(displayName, dept, memberInfo, popoverAlignClass, arrowAlignClass)}
             </span>
           `;
             })
@@ -2420,9 +2459,10 @@
               <div class="space-y-1">
                 <label for="m-participation-type" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">参加形式 <span class="text-red-500">*</span></label>
                 <select id="m-participation-type" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                  <option value="" disabled selected>参加形式を選択してください</option>
                   <option value="対面">対面</option>
                   <option value="リモート">リモート</option>
-                  <option value="どちらでも" selected>どちらでも</option>
+                  <option value="どちらでも">どちらでも</option>
                 </select>
               </div>
               <div class="space-y-1">
@@ -2464,8 +2504,9 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
-                  <label for="m-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">ステータス</label>
-                  <select id="m-status" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:outline-none">
+                  <label for="m-status" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase">ステータス <span class="text-red-500">*</span></label>
+                  <select id="m-status" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 focus:outline-none">
+                    <option value="" disabled selected>ステータスを選択してください</option>
                     <option value="true">アクティブ</option>
                     <option value="false">非アクティブ</option>
                   </select>
@@ -2634,7 +2675,8 @@
           if (state.tempImageData) {
             const img = document.createElement("img");
             img.src = state.tempImageData;
-            img.className = "w-full h-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-105";
+            img.className =
+              "w-full h-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-105";
             img.title = "クリックして拡大プレビュー";
             img.addEventListener("click", function () {
               openImagePreview(state.tempImageData);
@@ -2715,7 +2757,8 @@
                     preview.innerHTML = "";
                     const img = document.createElement("img");
                     img.src = base64Data;
-                    img.className = "w-full h-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-105";
+                    img.className =
+                      "w-full h-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-105";
                     img.title = "クリックして拡大プレビュー";
                     img.addEventListener("click", function () {
                       openImagePreview(base64Data);
@@ -2789,7 +2832,9 @@
           const modal = document.getElementById("image-action-confirm-modal");
           const titleEl = document.getElementById("image-confirm-title");
           const msgEl = document.getElementById("image-confirm-message");
-          const btnConfirm = document.getElementById("btn-confirm-image-action");
+          const btnConfirm = document.getElementById(
+            "btn-confirm-image-action",
+          );
           const iconContainer = document.getElementById(
             "image-confirm-icon-container",
           );
@@ -3060,26 +3105,23 @@
         state.isMatchingRunning = true;
         renderView();
 
-        await asyncGasAction(
-          "runMatching",
-          [params],
-          {
-            successTitle: "マッチング案作成完了",
-            successMsg: "グループ分け案が正常に作成されました。内容を確認・調整してください。",
-            errorTitle: "作成エラー",
-            errorMsg: "マッチングの生成に失敗しました。",
-            onSuccess: (res) => {
-              state.tempGroups = res.groups;
-              state.tempUnmatched = res.unmatched || [];
-              state.tempMethod =
-                res.method === "logic_fallback"
-                  ? "Logic (Fallback)"
-                  : res.method === "logic"
-                    ? "Logic"
-                    : "Gemini";
-            }
-          }
-        );
+        await asyncGasAction("runMatching", [params], {
+          successTitle: "マッチング案作成完了",
+          successMsg:
+            "グループ分け案が正常に作成されました。内容を確認・調整してください。",
+          errorTitle: "作成エラー",
+          errorMsg: "マッチングの生成に失敗しました。",
+          onSuccess: (res) => {
+            state.tempGroups = res.groups;
+            state.tempUnmatched = res.unmatched || [];
+            state.tempMethod =
+              res.method === "logic_fallback"
+                ? "Logic (Fallback)"
+                : res.method === "logic"
+                  ? "Logic"
+                  : "Gemini";
+          },
+        });
 
         state.isMatchingRunning = false;
         renderView();
@@ -3188,7 +3230,8 @@
             loadingTitle: "保存中",
             loadingMsg: "マッチング履歴を保存しています...",
             successTitle: "確定・保存完了",
-            successMsg: "マッチング結果が履歴シートに保存されました！ユーザーポータルに公開中。",
+            successMsg:
+              "マッチング結果が履歴シートに保存されました！ユーザーポータルに公開中。",
             errorTitle: "保存エラー",
             errorMsg: "スプレッドシートへの保存に失敗しました。",
             onSuccess: async () => {
@@ -3196,8 +3239,8 @@
               state.tempMethod = "";
               await refreshStateFromServer();
               window.location.hash = "#user-matching";
-            }
-          }
+            },
+          },
         );
       }
 
@@ -3211,22 +3254,18 @@
           return;
         }
 
-        await asyncGasAction(
-          "deleteMatchingGroup",
-          [date, groupId],
-          {
-            loadingTitle: "削除中",
-            loadingMsg: "グループを削除しています...",
-            successTitle: "削除完了",
-            successMsg: `グループ ${groupId} を正常に削除しました。`,
-            errorTitle: "削除エラー",
-            errorMsg: "グループの削除に失敗しました。",
-            onSuccess: async () => {
-              // データを再読み込みしてダッシュボードを更新
-              await refreshStateFromServer();
-            }
-          }
-        );
+        await asyncGasAction("deleteMatchingGroup", [date, groupId], {
+          loadingTitle: "削除中",
+          loadingMsg: "グループを削除しています...",
+          successTitle: "削除完了",
+          successMsg: `グループ ${groupId} を正常に削除しました。`,
+          errorTitle: "削除エラー",
+          errorMsg: "グループの削除に失敗しました。",
+          onSuccess: async () => {
+            // データを再読み込みしてダッシュボードを更新
+            await refreshStateFromServer();
+          },
+        });
       }
 
       // --- ⑤-メンバー管理コントローラー (管理者用) ---
@@ -3289,62 +3328,54 @@
       }
 
       async function handleToggleStatus(memberId) {
-        await asyncGasAction(
-          "toggleMemberStatus",
-          [memberId],
-          {
-            loadingTitle: "更新中",
-            loadingMsg: "ステータスを更新しています...",
-            successTitle: "ステータス更新",
-            silent: true,
-            errorTitle: "更新エラー",
-            errorMsg: "ステータスの更新に失敗しました。",
-            onSuccess: (res) => {
-              const idx = state.members.findIndex((m) => m.id === memberId);
-              if (idx !== -1) {
-                state.members[idx].status = res.nextStatus;
-                state.activeCount = state.members.filter(
-                  (m) => m.status === true,
-                ).length;
-              }
-
-              showToast(
-                "ステータス更新",
-                `ステータスを「${res.nextStatus ? "アクティブ" : "非アクティブ"}」に変更しました。`,
-                "success",
-              );
-              renderView();
+        await asyncGasAction("toggleMemberStatus", [memberId], {
+          loadingTitle: "更新中",
+          loadingMsg: "ステータスを更新しています...",
+          successTitle: "ステータス更新",
+          silent: true,
+          errorTitle: "更新エラー",
+          errorMsg: "ステータスの更新に失敗しました。",
+          onSuccess: (res) => {
+            const idx = state.members.findIndex((m) => m.id === memberId);
+            if (idx !== -1) {
+              state.members[idx].status = res.nextStatus;
+              state.activeCount = state.members.filter(
+                (m) => m.status === true,
+              ).length;
             }
-          }
-        );
+
+            showToast(
+              "ステータス更新",
+              `ステータスを「${res.nextStatus ? "アクティブ" : "非アクティブ"}」に変更しました。`,
+              "success",
+            );
+            renderView();
+          },
+        });
       }
 
       async function handleTogglePriority(memberId) {
-        await asyncGasAction(
-          "toggleMemberPriority",
-          [memberId],
-          {
-            loadingTitle: "更新中",
-            loadingMsg: "優先ステータスを更新しています...",
-            successTitle: "優先ステータス更新",
-            silent: true,
-            errorTitle: "更新エラー",
-            errorMsg: "優先ステータスの更新に失敗しました。",
-            onSuccess: (res) => {
-              const idx = state.members.findIndex((m) => m.id === memberId);
-              if (idx !== -1) {
-                state.members[idx].priority = res.nextPriority;
-              }
-
-              showToast(
-                "優先ステータス更新",
-                `次回優先ステータスを「${res.nextPriority ? "優先" : "通常"}」に変更しました。`,
-                "success",
-              );
-              renderView();
+        await asyncGasAction("toggleMemberPriority", [memberId], {
+          loadingTitle: "更新中",
+          loadingMsg: "優先ステータスを更新しています...",
+          successTitle: "優先ステータス更新",
+          silent: true,
+          errorTitle: "更新エラー",
+          errorMsg: "優先ステータスの更新に失敗しました。",
+          onSuccess: (res) => {
+            const idx = state.members.findIndex((m) => m.id === memberId);
+            if (idx !== -1) {
+              state.members[idx].priority = res.nextPriority;
             }
-          }
-        );
+
+            showToast(
+              "優先ステータス更新",
+              `次回優先ステータスを「${res.nextPriority ? "優先" : "通常"}」に変更しました。`,
+              "success",
+            );
+            renderView();
+          },
+        });
       }
 
       function toggleDeptOtherInput(prefix) {
@@ -3359,13 +3390,11 @@
         if (select.value === "その他") {
           container.classList.remove("hidden");
           if (otherInput) {
-            otherInput.required = true;
             otherInput.focus();
           }
         } else {
           container.classList.add("hidden");
           if (otherInput) {
-            otherInput.required = false;
             otherInput.value = "";
           }
         }
@@ -3376,23 +3405,26 @@
        * 一般用（'self'）と管理者用（'m'）で再利用し、複雑な埋め込みロジックを排除
        */
       function renderDepartmentFieldHtml(prefix, currentDept) {
+        const activeDept = currentDept || "未登録";
         const knownDepts = state.departments.map((d) => d.name);
-        const isOther = currentDept && !knownDepts.includes(currentDept);
-        const otherVal = isOther ? currentDept : "";
-        const showOther = isOther || currentDept === "その他";
+        const isOther =
+          activeDept &&
+          !knownDepts.includes(activeDept) &&
+          activeDept !== "その他";
+        const otherVal = isOther ? activeDept : "";
+        const showOther = isOther || activeDept === "その他";
 
         // 「その他」の選択判定（マスタにない部署、または「その他」という値が入っている場合）
-        const isOtherSelected = isOther || currentDept === "その他";
+        const isOtherSelected = isOther || activeDept === "その他";
 
         return `
           <div class="space-y-2">
             <div class="space-y-1">
-              <label for="${prefix}-dept" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">所属部署<span class="text-red-500">*</span></label>
-              <select id="${prefix}-dept" required class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none" onchange="toggleDeptOtherInput('${prefix}')">
-                <option value="" disabled ${!currentDept ? "selected" : ""}>所属部署を選択してください</option>
+              <label for="${prefix}-dept" class="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">所属部署</label>
+              <select id="${prefix}-dept" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none" onchange="toggleDeptOtherInput('${prefix}')">
                 ${state.departments
                   .map((d) => {
-                    const isSelected = currentDept === d.name;
+                    const isSelected = activeDept === d.name;
                     return `<option value="${escapeHtml(d.name)}" ${isSelected ? "selected" : ""}>${escapeHtml(d.name)}</option>`;
                   })
                   .join("")}
@@ -3401,7 +3433,7 @@
             </div>
 
             <div id="${prefix}-dept-other-container" class="${showOther ? "" : "hidden"} space-y-1 mt-1.5">
-              <label for="${prefix}-dept-other" class="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">具体的な部署名をご記入ください <span class="text-red-500">*</span></label>
+              <label for="${prefix}-dept-other" class="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">具体的な部署名をご記入ください</label>
               <input type="text" id="${prefix}-dept-other" value="${escapeHtml(otherVal)}" class="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="例：人事部、広報部">
             </div>
           </div>
@@ -3421,12 +3453,7 @@
           const otherInput = document.getElementById(`${prefix}-dept-other`);
           dept = otherInput ? otherInput.value.trim() : "";
           if (!dept) {
-            showToast(
-              "入力エラー",
-              "部署名（その他）を具体的に入力してください。",
-              "error",
-            );
-            return null; // バリデーションエラー時は意図的に null を返して中断させる
+            return "未登録";
           }
         }
         return dept;
@@ -3680,12 +3707,12 @@
           "メンバーの新規代理登録";
         document.getElementById("m-name").value = "";
         document.getElementById("m-email").value = "";
-        document.getElementById("m-dept").value = "";
+        document.getElementById("m-dept").value = "未登録";
         document.getElementById("m-dept-other").value = "";
         document
           .getElementById("m-dept-other-container")
           .classList.add("hidden");
-        document.getElementById("m-participation-type").value = "どちらでも";
+        document.getElementById("m-participation-type").value = "";
         document.getElementById("m-interests").value = "";
         document.getElementById("m-specialty").value = "";
         document.getElementById("m-weakness").value = "";
@@ -3693,7 +3720,7 @@
         // 共通ヘルパーを使用して価値観ラジオボタンを初期化 (デフォルト3)
         resetValueRatingsRadios("m");
 
-        document.getElementById("m-status").value = "true";
+        document.getElementById("m-status").value = "";
         document.getElementById("m-priority").checked = false; // 優先フラグリセット
 
         setupMemberFormCounters("m");
@@ -3728,7 +3755,7 @@
             .classList.add("hidden");
         }
         document.getElementById("m-participation-type").value =
-          member.participationType || "どちらでも";
+          member.participationType || "";
         document.getElementById("m-interests").value = member.interests || "";
         document.getElementById("m-specialty").value = member.specialty || "";
         document.getElementById("m-weakness").value = member.weakness || "";
@@ -3739,7 +3766,9 @@
         document.getElementById("m-status").value =
           member.status === true || member.status === "アクティブ"
             ? "true"
-            : "false";
+            : member.status === false || member.status === "非アクティブ"
+              ? "false"
+              : "";
         document.getElementById("m-priority").checked = !!member.priority; // 優先フラグ反映
 
         setupMemberFormCounters("m");
@@ -3766,10 +3795,10 @@
         // 共通ヘルパーを使用して価値観ラジオボタンの取得 (未選択時はデフォルト3)
         const ratings = getValueRatings("m");
 
-        const status = document.getElementById("m-status").value === "true";
+        const statusVal = document.getElementById("m-status").value;
         const priority = document.getElementById("m-priority").checked; // 優先フラグの取得
 
-        if (!name || !email || !dept) {
+        if (!name || !email || !participationType || statusVal === "") {
           showToast(
             "入力エラー",
             "必須マーク (*) のある項目は入力必須です。",
@@ -3777,6 +3806,8 @@
           );
           return;
         }
+
+        const status = statusVal === "true";
 
         if (!validateBioLengths(interests, specialty, weakness)) return;
 
@@ -4155,7 +4186,8 @@
                 email: "yamada.t@example.com",
                 department: "開発部",
                 participationType: "対面",
-                interests: "趣味はサウナとTypeScript。最近はDIYにハマっています。",
+                interests:
+                  "趣味はサウナとTypeScript。最近はDIYにハマっています。",
                 specialty: "DIY",
                 weakness: "早起き",
                 motivation: 4,
@@ -4174,7 +4206,8 @@
                 email: "sato.m@example.com",
                 department: "人事部",
                 participationType: "リモート",
-                interests: "休日はカフェ巡りやヨガをしています。旅行が大好きです。",
+                interests:
+                  "休日はカフェ巡りやヨガをしています。旅行が大好きです。",
                 specialty: "ヨガ",
                 weakness: "方向音痴",
                 motivation: 3,
@@ -4193,7 +4226,8 @@
                 email: "suzuki.k@example.com",
                 department: "開発部",
                 participationType: "どちらでも",
-                interests: "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。",
+                interests:
+                  "GolangとAWSが得意。コーヒーを自分で焙煎して淹れるのが趣味。",
                 specialty: "コーヒー焙煎",
                 weakness: "人混み",
                 motivation: 4,
@@ -4212,7 +4246,8 @@
                 email: "takahashi.r@example.com",
                 department: "マーケティング部",
                 participationType: "対面",
-                interests: "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。",
+                interests:
+                  "映画鑑賞（SF・サスペンス）とピラティス。新しいトレンド分析が好き。",
                 specialty: "トレンド分析",
                 weakness: "虫",
                 motivation: 4,
@@ -4231,7 +4266,8 @@
                 email: "tanaka.t@example.com",
                 department: "営業部",
                 participationType: "リモート",
-                interests: "学生時代からゴルフをしています。週末はだいたいグリーンにいます。",
+                interests:
+                  "学生時代からゴルフをしています。週末はだいたいグリーンにいます。",
                 specialty: "ゴルフ",
                 weakness: "低血圧",
                 motivation: 3,
@@ -4250,7 +4286,8 @@
                 email: "watanabe.n@example.com",
                 department: "総務部",
                 participationType: "どちらでも",
-                interests: "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。",
+                interests:
+                  "料理（特にスパイスカレー作り）と猫の動画を見るのが癒やし。",
                 specialty: "カレー作り",
                 weakness: "ホラー映画",
                 motivation: 5,
@@ -4285,12 +4322,13 @@
               state.departments.length > 0
                 ? state.departments
                 : [
-                    { id: "D001", name: "管理室" },
-                    { id: "D002", name: "BPO統括部" },
-                    { id: "D003", name: "東京統括部" },
-                    { id: "D004", name: "ST開発部" },
-                    { id: "D005", name: "営業統括部" },
-                    { id: "D006", name: "印刷統括部" },
+                    { id: "D001", name: "未登録" },
+                    { id: "D002", name: "管理室" },
+                    { id: "D003", name: "BPO統括部" },
+                    { id: "D004", name: "東京統括部" },
+                    { id: "D005", name: "ST開発部" },
+                    { id: "D006", name: "営業統括部" },
+                    { id: "D007", name: "印刷統括部" },
                   ],
             totalCount: 6,
             activeCount: 6,
@@ -4303,7 +4341,8 @@
               email: "hiroki@example.com",
               department: "開発部",
               participationType: "対面",
-              interests: "趣味はサウナとTypeScript。最近はDIYにハマっています。",
+              interests:
+                "趣味はサウナとTypeScript。最近はDIYにハマっています。",
               specialty: "DIY",
               weakness: "早起き",
               motivation: 4,
@@ -4391,12 +4430,13 @@
           // 初期化されていない場合はダミーをセット
           if (!state.departments || state.departments.length === 0) {
             state.departments = [
-              { id: "D001", name: "管理室" },
-              { id: "D002", name: "BPO統括部" },
-              { id: "D003", name: "東京統括部" },
-              { id: "D004", name: "ST開発部" },
-              { id: "D005", name: "営業統括部" },
-              { id: "D006", name: "印刷統括部" },
+              { id: "D001", name: "未登録" },
+              { id: "D002", name: "管理室" },
+              { id: "D003", name: "BPO統括部" },
+              { id: "D004", name: "東京統括部" },
+              { id: "D005", name: "ST開発部" },
+              { id: "D006", name: "営業統括部" },
+              { id: "D007", name: "印刷統括部" },
             ];
           }
           const newDept = {
@@ -4415,12 +4455,13 @@
         if (functionName === "deleteDepartment") {
           if (!state.departments || state.departments.length === 0) {
             state.departments = [
-              { id: "D001", name: "管理室" },
-              { id: "D002", name: "BPO統括部" },
-              { id: "D003", name: "東京統括部" },
-              { id: "D004", name: "ST開発部" },
-              { id: "D005", name: "営業統括部" },
-              { id: "D006", name: "印刷統括部" },
+              { id: "D001", name: "未登録" },
+              { id: "D002", name: "管理室" },
+              { id: "D003", name: "BPO統括部" },
+              { id: "D004", name: "東京統括部" },
+              { id: "D005", name: "ST開発部" },
+              { id: "D006", name: "営業統括部" },
+              { id: "D007", name: "印刷統括部" },
             ];
           }
           state.departments = state.departments.filter((d) => d.id !== args[0]);
@@ -4616,7 +4657,9 @@
       >
         <i data-lucide="x" class="w-6 h-6"></i>
       </button>
-      <div class="max-w-[90%] max-h-[90%] flex items-center justify-center relative">
+      <div
+        class="max-w-[90%] max-h-[90%] flex items-center justify-center relative"
+      >
         <img
           id="image-preview-content"
           src=""

@@ -1,5 +1,87 @@
 # 作業・修正ログ
 
+## 2026-06-06 18:50
+
+- **対応内容**: マッチング結果表示における名前変更時の「部署不明」および「自分自身（isMe）」判定崩れの修正（IDベース紐付けへの移行）
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **index.html マッチング結果およびチャット画面メンバーのルックアップ方式の改善**:
+    - グループマッチング結果画面（`getUserMatchingViewHtml`）およびチャット画面（`getChatViewHtml`）において、従来は履歴シートの「メンバー名」をキーに最新部署やメンバー情報の取得（`state.members.find`）および自分自身のグループ判定（`isMe`）を行っていたため、ユーザーが「名前」を変更すると部署が「不明」になり、自分自身のハイライト判定も外れてしまうバグを修正しました。
+    - 履歴に保存されている一意な「メンバーID（`memberIds`）」をキーにして最新のメンバー情報を正しく逆引きルックアップする構造へ変更しました。また、名前自体も履歴時点のものではなく、最新のプロフィール名を表示するように紐付けをアップデートしました。
+
+## 2026-06-06 18:45
+
+- **対応内容**: ブラウザの自動入力（Autofill）適用時に入力フィールド背景が白化する現象の修正
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **index.html CSSに自動入力上書き定義を追加**:
+    - ブラウザの自動入力（Autofill）機能によって入力フィールド（`input`, `textarea`, `select`）の背景色が強制的に明るい青や黄色に白化される現象を防ぐため、CSSの `:-webkit-autofill` 疑似クラスを用いたスタイル定義を追加しました。
+    - ライトモード時は元の背景に合わせた白背景（`#ffffff`）、ダークモード時はアプリのUIデザインに溶け込む暗い背景（`#18181b`）と白系の文字色（`#f4f4f5`）になるようインセットシャドウ等で強制上書きを適用し、ダークモード時でも背景色が白浮きしないよう修正しました。
+
+## 2026-06-06 18:32
+
+- **対応内容**: 「参加形式」および「参加ステータス」の必須入力化とプレースホルダーの設定
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **index.html 「参加形式」の必須化とプレースホルダー追加**:
+    - 一般プロフィール画面と管理者モーダルの「参加形式」の `select` 要素に、未選択時のプレースホルダーとして `<option value="" ...>参加形式を選択してください</option>` を追加しました。
+    - 管理者の新規メンバー代理登録モーダル（`openAddMemberModal`）を開いた際の初期値を、デフォルトの「どちらでも」から未選択（空値）にするように修正しました。
+  - **index.html 「参加ステータス」の必須化とプレースホルダー追加**:
+    - 一般プロフィール画面の「次回交流会への参加ステータス」および管理者モーダルの「ステータス」に `required` 属性と必須の赤い星マーク `*` を追加しました。
+    - 選択のプレースホルダーとして `<option value="" ...>参加ステータスを選択してください</option>` （管理者側は「ステータスを選択してください」）をセレクトボックスの最初に追加しました。
+    - 新規メンバー代理登録時の初期値を未選択（空値）にするように修正しました。
+  - **index.html 保存処理時の入力値バリデーション強化**:
+    - 一般プロフィール保存処理（`handleSaveSelfProfile`）および管理者メンバー代理保存処理（`handleSubmitMember`）において、「参加形式」および「ステータス」が未選択（空値）の場合は保存処理を中断し、入力必須トーストエラーを出すようにバリデーションを追加しました。
+
+## 2026-06-06 18:28
+
+- **対応内容**: 初期所属部署マスタ（D001〜D007）の定義およびマイグレーションの更新
+- **対象ファイル**:
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **main.gs 初期部署マスタの更新と同期**:
+    - 「部署マスタ」シートの初期値を指定された7件（D001:未登録, D002:管理室, D003:BPO統括部, D004:東京統括部, D005:ST開発部, D006:営業統括部, D007:印刷統括部）に変更しました。
+    - 既存の「部署マスタ」シートが存在する場合、起動時（`initDatabase`）に部署IDをキーとして、D001〜D007の名前を最新のものに強制更新（存在しないIDは追加）するマイグレーションロジックに強化しました。
+  - **index.html ダミー初期データの同期**:
+    - ローカル開発用のダミーデータ（`getDummyResponse` 内の `getInitialData`、`addDepartment`、`deleteDepartment` 内）の初期部署リストを、更新後の7件（D001〜D007）に修正しました。
+
+## 2026-06-06 18:18
+
+- **対応内容**: 部署選択セレクトボックスから「所属部署を選択してください」の選択肢を削除
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **index.html 選択肢の削除**:
+    - 部署選択セレクトボックス（`renderDepartmentFieldHtml`）から、初期値プレースホルダーとして機能していた `<option value="" ...>所属部署を選択してください</option>` の要素を削除しました。これにより、デフォルトでマスタの最上位項目である「未登録」が初期選択された表示となります。
+
+## 2026-06-06 18:15
+
+- **対応内容**: 所属部署のデフォルト設定（部署ID「D001」＝「未登録」）および必須入力制限の解除
+- **対象ファイル**:
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [history.md](file:///c:/Users/hirok/dev/communicationApp/history.md)
+- **修正内容の詳細**:
+  - **main.gs 部署マスタ初期データの変更**:
+    - 「部署マスタ」シートの初期作成データにおいて、部署ID `D001` の部署名を「管理室」から「未登録」へと変更しました。
+    - すでに「部署マスタ」シートが存在する場合、起動時（`initDatabase`）に `D001` の部署名を「未登録」に自動で上書き更新するマイグレーションロジックを追加しました。
+  - **index.html 所属部署デフォルト設定と必須解除**:
+    - `renderDepartmentFieldHtml` において、`currentDept` が空の場合のデフォルト表示を「未登録」にするように修正しました。また、`select` 要素および「その他」入力欄から `required` 属性と必須の赤い星印 `*` を削除しました。
+    - `toggleDeptOtherInput` で「その他」選択時に `otherInput.required` に設定する制御を削除しました。
+    - `getSelectedDepartment` において、「その他」が選択されていて自由記述欄が空の場合にエラーメッセージを表示せず、自動でデフォルトの「未登録」を返して処理を継続するよう修正しました。
+    - 一般プロフィール保存処理 `handleSaveSelfProfile` および管理者メンバー代理保存処理 `handleSubmitMember` での部署の必須入力バリデーションチェックを解除しました。
+    - 管理者のメンバー新規代理登録 `openAddMemberModal` にて、部署の初期選択状態を空から「未登録」に設定しました。
+    - ローカル開発用のダミーデータ（`getDummyResponse` 内）で、`D001` の部署名をすべて「未登録」に修正しました。
+
 ## 2026-06-06 17:02
 
 - **対応内容**: ステータス・次回優先のトグル操作時における処理中トーストの追加

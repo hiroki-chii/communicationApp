@@ -231,18 +231,49 @@ function initDatabase() {
     deptSheet = ss.insertSheet("部署マスタ");
     deptSheet.appendRow(["部署ID", "部署名"]);
     const initialDepts = [
-      ["D001", "管理室"],
-      ["D002", "BPO統括部"],
-      ["D003", "東京統括部"],
-      ["D004", "ST開発部"],
-      ["D005", "営業統括部"],
-      ["D006", "印刷統括部"],
+      ["D001", "未登録"],
+      ["D002", "管理室"],
+      ["D003", "BPO統括部"],
+      ["D004", "東京統括部"],
+      ["D005", "ST開発部"],
+      ["D006", "営業統括部"],
+      ["D007", "印刷統括部"],
     ];
     initialDepts.forEach((row) => deptSheet.appendRow(row));
 
     // スタイル調整
     deptSheet.getRange("A1:B1").setBackground("#f1f5f9").setFontWeight("bold");
     deptSheet.autoResizeColumns(1, 2);
+  } else {
+    // 既存の部署マスタシートがある場合、D001〜D007を強制更新・追加するマイグレーションを実行
+    const lastRow = deptSheet.getLastRow();
+    const values = lastRow > 1 ? deptSheet.getRange(2, 1, lastRow - 1, 2).getValues() : [];
+    const targetDepts = [
+      ["D001", "未登録"],
+      ["D002", "管理室"],
+      ["D003", "BPO統括部"],
+      ["D004", "東京統括部"],
+      ["D005", "ST開発部"],
+      ["D006", "営業統括部"],
+      ["D007", "印刷統括部"],
+    ];
+
+    targetDepts.forEach(([id, name]) => {
+      let foundIdx = -1;
+      for (let i = 0; i < values.length; i++) {
+        if (values[i][0] === id) {
+          foundIdx = i;
+          break;
+        }
+      }
+      if (foundIdx !== -1) {
+        if (values[foundIdx][1] !== name) {
+          deptSheet.getRange(foundIdx + 2, 2).setValue(name);
+        }
+      } else {
+        deptSheet.appendRow([id, name]);
+      }
+    });
   }
 
   // 3. 「メンバー一覧」シートの初期化とマイグレーション
