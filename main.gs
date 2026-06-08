@@ -2069,6 +2069,165 @@ function deleteMatchingGroup(dateStr, groupId) {
 }
 
 /**
+ * 交流会のメンバーに選出されたメンバーの参加辞退を処理する。
+ * 辞退したメンバーの次回優先フラグ（16列目）を true に設定する。
+ * もし残されたグループのメンバー数が 1人以下 になる場合、グループ自体をキャンセル（削除）し、
+ * 残された1人のメンバーも次回優先フラグを true に戻す。
+ * 残りが2人以上の場合は、そのメンバーだけでグループを継続する。
+ *
+ * @param {string} dateStr 開催日付
+ * @param {string} groupId グループID
+ * @param {string} memberId 辞退するメンバー의 ID
+ * @return {Object} 処理結果オブジェクト
+ */
+function declineMatching(dateStr, groupId, memberId) {
+  try {
+    const userEmail = getCurrentUserEmail();
+    if (!userEmail) {
+      return { success: false, error: "Googleアカウントにログインしていません。" };
+    }
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const settings = getSettings(ss);
+    const isAdmin = isAdminUser(userEmail, settings);
+
+    const members = getMembers(ss);
+    const targetMember = members.find((m) => m.id === memberId);
+    if (!targetMember) {
+      return { success: false, error: "指定されたメンバーが見つかりません。" };
+    }
+
+    // 本人か管理者のみ辞退を許可する
+    if (!isAdmin && targetMember.email.toLowerCase() !== userEmail.toLowerCase()) {
+      return { success: false, error: "他人の参加辞退は行えません。" };
+    }
+
+    const sheet = ss.getSheetByName("マッチング履歴");
+    if (!sheet) {
+      return { success: false, error: "マッチング履歴シートが見つかりません。" };
+    }
+
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return { success: false, error: "マッチング履歴が存在しません。" };
+    }
+
+    const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
+    let rowIndex = -1;
+    let currentMemberIds = [];
+    let currentMemberNames = [];
+    let matchingMethod = "Gemini";
+    let memoText = "";
+
+    for (let i = 0; i < data.length; i++) {
+      const rowDate =
+        data[i][0] instanceof Date
+          ? Utilities.formatDate(data[i][0], "Asia/Tokyo", "yyyy-MM-dd")
+          : data[i][0].toString();
+      const rowGroupId = data[i][1];
+
+      if (rowDate === dateStr && rowGroupId === groupId) {
+        rowIndex = i + 2;
+        currentMemberIds = data[i][2].toString().split(",").map((s) => s.trim());
+        currentMemberNames = data[i][3].toString().split(",").map((s) => s.trim());
+        matchingMethod = data[i][4];
+        memoText = data[i][5];
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      return {
+        success: false,
+        error: `指定されたグループが見つかりません。日付: ${dateStr}, グループID: ${groupId}`,
+      };
+    }
+
+    const memberIdx = currentMemberIds.indexOf(memberId);
+    if (memberIdx === -1) {
+      return {
+        success: false,
+        error: "該当グループに指定メンバーが含まれていません。",
+      };
+    }
+
+    // メンバーリストから除外
+    currentMemberIds.splice(memberIdx, 1);
+    currentMemberNames.splice(memberIdx, 1);
+
+    const memberSheet = ss.getSheetByName("メンバー一覧");
+    if (!memberSheet) {
+      return { success: false, error: "メンバー一覧シートが見つかりません。" };
+    }
+
+    // 辞退したメンバーの「次回優先」を true に更新
+    const targetMemberRow = findMemberRowIndex(memberSheet, memberId);
+    if (targetMemberRow !== -1) {
+      memberSheet.getRange(targetMemberRow, 16).setValue(true); // 16列目（P列）: 次回優先
+    }
+
+    // 残りのメンバー数が1人以下の場合は、グループをキャンセル（解散）する
+    if (currentMemberIds.length <= 1) {
+      // 残されたメンバーがいる場合、その人の次回優先も true に戻す
+      if (currentMemberIds.length === 1) {
+        const remainingMemberId = currentMemberIds[0];
+        const remainingMemberRow = findMemberRowIndex(memberSheet, remainingMemberId);
+        if (remainingMemberRow !== -1) {
+          memberSheet.getRange(remainingMemberRow, 16).setValue(true);
+        }
+      }
+
+      // 履歴行を削除
+      sheet.deleteRow(rowIndex);
+
+      // チャットメッセージも削除
+      const chatSheet = ss.getSheetByName("チャットメッセージ");
+      if (chatSheet) {
+        const chatLastRow = chatSheet.getLastRow();
+        if (chatLastRow > 1) {
+          const roomId = `${dateStr}_${groupId}`;
+          const chatData = chatSheet.getRange(2, 2, chatLastRow - 1, 1).getValues();
+          for (let j = chatData.length - 1; j >= 0; j--) {
+            if (chatData[j][0] === roomId) {
+              chatSheet.deleteRow(j + 2);
+            }
+          }
+        }
+      }
+    } else {
+      // 2人以上の場合は、メンバーを更新してグループを継続する
+      sheet.getRange(rowIndex, 3).setValue(currentMemberIds.join(","));
+      sheet.getRange(rowIndex, 4).setValue(currentMemberNames.join(", "));
+
+      // システムメッセージをチャットに書き込む
+      const chatSheet = ss.getSheetByName("チャットメッセージ");
+      if (chatSheet) {
+        const roomId = `${dateStr}_${groupId}`;
+        const newMsgId = getNextId(chatSheet, "MSG", /^MSG(\d+)$/);
+        const timestamp = new Date().toISOString();
+        const systemRow = [
+          newMsgId,
+          roomId,
+          "SYSTEM",
+          "システム",
+          "system@example.com",
+          "システム",
+          `【システム】${targetMember.name}さんが参加を辞退しました。`,
+          timestamp,
+        ];
+        chatSheet.appendRow(systemRow);
+      }
+    }
+
+    SpreadsheetApp.flush();
+    return { success: true };
+  } catch (e) {
+    Logger.log(`declineMatching エラー: ${e.toString()}`);
+    return { success: false, error: e.toString() };
+  }
+}
+
+/**
  * フロントエンドからの実行要求に基づいて、マッチングロジックを展開するエントリーポイント (管理者専用)。
  * 優先枠の考慮、メンバー選出、API有無に応じたロジックフォールバック等を自動制御する。
  *

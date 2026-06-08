@@ -1,5 +1,29 @@
 # 作業・修正ログ
 
+## 2026-06-08 19:50
+
+- **対応内容**: 選出メンバーの参加辞退機能および次回優先自動復帰機能の実装
+- **対象ファイル**:
+  - [index.html](file:///c:/Users/hirok/dev/communicationApp/index.html)
+  - [main.gs](file:///c:/Users/hirok/dev/communicationApp/main.gs)
+- **修正内容の詳細**:
+  - **フロントエンド（index.html）の修正**:
+    - グループマッチング結果画面（`getUserMatchingViewHtml`）内の自分が含まれるグループカード（`isReallyMyGroup`）に、「参加を辞退する」ボタンを追加。
+    - 辞退操作時に確認を促す、Tailwind CSSとLucideアイコンによるプレミアムなデザインの「交流会辞退確認モーダル」（`#decline-confirm-modal`）を追加。
+    - 辞退処理用のJSイベントハンドラ（`openDeclineConfirmModal`, `closeDeclineConfirmModal`, `submitDeclineMatching`）を実装し、非同期通信ラッパー `asyncGasAction` を通じてGAS側の `declineMatching` 関数と連携。
+    - チャットメッセージ履歴表示において、システムメッセージ（送信者メールアドレスが `system@example.com`）のメッセージを画面中央に特別デザインで描画する条件分岐を追加。
+    - ローカル開発用に `declineMatching` に対するダミー応答ロジックを `getDummyResponse` 内に追加。
+  - **バックエンド（main.gs）の修正**:
+    - 新しいAPI関数 `declineMatching(dateStr, groupId, memberId)` を実装。
+    - セキュリティガードとして、ログイン中の本人のみ（または管理者のみ）が対象メンバーの辞退を行えるようメールアドレスを照合・バリデーション。
+    - 辞退したメンバーの「次回優先」フラグ（16列目）を `true` に更新。
+    - もしメンバーが辞退した結果、そのグループの残りのメンバー数が1名以下になる場合：
+      - 残された1名のメンバー（もし存在すれば）の次回優先フラグも `true` に戻す。
+      - グループ自体が成立しなくなるため、該当グループのマッチング履歴行を削除し、関連するチャット履歴も完全にクリーンアップ。
+    - グループの残りのメンバーが2名以上の場合は：
+      - 「マッチング履歴」シートのメンバーID・名前リストから辞退したメンバーを除外し、グループ情報を更新。
+      - 「チャットメッセージ」シートに、システムメッセージ（送信者 `system@example.com`）として辞退のアナウンスメッセージを挿入。
+
 ## 2026-06-08 14:03
 
 - **対応内容**: マッチングプロンプトの合成方式（デフォルト＋追加指示）に関する確認への回答

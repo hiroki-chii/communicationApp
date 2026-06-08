@@ -1193,7 +1193,7 @@
               </div>
             </div>
             
-            <div class="mt-2 border-t border-slate-100 dark:border-zinc-800/40 pt-3">
+            <div class="mt-2 border-t border-slate-100 dark:border-zinc-800/40 pt-3 flex flex-col gap-2">
               ${
                 isMyGroup
                   ? `
@@ -1208,6 +1208,16 @@
                   <span>メンバー専用チャット</span>
                 </button>
               `
+              }
+              ${
+                isReallyMyGroup
+                  ? `
+                <button onclick="openDeclineConfirmModal('${escapeHtml(latestMatchingDate)}', '${escapeHtml(g.groupId)}', '${escapeHtml(state.myProfile.id)}')" class="w-full py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/20 font-semibold text-xs rounded-xl shadow-sm transition-all duration-150 flex items-center justify-center gap-1.5 animate-pulse-subtle">
+                  <i data-lucide="user-x" class="w-4 h-4"></i>
+                  <span>参加を辞退する</span>
+                </button>
+              `
+                  : ""
               }
             </div>
             
@@ -1656,6 +1666,18 @@
 
             messagesHtml += messages
               .map((msg) => {
+                // システムメッセージ判定
+                if (msg.senderEmail && msg.senderEmail.toLowerCase() === "system@example.com") {
+                  const formattedMessage = escapeHtml(msg.message).replace(/\n/g, "<br>");
+                  return `
+                    <div class="flex items-center justify-center my-3 w-full">
+                      <div class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 font-medium border border-slate-200/50 dark:border-zinc-750/30 tracking-wide text-center">
+                        ${formattedMessage}
+                      </div>
+                    </div>
+                  `;
+                }
+
                 // 自分が送信したメッセージか判定 (大文字小文字を区別せず照合)
                 const isMe =
                   msg.senderEmail.toLowerCase() ===
@@ -3281,6 +3303,45 @@
         await confirmTempMatching();
       }
 
+      function openDeclineConfirmModal(dateStr, groupId, memberId) {
+        const modal = document.getElementById("decline-confirm-modal");
+        if (!modal) return;
+
+        const btnConfirm = document.getElementById("btn-confirm-decline");
+        if (btnConfirm) {
+          const newBtnConfirm = btnConfirm.cloneNode(true);
+          btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
+          newBtnConfirm.addEventListener("click", () => {
+            submitDeclineMatching(dateStr, groupId, memberId);
+          });
+        }
+
+        modal.classList.remove("hidden");
+      }
+
+      function closeDeclineConfirmModal() {
+        const modal = document.getElementById("decline-confirm-modal");
+        if (modal) {
+          modal.classList.add("hidden");
+        }
+      }
+
+      async function submitDeclineMatching(dateStr, groupId, memberId) {
+        closeDeclineConfirmModal();
+        await asyncGasAction("declineMatching", [dateStr, groupId, memberId], {
+          loadingTitle: "処理中",
+          loadingMsg: "交流会の参加を辞退しています...",
+          successTitle: "辞退完了",
+          successMsg: "交流会への参加辞退が完了しました。次回は優先的にマッチングされます。",
+          errorTitle: "辞退エラー",
+          errorMsg: "参加辞退の処理に失敗しました。",
+          onSuccess: async () => {
+            await refreshStateFromServer();
+            renderView();
+          }
+        });
+      }
+
       // 履歴から特定のグループを完全に削除する (管理者のみ)
       async function handleDeleteMatchingGroup(date, groupId) {
         if (
@@ -4546,6 +4607,32 @@
           };
         }
 
+        if (functionName === "declineMatching") {
+          const dateStr = args[0];
+          const groupId = args[1];
+          const memberId = args[2];
+          const groupIdx = state.history.findIndex(h => h.date === dateStr && h.groupId === groupId);
+          if (groupIdx !== -1) {
+            const group = state.history[groupIdx];
+            const mIdx = group.memberIds.indexOf(memberId);
+            if (mIdx !== -1) {
+              group.memberIds.splice(mIdx, 1);
+              group.memberNames.splice(mIdx, 1);
+              if (group.memberIds.length <= 1) {
+                if (group.memberIds.length === 1) {
+                  const remId = group.memberIds[0];
+                  const m = state.members.find(x => x.id === remId);
+                  if (m) m.priority = true;
+                }
+                state.history.splice(groupIdx, 1);
+              }
+            }
+          }
+          const m = state.members.find(x => x.id === memberId);
+          if (m) m.priority = true;
+          return { success: true };
+        }
+
         if (functionName === "sendChatMessage") {
           return {
             success: true,
@@ -4612,6 +4699,8 @@
       window.handleReinitDb = handleReinitDb;
       window.handleSendChatMessage = handleSendChatMessage;
       window.handleTogglePriority = handleTogglePriority;
+      window.openDeclineConfirmModal = openDeclineConfirmModal;
+      window.closeDeclineConfirmModal = closeDeclineConfirmModal;
       window.updateGroupCountOptions = updateGroupCountOptions;
       window.handleDeleteDept = handleDeleteDept;
       window.toggleDeptOtherInput = toggleDeptOtherInput;
@@ -4746,6 +4835,69 @@
           >
             <i data-lucide="check" class="w-3.5 h-3.5"></i>
             <span>確定して保存する</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 交流会辞退確認モーダル -->
+    <div
+      id="decline-confirm-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/75 hidden"
+    >
+      <div
+        class="w-full max-w-md p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl mx-4 space-y-4"
+      >
+        <div
+          class="flex items-center gap-3 text-rose-600 dark:text-rose-400"
+        >
+          <i data-lucide="user-x" class="w-6 h-6 shrink-0 animate-pulse"></i>
+          <h4
+            class="font-heading font-bold text-sm text-slate-900 dark:text-zinc-50"
+          >
+            交流会参加の辞退確認
+          </h4>
+        </div>
+        <div
+          class="space-y-3.5 text-xs leading-relaxed text-slate-600 dark:text-zinc-400 text-left"
+        >
+          <p class="font-medium text-slate-800 dark:text-zinc-200">
+            今回のランチ交流会への参加を辞退しますか？
+          </p>
+          <div
+            class="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/20 rounded-xl flex gap-2.5 items-start"
+          >
+            <i
+              data-lucide="info"
+              class="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5"
+            ></i>
+            <p
+              class="text-[11px] text-amber-800 dark:text-amber-300 leading-normal"
+            >
+              辞退すると、グループから除外され、<strong>次回交流会で優先的にマッチングされるようになります。</strong>
+            </p>
+          </div>
+          <p
+            class="text-[11px] bg-slate-50 dark:bg-zinc-800/40 p-2.5 rounded-lg border border-slate-100 dark:border-zinc-850 leading-normal"
+          >
+            ※ あなたが辞退することでグループのメンバーが1人になってしまう場合、そのグループ自体がキャンセル（他のメンバーも次回優先へ移行）となります。
+          </p>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onclick="closeDeclineConfirmModal()"
+            class="px-4 py-2 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-xs font-semibold rounded-lg text-slate-700 dark:text-zinc-300 transition-colors"
+          >
+            キャンセル
+          </button>
+          <button
+            type="button"
+            id="btn-confirm-decline"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white text-xs font-bold rounded-lg shadow-md transition-colors flex items-center gap-1.5"
+          >
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>辞退する</span>
           </button>
         </div>
       </div>
