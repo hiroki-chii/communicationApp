@@ -1534,7 +1534,7 @@
             <div class="p-4 rounded-xl border border-indigo-100/50 bg-indigo-50/15 dark:border-indigo-900/20 dark:bg-indigo-950/10 text-xs leading-relaxed">
               <p class="font-bold text-slate-700 dark:text-zinc-300 mb-1 flex items-center gap-1">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i>
-                <span>AI提案のおすすめ雑談テーマ</span>
+                <span>雑談おすすめテーマ</span>
               </p>
               <p class="text-slate-500 dark:text-zinc-400">${escapeHtml(matchingGroup.memo)}</p>
             </div>
@@ -1883,7 +1883,7 @@
                   <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">${escapeHtml(g.groupId)}</span>
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30">${escapeHtml(g.method)}</span>
-                    <button type="button" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 transition-all opacity-0 group-hover/card:opacity-100 focus:opacity-100" title="このグループを削除" onclick="handleDeleteMatchingGroup('${escapeHtml(date)}', '${escapeHtml(g.groupId)}')">
+                    <button type="button" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 transition-all" title="このグループを削除" onclick="handleDeleteMatchingGroup('${escapeHtml(date)}', '${escapeHtml(g.groupId)}')">
                       <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                   </div>
@@ -1895,7 +1895,7 @@
                   g.memo
                     ? `
                   <div class="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed border-t border-slate-50 dark:border-zinc-800/40 pt-2.5 bg-slate-50/50 dark:bg-zinc-900/50 -mx-5 -mb-5 p-4 rounded-b-xl border-t">
-                    <p class="font-medium text-slate-700 dark:text-zinc-300 mb-0.5 flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> AIコメント</p>
+                    <p class="font-medium text-slate-700 dark:text-zinc-300 mb-0.5 flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> 雑談おすすめテーマ</p>
                     ${escapeHtml(g.memo)}
                   </div>
                 `
@@ -4693,23 +4693,41 @@
       <div
         class="w-full max-w-md p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl mx-4 space-y-4"
       >
-        <div class="flex items-center gap-3 text-indigo-650 dark:text-indigo-400">
+        <div
+          class="flex items-center gap-3 text-indigo-650 dark:text-indigo-400"
+        >
           <i data-lucide="mail" class="w-6 h-6 shrink-0 animate-pulse"></i>
-          <h4 class="font-heading font-bold text-sm text-slate-900 dark:text-zinc-50">
+          <h4
+            class="font-heading font-bold text-sm text-slate-900 dark:text-zinc-50"
+          >
             マッチング結果の確定と送信の確認
           </h4>
         </div>
-        <div class="space-y-3.5 text-xs leading-relaxed text-slate-600 dark:text-zinc-400 text-left">
+        <div
+          class="space-y-3.5 text-xs leading-relaxed text-slate-600 dark:text-zinc-400 text-left"
+        >
           <p class="font-medium text-slate-800 dark:text-zinc-200">
             マッチング結果を確定して公開保存します。
           </p>
-          <div class="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/20 rounded-xl flex gap-2.5 items-start">
-            <i data-lucide="info" class="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5"></i>
-            <p class="text-[11px] text-amber-800 dark:text-amber-300 leading-normal">
-              確定すると、<strong class="font-bold text-amber-900 dark:text-amber-200">対象メンバーへ交流会案内メールが即時送信</strong>されます。
+          <div
+            class="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-900/20 rounded-xl flex gap-2.5 items-start"
+          >
+            <i
+              data-lucide="info"
+              class="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5"
+            ></i>
+            <p
+              class="text-[11px] text-amber-800 dark:text-amber-300 leading-normal"
+            >
+              確定すると、<strong
+                class="font-bold text-amber-900 dark:text-amber-200"
+                >対象メンバーへ交流会案内メールが即時送信</strong
+              >されます。
             </p>
           </div>
-          <p class="text-[11px] bg-slate-50 dark:bg-zinc-800/40 p-2.5 rounded-lg border border-slate-100 dark:border-zinc-850 leading-normal">
+          <p
+            class="text-[11px] bg-slate-50 dark:bg-zinc-800/40 p-2.5 rounded-lg border border-slate-100 dark:border-zinc-850 leading-normal"
+          >
             グループのメンバー構成、および「雑談おすすめテーマ」の内容が適切であることを今一度ご確認ください。
           </p>
         </div>
