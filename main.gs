@@ -1294,6 +1294,18 @@ function addMemberToSheet(memberObj) {
 
   sheet.autoResizeColumns(1, 17);
 
+  // 新たなメンバーが追加されたら管理者にメール通知を送る
+  try {
+    sendNewMemberNotificationToAdmins({
+      id: newId,
+      name: memberObj.name || "",
+      email: memberObj.email || "",
+      department: memberObj.department || "未設定",
+    });
+  } catch (err) {
+    Logger.log(`管理者への新規メンバー通知メール送信エラー: ${err.toString()}`);
+  }
+
   return {
     success: true,
     member: getMembers(ss).find((m) => m.id === newId),
@@ -2829,4 +2841,52 @@ function deleteFileByUrl(url) {
       );
     }
   }
+}
+
+/**
+ * 新規メンバー登録時に管理者にメール通知を送信する。
+ *
+ * @param {Object} member 新規登録されたメンバー情報 (id, name, email, department)
+ */
+function sendNewMemberNotificationToAdmins(member) {
+  const adminEmails = getAdminEmails();
+  if (adminEmails.length === 0 || (adminEmails.length === 1 && adminEmails[0] === "")) {
+    Logger.log("管理者メールアドレスが設定されていません。通知メールの送信をスキップします。");
+    return;
+  }
+
+  const webAppUrl = getPortalUrl();
+  const subject = `【NBテーブル】新規メンバー登録のお知らせ（${member.name} さん）`;
+  
+  let body = `管理者 各位
+  
+お疲れ様です。NBテーブル（社内ランチ交流会マッチングシステム）です。
+システムに新しいメンバーが登録されましたのでお知らせいたします。
+
+■ 新メンバー情報
+・メンバーID: ${member.id}
+・お名前: ${member.name} さん
+・メールアドレス: ${member.email}
+・部署・チーム: ${member.department}
+
+`;
+
+  if (webAppUrl) {
+    body += `■ ポータル画面（管理者画面で詳細を確認できます）\n${webAppUrl}\n\n`;
+  }
+
+  body += `※ 本メールはシステムより自動送信されています。\n何かご不明な点がございましたら、システム管理者までご連絡ください。\n`;
+
+  adminEmails.forEach((adminEmail) => {
+    if (!adminEmail) return;
+    try {
+      GmailApp.sendEmail(adminEmail, subject, body, {
+        name: "NBテーブル管理システム",
+        noReply: true,
+      });
+      Logger.log(`管理者への新メンバー通知メール送信成功: ${adminEmail}`);
+    } catch (err) {
+      Logger.log(`管理者への新メンバー通知メール送信失敗: ${adminEmail} エラー: ${err.toString()}`);
+    }
+  });
 }
