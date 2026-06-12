@@ -1,0 +1,5 @@
+# clasp config
+.clasp.json
+
+# clasp credentials (if saved locally)
+.clasprc.json
